@@ -26,7 +26,8 @@ int main( int argc, char* argv[] ) {
         return 2;
     }
 
-    struct Roll rollList[32];
+    int maxNumberOfRolls = sizeof(int) * 8 ; //chosen to line up with int, 32 on my system
+    struct Roll rollList[maxNumberOfRolls];
     int numberOfRolls = 0;
     int maxFileLineLength = 100;
     char fileLine[maxFileLineLength];
@@ -46,11 +47,23 @@ int main( int argc, char* argv[] ) {
                 roll.length = length;
             }
         }
+        if ( numberOfRolls == maxNumberOfRolls ) {
+            printf( "You attempted to add more than the maximum allowable rolls (%d)!\nRunning as if you only input %d.\n", maxNumberOfRolls, maxNumberOfRolls );
+            break;
+        }
         rollList[numberOfRolls++] = roll;
     }
 
-    for ( int i = 0; i < numberOfRolls; i++ ) {
-        printf( "Roll info:\n\tLength: %.2f\n\tId: %s\n", rollList[i].length, rollList[i].id );
+    
+    unsigned int maxNumber = 0;
+    for ( int i = 0; i < numberOfRolls; i++ ) { //used this in place of pow
+                                                //maxNumber will be all 1's
+        maxNumber = maxNumber << 1;
+        maxNumber += 1;
+    }
+    printf( "%u\n", maxNumber );
+    for ( unsigned int i = 0; i <= maxNumber; i++ ) {
+
     }
 
     return 0;
