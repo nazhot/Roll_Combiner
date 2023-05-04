@@ -71,6 +71,9 @@ int main( int argc, char* argv[] ) {
         rollList[numberOfRolls++] = roll;
     }
 
+    int maxSplices = 4;
+    int maxLength  = 20;
+    int minLength  = 10;
     
     unsigned int maxNumber = 0;
     for ( int i = 0; i < numberOfRolls; i++ ) { //used this in place of pow. maxNumber will be all 1's, with numberOfRolls being how many 1's there are
@@ -78,9 +81,19 @@ int main( int argc, char* argv[] ) {
         maxNumber += 1;
     }
 
+    int numberOfCombos = 0;
+
     for ( unsigned int i = 1; i <= maxNumber; i++ ) {
-        printf( "%u: %.2f\n", i, rollsLength( rollList, i, numberOfRolls ) );
+        //printf( "%u: %.2f\n", i, rollsLength( rollList, i, numberOfRolls ) );
+        if ( rollsCount( i , numberOfRolls ) <= maxSplices + 1 ) {
+            float length = rollsLength( rollList, i, numberOfRolls );
+            if ( length >= minLength && length <= maxLength ) {
+                numberOfCombos++;
+            }
+        }
     }
+    printf( "Total Number of Possible Combos: %i\n", maxNumber );
+    printf( "Total Number of Actual Combos: %i\n", numberOfCombos );
 
     return 0;
 }
