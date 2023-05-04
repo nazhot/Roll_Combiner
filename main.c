@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 struct Roll {
-    char* id;
+    char id[15];
     float length;
 };
 
@@ -25,18 +26,32 @@ int main( int argc, char* argv[] ) {
         return 2;
     }
 
-    int numberOfRolls = 3;
-    int maxSplices = 4;
-    int maxRollsPerGroups = 4;
+    struct Roll rollList[32];
+    int numberOfRolls = 0;
     int maxFileLineLength = 100;
-    struct Roll Rolls[numberOfRolls];
-
     char fileLine[maxFileLineLength];
 
     while ( fgets( fileLine, maxFileLineLength, p_rollFile ) ) {
-
+        struct Roll roll;
+        for ( int i = 0; fileLine[i] != '\0'; i++ ) {
+            if ( fileLine[i] == ':' ) {
+                int colonIndex = i;
+                char id[colonIndex + 1];
+                strncpy( id, fileLine, colonIndex );
+                id[colonIndex] = '\0';
+                strncpy( roll.id, id, colonIndex + 1 );
+                char lengthString[100];
+                strncpy( lengthString, fileLine + colonIndex + 1, 15 ); 
+                float length = atof( lengthString );
+                roll.length = length;
+            }
+        }
+        rollList[numberOfRolls++] = roll;
     }
 
+    for ( int i = 0; i < numberOfRolls; i++ ) {
+        printf( "Roll info:\n\tLength: %.2f\n\tId: %s\n", rollList[i].length, rollList[i].id );
+    }
 
     return 0;
 }
