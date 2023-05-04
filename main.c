@@ -16,6 +16,15 @@ int rollsCount( unsigned int num, int numRolls ) {
     return count;
 }
 
+float rollsLength( struct Roll *rolls, unsigned int num, int numRolls ) {
+    float totalLength = 0;
+    for ( int i = 0; i < numRolls; i++ ) {
+        if ( num >> i & 1 ) {
+            totalLength += rolls[i].length;
+        }
+    }
+    return totalLength;
+}
 
 int main( int argc, char* argv[] ) {
 
@@ -64,14 +73,13 @@ int main( int argc, char* argv[] ) {
 
     
     unsigned int maxNumber = 0;
-    for ( int i = 0; i < numberOfRolls; i++ ) { //used this in place of pow
-                                                //maxNumber will be all 1's
+    for ( int i = 0; i < numberOfRolls; i++ ) { //used this in place of pow. maxNumber will be all 1's, with numberOfRolls being how many 1's there are
         maxNumber = maxNumber << 1;
         maxNumber += 1;
     }
-    printf( "%u\n", maxNumber );
-    for ( unsigned int i = 0; i <= maxNumber; i++ ) {
 
+    for ( unsigned int i = 1; i <= maxNumber; i++ ) {
+        printf( "%u: %.2f\n", i, rollsLength( rollList, i, numberOfRolls ) );
     }
 
     return 0;
