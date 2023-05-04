@@ -8,6 +8,14 @@ struct Roll {
     float length;
 };
 
+int rollsCount( unsigned int num, int numRolls ) {
+    int count = 0;
+    for ( int i = 0; i < numRolls; i++ ) {
+        count += num >> i & 1;
+    }
+    return count;
+}
+
 
 int main( int argc, char* argv[] ) {
 
