@@ -83,19 +83,25 @@ int main( int argc, char* argv[] ) {
         maxNumber += 1;
     }
 
-    int numberOfCombos = 0;
+    int numberOfGroups = 0;
+    int numberOfOrders = 0;
 
     for ( unsigned int i = 1; i <= maxNumber; i++ ) {
         //printf( "%u: %.2f\n", i, rollsLength( rollList, i, numberOfRolls ) );
+        float length = rollsLength( rollList, i, numberOfRolls );
         if ( rollsCount( i , numberOfRolls ) <= maxSplices + 1 ) {
-            float length = rollsLength( rollList, i, numberOfRolls );
             if ( length >= minGroupLength && length <= maxGroupLength ) {
-                numberOfCombos++;
+                numberOfGroups++;
             }
+            continue;
+        }
+        if ( length >= minOrderLength && length <= maxOrderLength ) {
+            numberOfOrders++;
         }
     }
     printf( "Total Number of Possible Combos: %i\n", maxNumber );
-    printf( "Total Number of Actual Combos: %i\n", numberOfCombos );
+    printf( "Total Number of Actual Groups: %i\n", numberOfGroups );
+    printf( "Total Number of Actual Orders: %i\n", numberOfOrders );
 
     return 0;
 }
