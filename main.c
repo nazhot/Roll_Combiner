@@ -85,12 +85,21 @@ int main( int argc, char* argv[] ) {
 
     int numberOfGroups = 0;
     int numberOfOrders = 0;
+    unsigned int groupsContainRoll[numberOfRolls];
+    unsigned int groupsDontContainRoll[numberOfRolls];
 
     for ( unsigned int i = 1; i <= maxNumber; i++ ) {
         //printf( "%u: %.2f\n", i, rollsLength( rollList, i, numberOfRolls ) );
         float length = rollsLength( rollList, i, numberOfRolls );
         if ( rollsCount( i , numberOfRolls ) <= maxSplices + 1 ) {
             if ( length >= minGroupLength && length <= maxGroupLength ) {
+                for ( int j = 0; j < numberOfRolls; j++ ) { 
+                    if ( i >> j & 1) {
+                        groupsContainRoll[j]++; 
+                    } else {
+                        groupsDontContainRoll[j]++;
+                    }
+                }
                 numberOfGroups++;
             }
             continue;
@@ -103,5 +112,11 @@ int main( int argc, char* argv[] ) {
     printf( "Total Number of Actual Groups: %i\n", numberOfGroups );
     printf( "Total Number of Actual Orders: %i\n", numberOfOrders );
 
+    printf( "-------------------------------------------\n" );
+
+    for ( int i = 0; i < numberOfRolls; i++ ){
+        printf( "Number of groups that contain roll %i: %u\n", i, groupsContainRoll[i] );
+        printf( "Number of groups that DON'T contain roll %i: %u\n", i, groupsDontContainRoll[i] );
+    }
     return 0;
 }
