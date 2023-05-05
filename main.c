@@ -71,9 +71,11 @@ int main( int argc, char* argv[] ) {
         rollList[numberOfRolls++] = roll;
     }
 
-    int maxSplices = 4;
-    int maxLength  = 20;
-    int minLength  = 10;
+    float minOrderLength = 1800;
+    float maxOrderLength = 2000;
+    int maxSplices = 7;
+    int minGroupLength  = 250;
+    int maxGroupLength  = 350;
     
     unsigned int maxNumber = 0;
     for ( int i = 0; i < numberOfRolls; i++ ) { //used this in place of pow. maxNumber will be all 1's, with numberOfRolls being how many 1's there are
@@ -87,7 +89,7 @@ int main( int argc, char* argv[] ) {
         //printf( "%u: %.2f\n", i, rollsLength( rollList, i, numberOfRolls ) );
         if ( rollsCount( i , numberOfRolls ) <= maxSplices + 1 ) {
             float length = rollsLength( rollList, i, numberOfRolls );
-            if ( length >= minLength && length <= maxLength ) {
+            if ( length >= minGroupLength && length <= maxGroupLength ) {
                 numberOfCombos++;
             }
         }
