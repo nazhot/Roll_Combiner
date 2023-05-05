@@ -11,7 +11,7 @@ struct Roll {
 
 int rollsCount( unsigned int num, int numRolls ) {
     int count = 0;
-    for ( int i = 0; i < numRolls; i++ ) {
+    for ( int i = 0; i <= numRolls; i++ ) {
         count += num >> i & 1;
     }
     return count;
@@ -19,7 +19,7 @@ int rollsCount( unsigned int num, int numRolls ) {
 
 float rollsLength( struct Roll *rolls, unsigned int num, int numRolls ) {
     float totalLength = 0;
-    for ( int i = 0; i < numRolls; i++ ) {
+    for ( int i = 0; i <= numRolls; i++ ) {
         if ( num >> i & 1 ) {
             totalLength += rolls[i].length;
         }
@@ -99,14 +99,12 @@ int main( int argc, char* argv[] ) {
             printf( "Updating current max roll from %i to %i, on %u\n", currentMaxRoll, currentMaxRoll + 1, i );
             currentMaxRoll++;
         }
-        float length = rollsLength( rollList, i, numberOfRolls );
-        if ( rollsCount( i , numberOfRolls ) <= maxSplices + 1 ) {
+        float length = rollsLength( rollList, i, currentMaxRoll );
+        if ( rollsCount( i , currentMaxRoll ) <= maxSplices + 1 ) {
             if ( length >= minGroupLength && length <= maxGroupLength ) {
                 for ( int j = 0; j <= currentMaxRoll; j++ ) { 
                     if ( i >> j & 1) {
                         groupsContainRoll[j]++; 
-                    } else {
-                        groupsDontContainRoll[j]++;
                     }
                 }
                 numberOfGroups++;
@@ -119,7 +117,6 @@ int main( int argc, char* argv[] ) {
     }
     diff = clock() - start;
     int msec = diff * 1000 / CLOCKS_PER_SEC;
-    printf( "%d second %d milliseconds\n", msec/1000, msec%1000 );
     printf( "Total Number of Possible Combos: %u\n", maxNumber );
     printf( "Total Number of Actual Groups: %u\n", numberOfGroups );
     printf( "Total Number of Actual Orders: %u\n", numberOfOrders );
@@ -128,7 +125,8 @@ int main( int argc, char* argv[] ) {
 
     for ( int i = 0; i < numberOfRolls; i++ ){
         printf( "Number of groups that contain roll %i: %u\n", i, groupsContainRoll[i] );
-        printf( "Number of groups that DON'T contain roll %i: %u\n", i, groupsDontContainRoll[i] );
+        printf( "Number of groups that DON'T contain roll %i: %u\n", i, numberOfGroups - groupsContainRoll[i] );
     }
+    printf( "%d second %d milliseconds\n", msec/1000, msec%1000 );
     return 0;
 }
