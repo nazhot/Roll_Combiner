@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <time.h>
 
 struct Roll {
     char id[15];
@@ -80,6 +81,8 @@ int main( int argc, char* argv[] ) {
     unsigned int groupsDontContainRoll[numberOfRolls];
     
     unsigned int maxNumber = 0;
+
+
     for ( int i = 0; i < numberOfRolls; i++ ) { //used this in place of pow. maxNumber will be all 1's, with numberOfRolls being how many 1's there are
         maxNumber = maxNumber << 1;
         maxNumber += 1;
@@ -90,6 +93,7 @@ int main( int argc, char* argv[] ) {
     unsigned int numberOfGroups = 0;
     unsigned int numberOfOrders = 0;
     int currentMaxRoll = 0;
+    clock_t start = clock(), diff; 
     for ( unsigned int i = 1; i <= maxNumber; i++ ) {
         if ( i >> ( currentMaxRoll + 1 ) & 1 ) {
             printf( "Updating current max roll from %i to %i, on %u\n", currentMaxRoll, currentMaxRoll + 1, i );
@@ -113,6 +117,9 @@ int main( int argc, char* argv[] ) {
             numberOfOrders++;
         }
     }
+    diff = clock() - start;
+    int msec = diff * 1000 / CLOCKS_PER_SEC;
+    printf( "%d second %d milliseconds\n", msec/1000, msec%1000 );
     printf( "Total Number of Possible Combos: %u\n", maxNumber );
     printf( "Total Number of Actual Groups: %u\n", numberOfGroups );
     printf( "Total Number of Actual Orders: %u\n", numberOfOrders );
