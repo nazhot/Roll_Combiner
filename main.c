@@ -7,10 +7,34 @@
 #define MAX_ID_LEN 15 //how long the id in each roll can be
                       //guarded by strncpy
 
+
 struct Roll {
     char id[MAX_ID_LEN];
     float length;
 };
+
+
+/*
+ * increment an array through all possible numbers up to maxValue
+ * array starts at [0, 1, 2, 3, ..., n]
+ * array ends at   [maxValue - 3, maxValue - 2, maxValue - 1, maxValue]
+ *      array:       array to increment
+ *      arrayLength: how long the array is
+ *      maxValue:    highest value the final element in the array will go to (inclusive)
+*/
+int incrementArray( unsigned int array[], int arrayLength, int maxValue ) {
+    for ( int i = arrayLength - 1; i >= 0; i-- ) {
+        int difference = (arrayLength - 1) - i;
+        if ( array[i] < maxValue - difference ) {
+            array[i] += 1;
+            for ( int j = 1; i + j < arrayLength; j++ ) {
+                array[i + j] = array[i] + j;
+            }
+            return 1;
+        }
+    }
+    return 0;
+}
 
 
 int groupsMakeUpOrder( unsigned int order, unsigned int groups[], unsigned int groupIndexes[], int groupIndexesLength ) {
@@ -25,39 +49,22 @@ int groupsMakeUpOrder( unsigned int order, unsigned int groups[], unsigned int g
 }
 
 
-int numCombosThatMakeUpOrder( unsigned int num, unsigned int groups[], int minGroups, int maxGroups, int totalNumGroups, int numRolls ) {
+int numCombosThatMakeUpOrder( unsigned int order, unsigned int groups[], int minGroups, int maxGroups, int totalNumGroups, int numRolls ) {
     int numCombos = 0;
     for ( int numGroups = minGroups; numGroups <= maxGroups; numGroups++ ) {
-        int groupIndexes[numGroups];
+        unsigned int groupIndexes[numGroups];
         for ( int i = 0; i < numGroups; i++ ) {
             groupIndexes[i] = i;
         }
-    }
+        
+        do {
+            numCombos += groupsMakeUpOrder( order, groups, groupIndexes, numGroups );
 
+        } while ( incrementArray( groupIndexes, numGroups, totalNumGroups ) );
+    }
     return numCombos;
 }
 
-/*
- * increment an array through all possible numbers up to maxValue
- * array starts at [0, 1, 2, 3, ..., n]
- * array ends at   [maxValue - 3, maxValue - 2, maxValue - 1, maxValue]
- *      array:       array to increment
- *      arrayLength: how long the array is
- *      maxValue:    highest value the final element in the array will go to (inclusive)
-*/
-int incrementArray( int array[], int arrayLength, int maxValue ) {
-    for ( int i = arrayLength - 1; i >= 0; i-- ) {
-        int difference = (arrayLength - 1) - i;
-        if ( array[i] < maxValue - difference ) {
-            array[i] += 1;
-            for ( int j = 1; i + j < arrayLength; j++ ) {
-                array[i + j] = array[i] + j;
-            }
-            return 1;
-        }
-    }
-    return 0;
-}
 
 /*
  * get the number of rolls contained within the given number
@@ -169,6 +176,8 @@ int main( int argc, char* argv[] ) {
     unsigned int numberOfGroups        = 0;    //how many total groups are found
     unsigned int numberOfOrders        = 0;    //how many total orders are found (doens't check for valid groups)
     int          currentMaxRoll        = 0;    //the current highest roll in the loop
+    unsigned int *groupArray           = malloc( sizeof(unsigned int) * 1024 );
+    int          groupArraySize        = 1024;
 
     unsigned int groupsContainRoll[numberOfRolls]; 
 
@@ -228,6 +237,11 @@ int main( int argc, char* argv[] ) {
                         groupsContainRoll[j]++; 
                     }
                 }
+                if ( numberOfGroups == groupArraySize ) {
+                    groupArraySize *= 2;
+                    groupArray = realloc( groupArray, sizeof(unsigned int) * groupArraySize );
+                }
+                groupArray[numberOfGroups] = i;
                 numberOfGroups++;
             }
             continue;
@@ -249,5 +263,9 @@ int main( int argc, char* argv[] ) {
         printf( "Number of groups that contain roll %i: %u\n", i, groupsContainRoll[i] );
     }
     printf( "%d second %d milliseconds\n", msec/1000, msec%1000 );
+
+
+    free(groupArray);
+
     return 0;
 }
