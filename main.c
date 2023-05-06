@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
 
 #define MAX_ID_LEN 15 //how long the id in each roll can be
                       //guarded by strncpy
@@ -10,6 +11,19 @@ struct Roll {
     char id[MAX_ID_LEN];
     float length;
 };
+
+
+int groupsMakeUpOrder( unsigned int order, unsigned int groups[], unsigned int groupIndexes[], int groupIndexesLength ) {
+    for ( int groupIndex = 0; groupIndex < groupIndexesLength; groupIndex++ ) {
+        unsigned int group = groups[groupIndexes[groupIndex]];
+       if ( ( order & group ) != group ) {
+        return 0;
+       }
+       order = order ^ group;
+    }
+    return order == 0;
+}
+
 
 int numCombosThatMakeUpOrder( unsigned int num, unsigned int groups[], int minGroups, int maxGroups, int totalNumGroups, int numRolls ) {
     int numCombos = 0;
@@ -144,12 +158,14 @@ int main( int argc, char* argv[] ) {
     float        minOrderLength        = 1800; //meters
     float        maxOrderLength        = 2000; //meters
     int          maxSplices            = 7;    //how many splices allowed when putting rolls together for a group
-    int          minGroupLength        = 250;  //meters
-    int          maxGroupLength        = 350;  //meters
+    float        minGroupLength        = 250;  //meters
+    float        maxGroupLength        = 350;  //meters
     unsigned int maxNumber             = 0;    //number where all bits are 1, with the number of bits being equal to the number of rolls
     float        tempLengthSum         = 0;    //accumulates the length
     int          minRollsInGroup       = 0;    //minimum number of rolls needed to form a group
     int          minRollsInOrder       = 0;    //minimum number of rolls needed to form an order
+    int          minGroupsInOrder      = ceil( minOrderLength / maxGroupLength );
+    int          maxGroupsInOrder      = floor( maxOrderLength / minGroupLength );
     unsigned int numberOfGroups        = 0;    //how many total groups are found
     unsigned int numberOfOrders        = 0;    //how many total orders are found (doens't check for valid groups)
     int          currentMaxRoll        = 0;    //the current highest roll in the loop
@@ -177,6 +193,9 @@ int main( int argc, char* argv[] ) {
 
     printf( "Minimum number of rolls needed to make group: %i\n", minRollsInGroup );
     printf( "Minimum number of rolls needed to make order: %i\n", minRollsInOrder );
+    printf( "Minimum number of groups to make an order: %i\n", minGroupsInOrder );
+    printf( "Maximum number of groups to make an order: %i\n", maxGroupsInOrder );
+
 
     clock_t start = clock(), diff; 
     for ( unsigned int i = 1; i <= maxNumber; i++ ) {
