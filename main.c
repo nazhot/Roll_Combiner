@@ -99,9 +99,10 @@ int main( int argc, char* argv[] ) {
     int maxGroupLength  = 350;
     unsigned int groupsContainRoll[numberOfRolls];
     unsigned int groupsDontContainRoll[numberOfRolls];
-    
-    unsigned int maxNumber = 0;
+    int minNumRollsInGroup;
+    int minNumRollsInOrder;
 
+    unsigned int maxNumber = 0;
 
     for ( int i = 0; i < numberOfRolls; i++ ) { //used this in place of pow. maxNumber will be all 1's, with numberOfRolls being how many 1's there are
         maxNumber = maxNumber << 1;
@@ -109,6 +110,26 @@ int main( int argc, char* argv[] ) {
         groupsContainRoll[i] = 0;
         groupsDontContainRoll[i] = 0;
     }
+
+    float minNumRollsInGroupLength = 0;
+    int minNumRollsInGroupCounter = 0;
+
+    float minNumRollsInOrderLength = 0;
+    int minNumRollsInOrderCounter = 0;
+    for ( int i = numberOfRolls - 1; i >= 0; i-- ) {
+        if ( minNumRollsInGroupLength < minGroupLength ) {
+            minNumRollsInGroupLength += ascendingLengthsArray[i];
+            minNumRollsInGroupCounter++;
+        }
+
+        if ( minNumRollsInOrderLength < minOrderLength ) {
+            minNumRollsInOrderLength += ascendingLengthsArray[i];
+            minNumRollsInOrderCounter++;
+        }
+    }
+
+    printf( "Minimum number of rolls needed to make group: %i\n", minNumRollsInGroupCounter );
+    printf( "Minimum number of rolls needed to make order: %i\n", minNumRollsInOrderCounter );
 
     unsigned int numberOfGroups = 0;
     unsigned int numberOfOrders = 0;
