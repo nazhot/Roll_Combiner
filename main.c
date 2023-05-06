@@ -46,6 +46,8 @@ int main( int argc, char* argv[] ) {
 
     int maxNumberOfRolls = sizeof(int) * 8 ; //chosen to line up with int, 32 on my system
     struct Roll rollList[maxNumberOfRolls];
+    float ascendingLengthsArray[maxNumberOfRolls];
+    int ascendingLengthsArrayIndex = 0;
     int numberOfRolls = 0;
     int maxFileLineLength = 100;
     char fileLine[maxFileLineLength];
@@ -62,6 +64,24 @@ int main( int argc, char* argv[] ) {
                 char lengthString[100];
                 strncpy( lengthString, fileLine + colonIndex + 1, 15 ); 
                 float length = atof( lengthString );
+
+                //add to the list of roll lengths, in ascending order
+                for ( int j = 0; j < maxNumberOfRolls; j++ ) {
+                    if ( j == ascendingLengthsArrayIndex ) {
+                        ascendingLengthsArray[j] = length;
+                        ascendingLengthsArrayIndex++;
+                        break;
+                    }
+
+                    if ( length < ascendingLengthsArray[j] ) {
+                        for ( int k = ascendingLengthsArrayIndex; k > j; k-- ) {
+                            ascendingLengthsArray[k] = ascendingLengthsArray[k - 1];
+                        }
+                        ascendingLengthsArray[j] = length;
+                        ascendingLengthsArrayIndex++;
+                        break;
+                    }
+                }
                 roll.length = length;
             }
         }
