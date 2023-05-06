@@ -99,9 +99,6 @@ int main( int argc, char* argv[] ) {
     int maxGroupLength  = 350;
     unsigned int groupsContainRoll[numberOfRolls];
     unsigned int groupsDontContainRoll[numberOfRolls];
-    int minNumRollsInGroup;
-    int minNumRollsInOrder;
-
     unsigned int maxNumber = 0;
 
     for ( int i = 0; i < numberOfRolls; i++ ) { //used this in place of pow. maxNumber will be all 1's, with numberOfRolls being how many 1's there are
@@ -140,8 +137,21 @@ int main( int argc, char* argv[] ) {
             printf( "Updating current max roll from %i to %i, on %u\n", currentMaxRoll, currentMaxRoll + 1, i );
             currentMaxRoll++;
         }
+
+        int numRollsInNumber = rollsCount( i, currentMaxRoll );
+
+        //if there aren't even enough rolls to make a group, no need to check
+        if ( numRollsInNumber < minNumRollsInGroupCounter ) { 
+            continue;
+        }
+
+        //too many rolls to be a group, too little to be an full order
+        if ( numRollsInNumber > maxSplices + 1 && numRollsInNumber < minNumRollsInOrderCounter ) {
+            continue;
+        }
+
         float length = rollsLength( rollList, i, currentMaxRoll );
-        if ( rollsCount( i , currentMaxRoll ) <= maxSplices + 1 ) {
+        if ( numRollsInNumber <= maxSplices + 1 ) {
             if ( length >= minGroupLength && length <= maxGroupLength ) {
                 for ( int j = 0; j <= currentMaxRoll; j++ ) { 
                     if ( i >> j & 1) {
