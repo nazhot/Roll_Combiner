@@ -11,6 +11,40 @@ struct Roll {
     float length;
 };
 
+int numCombosThatMakeUpOrder( unsigned int num, unsigned int groups[], int minGroups, int maxGroups, int totalNumGroups, int numRolls ) {
+    int numCombos = 0;
+    for ( int numGroups = minGroups; numGroups <= maxGroups; numGroups++ ) {
+        int groupIndexes[numGroups];
+        for ( int i = 0; i < numGroups; i++ ) {
+            groupIndexes[i] = i;
+        }
+    }
+
+    return numCombos;
+}
+
+/*
+ * increment an array through all possible numbers up to maxValue
+ * array starts at [0, 1, 2, 3, ..., n]
+ * array ends at   [maxValue - 3, maxValue - 2, maxValue - 1, maxValue]
+ *      array:       array to increment
+ *      arrayLength: how long the array is
+ *      maxValue:    highest value the final element in the array will go to (inclusive)
+*/
+int incrementArray( int array[], int arrayLength, int maxValue ) {
+    for ( int i = arrayLength - 1; i >= 0; i-- ) {
+        int difference = (arrayLength - 1) - i;
+        if ( array[i] < maxValue - difference ) {
+            array[i] += 1;
+            for ( int j = 1; i + j < arrayLength; j++ ) {
+                array[i + j] = array[i] + j;
+            }
+            return 1;
+        }
+    }
+    return 0;
+}
+
 /*
  * get the number of rolls contained within the given number
  * a roll is represented by a bit being set to 1
