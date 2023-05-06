@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <time.h>
 
+#define MAX_ID_LEN 15 //how long the id in each roll can be
+                      //guarded by strncpy
+
 struct Roll {
-    char id[15];
+    char id[MAX_ID_LEN];
     float length;
 };
 
@@ -69,14 +71,15 @@ int main( int argc, char* argv[] ) {
         struct Roll roll;
         for ( int i = 0; fileLine[i] != '\0'; i++ ) {
             if ( fileLine[i] == ':' ) {
-                int colonIndex = i;
-                char id[colonIndex + 1]; //+1 because of null terminator
-                strncpy( id, fileLine, colonIndex );
-                id[colonIndex] = '\0';
-                strncpy( roll.id, id, colonIndex + 1 );
-                char lengthString[100];
-                strncpy( lengthString, fileLine + colonIndex + 1, 15 ); 
-                lengthString[15] = '\0';
+                char id[i + 1]; //+1 because of null terminator
+                char lengthString[MAX_ID_LEN];
+
+                strncpy( id, fileLine, i );
+                id[i] = '\0';
+                strncpy( roll.id, id, i + 1 );
+
+                strncpy( lengthString, fileLine + i + 1, MAX_ID_LEN ); 
+                lengthString[MAX_ID_LEN - 1] = '\0';
                 float length = atof( lengthString );
 
                 //add to the list of roll lengths, in ascending order
@@ -146,6 +149,7 @@ int main( int argc, char* argv[] ) {
         //if the bit at currentMaxRoll + 1 is 1, that means we've gone up a further spot
         if ( i >> ( currentMaxRoll + 1 ) & 1 ) {
             printf( "Updating current max roll from %i to %i, on %u\n", currentMaxRoll, currentMaxRoll + 1, i );
+            printf( "Current group/order count: %u/%u\n", numberOfGroups, numberOfOrders );
             currentMaxRoll++;
         }
 
@@ -190,7 +194,6 @@ int main( int argc, char* argv[] ) {
 
     for ( int i = 0; i < numberOfRolls; i++ ){
         printf( "Number of groups that contain roll %i: %u\n", i, groupsContainRoll[i] );
-        printf( "Number of groups that DON'T contain roll %i: %u\n", i, numberOfGroups - groupsContainRoll[i] );
     }
     printf( "%d second %d milliseconds\n", msec/1000, msec%1000 );
     return 0;
