@@ -9,6 +9,12 @@ struct Roll {
     float length;
 };
 
+/*
+ * get the number of rolls contained within the given number
+ * a roll is represented by a bit being set to 1
+ *      num:      number representation of the set of rolls
+ *      numRolls: maximum number of bits to check
+*/
 int rollsCount( unsigned int num, int numRolls ) {
     int count = 0;
     for ( int i = 0; i <= numRolls; i++ ) {
@@ -17,6 +23,13 @@ int rollsCount( unsigned int num, int numRolls ) {
     return count;
 }
 
+
+/*
+ * get the total length of a set of rolls
+ *      rolls:    array of Rolls, that have length and id information
+ *      num:      number representation of the set of rolls
+ *      numRolls: maximum number of bits to check
+*/
 float rollsLength( struct Roll *rolls, unsigned int num, int numRolls ) {
     float totalLength = 0;
     for ( int i = 0; i <= numRolls; i++ ) {
@@ -44,41 +57,40 @@ int main( int argc, char* argv[] ) {
         return 2;
     }
 
-    int maxNumberOfRolls = sizeof(int) * 8 ; //chosen to line up with int, 32 on my system
+    int         maxNumberOfRolls           = sizeof(int) * 8 ; //chosen to line up with int, 32 on my system
+    int         numberOfRolls              = 0;
+    int         maxFileLineLength          = 100;
+    
+    char        fileLine[maxFileLineLength];
     struct Roll rollList[maxNumberOfRolls];
-    float ascendingLengthsArray[maxNumberOfRolls];
-    int ascendingLengthsArrayIndex = 0;
-    int numberOfRolls = 0;
-    int maxFileLineLength = 100;
-    char fileLine[maxFileLineLength];
+    float       ascendingLengthsArray[maxNumberOfRolls];
 
     while ( fgets( fileLine, maxFileLineLength, p_rollFile ) ) {
         struct Roll roll;
         for ( int i = 0; fileLine[i] != '\0'; i++ ) {
             if ( fileLine[i] == ':' ) {
                 int colonIndex = i;
-                char id[colonIndex + 1];
+                char id[colonIndex + 1]; //+1 because of null terminator
                 strncpy( id, fileLine, colonIndex );
                 id[colonIndex] = '\0';
                 strncpy( roll.id, id, colonIndex + 1 );
                 char lengthString[100];
                 strncpy( lengthString, fileLine + colonIndex + 1, 15 ); 
+                lengthString[15] = '\0';
                 float length = atof( lengthString );
 
                 //add to the list of roll lengths, in ascending order
                 for ( int j = 0; j < maxNumberOfRolls; j++ ) {
-                    if ( j == ascendingLengthsArrayIndex ) {
+                    if ( j == numberOfRolls ) {
                         ascendingLengthsArray[j] = length;
-                        ascendingLengthsArrayIndex++;
                         break;
                     }
 
                     if ( length < ascendingLengthsArray[j] ) {
-                        for ( int k = ascendingLengthsArrayIndex; k > j; k-- ) {
+                        for ( int k = numberOfRolls; k > j; k-- ) {
                             ascendingLengthsArray[k] = ascendingLengthsArray[k - 1];
                         }
                         ascendingLengthsArray[j] = length;
-                        ascendingLengthsArrayIndex++;
                         break;
                     }
                 }
@@ -92,47 +104,46 @@ int main( int argc, char* argv[] ) {
         rollList[numberOfRolls++] = roll;
     }
 
-    float minOrderLength = 1800;
-    float maxOrderLength = 2000;
-    int maxSplices = 7;
-    int minGroupLength  = 250;
-    int maxGroupLength  = 350;
-    unsigned int groupsContainRoll[numberOfRolls];
-    unsigned int groupsDontContainRoll[numberOfRolls];
-    unsigned int maxNumber = 0;
+    float        minOrderLength        = 1800; //meters
+    float        maxOrderLength        = 2000; //meters
+    int          maxSplices            = 7;    //how many splices allowed when putting rolls together for a group
+    int          minGroupLength        = 250;  //meters
+    int          maxGroupLength        = 350;  //meters
+    unsigned int maxNumber             = 0;    //number where all bits are 1, with the number of bits being equal to the number of rolls
+    float        tempLengthSum         = 0;    //accumulates the length
+    int          minRollsInGroup       = 0;    //minimum number of rolls needed to form a group
+    int          minRollsInOrder       = 0;    //minimum number of rolls needed to form an order
+    unsigned int numberOfGroups        = 0;    //how many total groups are found
+    unsigned int numberOfOrders        = 0;    //how many total orders are found (doens't check for valid groups)
+    int          currentMaxRoll        = 0;    //the current highest roll in the loop
 
-    for ( int i = 0; i < numberOfRolls; i++ ) { //used this in place of pow. maxNumber will be all 1's, with numberOfRolls being how many 1's there are
-        maxNumber = maxNumber << 1;
-        maxNumber += 1;
+    unsigned int groupsContainRoll[numberOfRolls]; 
+
+    //set up maxNumber, and initialize groupContainsRoll array
+    for ( int i = 0; i < numberOfRolls; i++ ) { 
+        maxNumber            = maxNumber << 1; 
+        maxNumber           += 1;
         groupsContainRoll[i] = 0;
-        groupsDontContainRoll[i] = 0;
     }
 
-    float minNumRollsInGroupLength = 0;
-    int minNumRollsInGroupCounter = 0;
-
-    float minNumRollsInOrderLength = 0;
-    int minNumRollsInOrderCounter = 0;
+    //figure out the minimum required rolls for a group/order
     for ( int i = numberOfRolls - 1; i >= 0; i-- ) {
-        if ( minNumRollsInGroupLength < minGroupLength ) {
-            minNumRollsInGroupLength += ascendingLengthsArray[i];
-            minNumRollsInGroupCounter++;
+        if ( tempLengthSum >= minOrderLength ) {
+            break;
         }
-
-        if ( minNumRollsInOrderLength < minOrderLength ) {
-            minNumRollsInOrderLength += ascendingLengthsArray[i];
-            minNumRollsInOrderCounter++;
+        if ( tempLengthSum < minGroupLength ) {
+            minRollsInGroup++;
         }
+        tempLengthSum += ascendingLengthsArray[i];
+        minRollsInOrder++;
     }
 
-    printf( "Minimum number of rolls needed to make group: %i\n", minNumRollsInGroupCounter );
-    printf( "Minimum number of rolls needed to make order: %i\n", minNumRollsInOrderCounter );
+    printf( "Minimum number of rolls needed to make group: %i\n", minRollsInGroup );
+    printf( "Minimum number of rolls needed to make order: %i\n", minRollsInOrder );
 
-    unsigned int numberOfGroups = 0;
-    unsigned int numberOfOrders = 0;
-    int currentMaxRoll = 0;
     clock_t start = clock(), diff; 
     for ( unsigned int i = 1; i <= maxNumber; i++ ) {
+        //if the bit at currentMaxRoll + 1 is 1, that means we've gone up a further spot
         if ( i >> ( currentMaxRoll + 1 ) & 1 ) {
             printf( "Updating current max roll from %i to %i, on %u\n", currentMaxRoll, currentMaxRoll + 1, i );
             currentMaxRoll++;
@@ -141,16 +152,18 @@ int main( int argc, char* argv[] ) {
         int numRollsInNumber = rollsCount( i, currentMaxRoll );
 
         //if there aren't even enough rolls to make a group, no need to check
-        if ( numRollsInNumber < minNumRollsInGroupCounter ) { 
+        if ( numRollsInNumber < minRollsInGroup ) { 
             continue;
         }
 
         //too many rolls to be a group, too little to be an full order
-        if ( numRollsInNumber > maxSplices + 1 && numRollsInNumber < minNumRollsInOrderCounter ) {
+        if ( numRollsInNumber > maxSplices + 1 && numRollsInNumber < minRollsInOrder ) {
             continue;
         }
 
+        //total length of the rolls within the current number
         float length = rollsLength( rollList, i, currentMaxRoll );
+
         if ( numRollsInNumber <= maxSplices + 1 ) {
             if ( length >= minGroupLength && length <= maxGroupLength ) {
                 for ( int j = 0; j <= currentMaxRoll; j++ ) { 
@@ -162,6 +175,7 @@ int main( int argc, char* argv[] ) {
             }
             continue;
         }
+
         if ( length >= minOrderLength && length <= maxOrderLength ) {
             numberOfOrders++;
         }
