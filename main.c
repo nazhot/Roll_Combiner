@@ -129,27 +129,6 @@ float rollsLength( struct Roll *rolls, unsigned int num, int numRolls ) {
     return totalLength;
 }
 
-unsigned int* getGroupsWithoutRolls( unsigned int rollsToAvoid[], int rLength,  unsigned int groups[], int gLength ) {
-    unsigned int *filteredGroups = malloc( sizeof( unsigned int ) * 1024 );
-    int numGroups = 0;
-    int filteredGroupsSize = 1024;
-    unsigned int rollsNum = 0;
-    for ( int i = 0; i < rLength; i++ ) {
-        rollsNum += 1 << rollsToAvoid[i];
-    }
-    for ( int i = 0; i < gLength; i++ ){
-        if ( ( rollsNum & groups[i] ) == 0 ) {
-            if ( numGroups == filteredGroupsSize ) {
-                filteredGroupsSize *= 2;
-                filteredGroups = realloc( filteredGroups, sizeof( unsigned int ) * filteredGroupsSize );
-            }
-            filteredGroups[numGroups] = groups[i];
-        }
-    }
-    return filteredGroups;
-}
-
-
 
 int main( int argc, char* argv[] ) {
 
@@ -234,9 +213,11 @@ int main( int argc, char* argv[] ) {
     int          groupArraySize        = 1024;
 
     unsigned int groupsContainRoll[numberOfRolls]; 
+    unsigned int **groupsWithXRolls = malloc( (maxSplices + 1 ) * sizeof( int* ) );
     unsigned int groupsWithXRollsCount[maxSplices + 1];
     for ( int i = 0; i < maxSplices + 1; i++ ) {
-        groupsWithXRollsCount[i] = 0;    
+        groupsWithXRollsCount[i] = 0;
+        groupsWithXRolls[i] = malloc( sizeof( unsigned int ) * 1024 );
     }
 
     //set up maxNumber, and initialize groupContainsRoll array
@@ -322,6 +303,7 @@ int main( int argc, char* argv[] ) {
 
     printf( "Total Groups when seperated: %u\n", totalGroupsCount );
     printf( "%d second %d milliseconds\n", msec/1000, msec%1000 );
+
 
     free(groupArray);
 
