@@ -48,19 +48,51 @@ int groupsMakeUpOrder( unsigned int order, unsigned int groups[], unsigned int g
     return order == 0;
 }
 
+void printArray( unsigned int array[], int arrayLength ) {
+    printf( "[" );
+    for ( int i = 0; i < arrayLength; i++ ) {
+       printf( "%u", array[i] ); 
+       if ( i < arrayLength - 1 ) {
+        printf( ", " );
+       }
+    }
+    printf( "]\n" );
+}
 
-int numCombosThatMakeUpOrder( unsigned int order, unsigned int groups[], int minGroups, int maxGroups, int totalNumGroups, int numRolls ) {
+void printNumberBits( unsigned int num ) {
+    printf( "%u: ", num );
+    int numBits = sizeof( unsigned int ) * 8;
+    for ( int i = 0; i < numBits; i++ ) {
+        printf( "%i", num >> i & 1 );
+    }
+    printf( "\n" );
+}
+
+int numCombosThatMakeUpOrder( unsigned int order, unsigned int groups[], int minGroups, int maxGroups, int totalNumGroups ) {
+    printf( "Before filtering: %u\n", totalNumGroups );
     int numCombos = 0;
+    unsigned int filteredGroups[totalNumGroups];
+    int          numFilteredGroups = 0;
+    for ( int i = 0; i < totalNumGroups; i++ ) {
+        unsigned int group = groups[i];
+        if ( ( order & group ) == group ) {
+            filteredGroups[numFilteredGroups] = group;
+            numFilteredGroups++;
+        }
+    }
+    printf( "After filtering: %u\n", numFilteredGroups ); 
+
     for ( int numGroups = minGroups; numGroups <= maxGroups; numGroups++ ) {
+        printf( "Starting with numGroups = %i\n", numGroups );
         unsigned int groupIndexes[numGroups];
         for ( int i = 0; i < numGroups; i++ ) {
             groupIndexes[i] = i;
         }
         
         do {
-            numCombos += groupsMakeUpOrder( order, groups, groupIndexes, numGroups );
-
-        } while ( incrementArray( groupIndexes, numGroups, totalNumGroups ) );
+            numCombos += groupsMakeUpOrder( order, filteredGroups, groupIndexes, numGroups );
+            //printArray( groupIndexes, numGroups );
+        } while ( incrementArray( groupIndexes, numGroups, numFilteredGroups ) );
     }
     return numCombos;
 }
@@ -97,6 +129,28 @@ float rollsLength( struct Roll *rolls, unsigned int num, int numRolls ) {
     return totalLength;
 }
 
+unsigned int* getGroupsWithoutRolls( unsigned int rollsToAvoid[], int rLength,  unsigned int groups[], int gLength ) {
+    unsigned int *filteredGroups = malloc( sizeof( unsigned int ) * 1024 );
+    int numGroups = 0;
+    int filteredGroupsSize = 1024;
+    unsigned int rollsNum = 0;
+    for ( int i = 0; i < rLength; i++ ) {
+        rollsNum += 1 << rollsToAvoid[i];
+    }
+    for ( int i = 0; i < gLength; i++ ){
+        if ( ( rollsNum & groups[i] ) == 0 ) {
+            if ( numGroups == filteredGroupsSize ) {
+                filteredGroupsSize *= 2;
+                filteredGroups = realloc( filteredGroups, sizeof( unsigned int ) * filteredGroupsSize );
+            }
+            filteredGroups[numGroups] = groups[i];
+        }
+    }
+    return filteredGroups;
+}
+
+
+
 int main( int argc, char* argv[] ) {
 
     if ( argc != 2 ) {
@@ -117,7 +171,7 @@ int main( int argc, char* argv[] ) {
     int         maxNumberOfRolls           = sizeof(int) * 8 ; //chosen to line up with int, 32 on my system
     int         numberOfRolls              = 0;
     int         maxFileLineLength          = 100;
-    
+
     char        fileLine[maxFileLineLength];
     struct Roll rollList[maxNumberOfRolls];
     float       ascendingLengthsArray[maxNumberOfRolls];
@@ -180,6 +234,10 @@ int main( int argc, char* argv[] ) {
     int          groupArraySize        = 1024;
 
     unsigned int groupsContainRoll[numberOfRolls]; 
+    unsigned int groupsWithXRollsCount[maxSplices + 1];
+    for ( int i = 0; i < maxSplices + 1; i++ ) {
+        groupsWithXRollsCount[i] = 0;    
+    }
 
     //set up maxNumber, and initialize groupContainsRoll array
     for ( int i = 0; i < numberOfRolls; i++ ) { 
@@ -207,11 +265,11 @@ int main( int argc, char* argv[] ) {
 
 
     clock_t start = clock(), diff; 
+    //changed so that it is only gathering groups now
     for ( unsigned int i = 1; i <= maxNumber; i++ ) {
         //if the bit at currentMaxRoll + 1 is 1, that means we've gone up a further spot
         if ( i >> ( currentMaxRoll + 1 ) & 1 ) {
             printf( "Updating current max roll from %i to %i, on %u\n", currentMaxRoll, currentMaxRoll + 1, i );
-            printf( "Current group/order count: %u/%u\n", numberOfGroups, numberOfOrders );
             currentMaxRoll++;
         }
 
@@ -223,32 +281,26 @@ int main( int argc, char* argv[] ) {
         }
 
         //too many rolls to be a group, too little to be an full order
-        if ( numRollsInNumber > maxSplices + 1 && numRollsInNumber < minRollsInOrder ) {
+        if ( numRollsInNumber > maxSplices + 1 ) { // && numRollsInNumber < minRollsInOrder ) {
             continue;
         }
 
         //total length of the rolls within the current number
         float length = rollsLength( rollList, i, currentMaxRoll );
 
-        if ( numRollsInNumber <= maxSplices + 1 ) {
-            if ( length >= minGroupLength && length <= maxGroupLength ) {
-                for ( int j = 0; j <= currentMaxRoll; j++ ) { 
-                    if ( i >> j & 1) {
-                        groupsContainRoll[j]++; 
-                    }
+        if ( length >= minGroupLength && length <= maxGroupLength ) {
+            for ( int j = 0; j <= currentMaxRoll; j++ ) { 
+                if ( i >> j & 1) {
+                    groupsContainRoll[j]++; 
                 }
-                if ( numberOfGroups == groupArraySize ) {
-                    groupArraySize *= 2;
-                    groupArray = realloc( groupArray, sizeof(unsigned int) * groupArraySize );
-                }
-                groupArray[numberOfGroups] = i;
-                numberOfGroups++;
             }
-            continue;
-        }
-
-        if ( length >= minOrderLength && length <= maxOrderLength ) {
-            numberOfOrders++;
+            groupsWithXRollsCount[numRollsInNumber]++;
+            if ( numberOfGroups == groupArraySize ) {
+                groupArraySize *= 2;
+                groupArray = realloc( groupArray, sizeof(unsigned int) * groupArraySize );
+            }
+            groupArray[numberOfGroups] = i;
+            numberOfGroups++;
         }
     }
     diff = clock() - start;
@@ -259,11 +311,17 @@ int main( int argc, char* argv[] ) {
 
     printf( "-------------------------------------------\n" );
 
+    unsigned int totalGroupsCount = 0;
     for ( int i = 0; i < numberOfRolls; i++ ){
         printf( "Number of groups that contain roll %i: %u\n", i, groupsContainRoll[i] );
+        totalGroupsCount += groupsContainRoll[i];
+        if (i < maxSplices + 1) {
+            printf( "Number of groups with %i rolls: %u\n", i, groupsWithXRollsCount[i] );
+        }
     }
-    printf( "%d second %d milliseconds\n", msec/1000, msec%1000 );
 
+    printf( "Total Groups when seperated: %u\n", totalGroupsCount );
+    printf( "%d second %d milliseconds\n", msec/1000, msec%1000 );
 
     free(groupArray);
 
