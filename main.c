@@ -185,9 +185,9 @@ int main( int argc, char* argv[] ) {
     int          groupArraySize        = 1024;
 
     unsigned int groupsContainRoll[numberOfRolls]; 
-    unsigned int **groupsWithXRolls = malloc( (maxSplices + 1 ) * sizeof( int* ) );
-    unsigned int groupsWithXRollsCount[maxSplices + 1];
-    for ( int i = 0; i < maxSplices + 1; i++ ) {
+    unsigned int **groupsWithXRolls = malloc( (maxSplices + 2 ) * sizeof( int* ) );
+    unsigned int groupsWithXRollsCount[maxSplices + 2];
+    for ( int i = 0; i <= maxSplices + 1; i++ ) {
         groupsWithXRollsCount[i] = 0;
         groupsWithXRolls[i] = malloc( sizeof( unsigned int ) * 1024 );
     }
@@ -260,7 +260,7 @@ int main( int argc, char* argv[] ) {
     for ( int i = 0; i < numberOfRolls; i++ ){
         printf( "Number of groups that contain roll %i: %u\n", i, groupsContainRoll[i] );
         totalGroupsCount += groupsContainRoll[i];
-        if (i < maxSplices + 1) {
+        if (i <= maxSplices + 1) {
             printf( "Number of groups with %i rolls: %u\n", i, groupsWithXRollsCount[i] );
         }
     }
