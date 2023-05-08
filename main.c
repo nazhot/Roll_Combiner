@@ -14,6 +14,21 @@ struct Roll {
 };
 
 
+void printRollsFromInt( struct Roll *rolls, unsigned int integer, int numberOfRolls ) {
+    printf( "----------GROUP----------\n" );
+    float totalLength = 0;
+    for ( int i = 0; i < numberOfRolls; i++ ) {
+       if ( integer >> i & 1 ) {
+           struct Roll roll = rolls[i];
+           printf( "Roll %d: %s, %.2f\n", i, roll.id, roll.length );
+           totalLength += roll.length;
+       }
+    }
+    printf( "Total Length: %.2f\n", totalLength );
+    printf( "-------------------------\n" );
+}
+
+
 /*
  * increment an array through all possible numbers up to maxValue
  * array starts at [0, 1, 2, 3, ..., n]
@@ -187,9 +202,11 @@ int main( int argc, char* argv[] ) {
     unsigned int groupsContainRoll[numberOfRolls]; 
     unsigned int **groupsWithXRolls = malloc( (maxSplices + 2 ) * sizeof( int* ) );
     unsigned int groupsWithXRollsCount[maxSplices + 2];
+    unsigned int groupsWithXRollsSize[maxSplices + 2];
     for ( int i = 0; i <= maxSplices + 1; i++ ) {
         groupsWithXRollsCount[i] = 0;
         groupsWithXRolls[i] = malloc( sizeof( unsigned int ) * 1024 );
+        groupsWithXRollsSize[i] = 1024;
     }
 
     //set up maxNumber, and initialize groupContainsRoll array
@@ -236,7 +253,12 @@ int main( int argc, char* argv[] ) {
                         groupsContainRoll[j]++; 
                     }
                 }
-
+                
+                if ( groupsWithXRollsCount[groupSize] == groupsWithXRollsSize[groupSize]) {
+                    groupsWithXRollsSize[groupSize] *= 2;
+                    groupsWithXRolls[groupSize] = realloc( groupsWithXRolls[groupSize], sizeof(unsigned int) * groupsWithXRollsSize[groupSize]);
+                }
+                groupsWithXRolls[groupSize][groupsWithXRollsCount[groupSize]] = groupRolls;
                 groupsWithXRollsCount[groupSize]++;
 
                 if ( numberOfGroups == groupArraySize ) {
@@ -263,6 +285,10 @@ int main( int argc, char* argv[] ) {
         if (i <= maxSplices + 1) {
             printf( "Number of groups with %i rolls: %u\n", i, groupsWithXRollsCount[i] );
         }
+    }
+
+    for ( int i = 0; i < groupsWithXRollsCount[2]; i++ ) {
+        printRollsFromInt( rollList, groupsWithXRolls[2][i], numberOfRolls );
     }
 
     printf( "Total Groups when seperated: %u\n", totalGroupsCount );
