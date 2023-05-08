@@ -36,6 +36,26 @@ int incrementArray( unsigned int array[], int arrayLength, int maxValue ) {
     return 0;
 }
 
+int incrementInt( unsigned int *p_integer, int numRolls, int totalNumRolls ) {
+    int integer = *p_integer;
+    for ( int i = totalNumRolls - 1; i >= 0; i-- ) {
+        if ( ! ( integer >> i & 1 ) ) {
+            continue;
+        }
+        if ( i == totalNumRolls ) {
+            for ( int j = 0; j < totalNumRolls; j++ ) {
+                if ( integer >> j & 1 ) {
+                    continue;
+                }
+                if ( j == totalNumRolls - numRolls ) { //array is at the end, can exit
+                    return 0;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
 
 int groupsMakeUpOrder( unsigned int order, unsigned int groups[], unsigned int groupIndexes[], int groupIndexesLength ) {
     for ( int groupIndex = 0; groupIndex < groupIndexesLength; groupIndex++ ) {
