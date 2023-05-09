@@ -193,6 +193,7 @@ int main( int argc, char* argv[] ) {
     float        tempLengthSum         = 0;    //accumulates the length
     int          minRollsInGroup       = 0;    //minimum number of rolls needed to form a group
     int          minRollsInOrder       = 0;    //minimum number of rolls needed to form an order
+    int          maxRollsInOrder       = 0;    //maximum number of rolls needed to form an order
     int          minGroupsInOrder      = ceil( minOrderLength / maxGroupLength );
     int          maxGroupsInOrder      = floor( maxOrderLength / minGroupLength );
     unsigned int numberOfGroups        = 0;    //how many total groups are found
@@ -211,9 +212,14 @@ int main( int argc, char* argv[] ) {
 
     //set up maxNumber, and initialize groupContainsRoll array
     for ( int i = 0; i < numberOfRolls; i++ ) { 
+        tempLengthSum += ascendingLengthsArray[i];
+        if ( tempLengthSum <= maxOrderLength ) {
+            maxRollsInOrder++;
+        }
         groupsContainRoll[i] = 0;
     }
 
+    tempLengthSum = 0;
     //figure out the minimum required rolls for a group/order
     for ( int i = numberOfRolls - 1; i >= 0; i-- ) {
         if ( tempLengthSum >= minOrderLength ) {
@@ -226,8 +232,10 @@ int main( int argc, char* argv[] ) {
         minRollsInOrder++;
     }
     
+    printf( "Number of rolls inputted: %i\n", numberOfRolls );
     printf( "Minimum number of rolls needed to make group: %i\n", minRollsInGroup );
     printf( "Minimum number of rolls needed to make order: %i\n", minRollsInOrder );
+    printf( "Maximum number of rolls needed to make order: %i\n", maxRollsInOrder );
     printf( "Minimum number of groups to make an order: %i\n", minGroupsInOrder );
     printf( "Maximum number of groups to make an order: %i\n", maxGroupsInOrder );
 
@@ -287,12 +295,37 @@ int main( int argc, char* argv[] ) {
         }
     }
 
-    for ( int i = 0; i < groupsWithXRollsCount[2]; i++ ) {
-        printRollsFromInt( rollList, groupsWithXRolls[2][i], numberOfRolls );
-    }
-
     printf( "Total Groups when seperated: %u\n", totalGroupsCount );
     printf( "%d second %d milliseconds\n", msec/1000, msec%1000 );
+
+    int testArray[6];
+
+    for ( int i = 0; i < 6; i++ ) {
+        testArray[i] = i;
+    }
+
+    unsigned int numDone = 0;
+    do {
+        numDone++;
+        if ( numDone % 100000000 == 0 ) {
+            printArray( testArray, 6 );
+        }
+        unsigned int order = 0;
+        int cantAdd = 0;
+        for ( int i = 0; i < 6; i++ ){
+            if ( ( testArray[i] & order ) != 0 ) {
+                cantAdd = 1;
+                break;
+            }
+            order = order | testArray[i];
+        }
+        if ( cantAdd ) {
+            continue;
+        }
+
+        printRollsFromInt( rollList, order, numberOfRolls );
+
+    } while ( incrementArray( testArray, 6, numberOfGroups - 1 ) );
 
 
     free(groupArray);
