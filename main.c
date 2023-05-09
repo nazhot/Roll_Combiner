@@ -306,10 +306,29 @@ int main( int argc, char* argv[] ) {
             orderIndexArray[i] = i;
         }
 
+
         do { 
             unsigned int order = arrayToInt( orderIndexArray, numRollsToTest ); 
             float orderLength = rollsLength( rollList, order, numberOfRolls );
             if ( orderLength >= minOrderLength && orderLength <= maxOrderLength ) {
+                unsigned int *filteredGroups = malloc( sizeof( unsigned int ) * 1024 );
+                int numberOfGroupsForOrder = 0;
+                int filteredSize = 1024;
+                for ( int j = 0; j < numberOfGroups; j++ ){
+                   if ( ( order & groupArray[j] ) != groupArray[j] ) {
+                        continue;
+                   }
+                   if ( numberOfGroupsForOrder == filteredSize ) {
+                        filteredSize *= 2;
+                        filteredGroups = realloc( filteredGroups, sizeof( unsigned int ) * filteredSize );
+                   }
+                   filteredGroups[numberOfGroupsForOrder] = groupArray[j];
+                   numberOfGroupsForOrder++;
+                }
+
+                free(filteredGroups);
+                //printf( "For first order with %i rolls, there are %i groups that could be in it\n", numRollsToTest, numberOfGroupsForOrder );
+                //break;
                 numValidOrders++;
             }
 
