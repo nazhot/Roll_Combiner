@@ -297,37 +297,73 @@ int main( int argc, char* argv[] ) {
 
     printf( "Total Groups when seperated: %u\n", totalGroupsCount );
     printf( "%d second %d milliseconds\n", msec/1000, msec%1000 );
+    int totalOrders = 0;
+    for ( int i = minRollsInOrder; i <= maxRollsInOrder; i++ ) {
+        int numValidOrders = 0;
+        int numRollsToTest = i;
+        int orderIndexArray[numRollsToTest];
+        for ( int i = 0; i < numRollsToTest; i++ ){
+            orderIndexArray[i] = i;
+        }
 
-    int testArray[6];
+        do { 
+            unsigned int order = arrayToInt( orderIndexArray, numRollsToTest ); 
+            float orderLength = rollsLength( rollList, order, numberOfRolls );
+            if ( orderLength >= minOrderLength && orderLength <= maxOrderLength ) {
+                numValidOrders++;
+            }
 
-    for ( int i = 0; i < 6; i++ ) {
+        } while ( incrementArray( orderIndexArray, numRollsToTest, numberOfRolls - 1 ) );
+
+        printf( "Number of orders with %i rolls: %i\n", numRollsToTest, numValidOrders );
+        totalOrders += numValidOrders;
+    }
+    printf( "Number of valid orders: %i\n", totalOrders );
+    int numRepeatsToTest = 4;
+    int numRollsToTest = 2;
+    int testArray[numRepeatsToTest];
+    int numGroupings = 0;
+    unsigned int uniqueGroups[1024];
+    int numUniqueGroups = 0;
+
+    for ( int i = 0; i < numRepeatsToTest; i++ ) {
         testArray[i] = i;
     }
 
-    unsigned int numDone = 0;
     do {
-        numDone++;
-        if ( numDone % 100000000 == 0 ) {
-            printArray( testArray, 6 );
-        }
         unsigned int order = 0;
-        int cantAdd = 0;
-        for ( int i = 0; i < 6; i++ ){
-            if ( ( testArray[i] & order ) != 0 ) {
-                cantAdd = 1;
+        int allUnique = 1;
+        for ( int i = 0; i < numRepeatsToTest; i++ ) {
+            unsigned int group = groupsWithXRolls[numRollsToTest][testArray[i]];
+            if ( ( order & group ) != 0 ) {
+                allUnique = 0;
                 break;
             }
-            order = order | testArray[i];
+            order = order | group;
         }
-        if ( cantAdd ) {
+
+        if ( !allUnique ) {
             continue;
         }
+        numGroupings++;
+        int alreadyMade = 0;
+        for ( int i = 0; i < numUniqueGroups; i++ ) {
+            if ( uniqueGroups[i] == order ) {
+                alreadyMade = 1;
+                break;
+            }
+        }
 
-        printRollsFromInt( rollList, order, numberOfRolls );
+        if ( alreadyMade ) {
+            continue;
+        }
+        uniqueGroups[numUniqueGroups] = order;
+        numUniqueGroups++;
 
-    } while ( incrementArray( testArray, 6, numberOfGroups - 1 ) );
-
-
+        //printRollsFromInt( rollList, order, numberOfRolls );
+    } while ( incrementArray( testArray, numRepeatsToTest, groupsWithXRollsCount[numRollsToTest] - 1) );
+    printf( "Number of valid groupings (not unique): %i\n", numGroupings );
+    printf( "Number of valid groupings (unique): %i\n", numUniqueGroups );
     free(groupArray);
 
     return 0;
