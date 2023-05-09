@@ -318,8 +318,16 @@ int main( int argc, char* argv[] ) {
     unsigned int orderWith21Rolls = 11010047;
     unsigned int orderWith27Rolls = 503054335;
     int totalGroupsTest = 0;
-    unsigned int *filteredGroups = malloc( sizeof( unsigned int ) * 1024 );
-    int           filteredGroupSize = 1024;
+    unsigned int **filteredGroupsWithXRolls = malloc( sizeof( unsigned int ) * ( maxSplices + 2 ) );
+    int            filteredGroupsWithXRollsCount[maxSplices + 2];
+    int            filteredGroupsWithXRollsSize[maxSplices + 2];
+
+    for ( int i = 0; i < maxSplices + 2; i++ ) {
+        filteredGroupsWithXRolls[i] = malloc( sizeof( unsigned int ) * 1024 );
+        filteredGroupsWithXRollsSize[i] = 1024;
+        filteredGroupsWithXRollsCount[i] = 0;
+
+    }
     printf( "For an order with 27 rolls, the breakdown is:\n" );
     for ( int groupSize = minRollsInGroup; groupSize <= maxSplices + 1; groupSize++ ) {
         int numGroups = groupsWithXRollsCount[groupSize];
@@ -329,34 +337,34 @@ int main( int argc, char* argv[] ) {
             if ( ( orderWith27Rolls & group ) != group ) {
                 continue;
             }
-            if ( filteredGroupSize == totalGroupsTest ) {
-                filteredGroupSize *= 2;
-                filteredGroups = realloc( filteredGroups, sizeof( unsigned int ) * filteredGroupSize );
+                if ( filteredGroupsWithXRollsSize[groupSize]  == filteredGroupsWithXRollsCount[groupSize] ) {
+                filteredGroupsWithXRollsSize[groupSize] *= 2;
+                filteredGroupsWithXRolls[groupSize] = realloc( filteredGroupsWithXRolls[groupSize], sizeof( unsigned int ) * filteredGroupsWithXRollsSize[groupSize] );
             }
-            filteredGroups[totalGroupsTest] = group;
+            filteredGroupsWithXRolls[groupSize][filteredGroupsWithXRollsCount[groupSize]] = group;
+            filteredGroupsWithXRollsCount[groupSize]++;
             totalGroupsTest++;
             counter++;
         }
         printf( "\t%i: %i\n", groupSize, counter );
     }
     printf( "Which is a total of %i groups\n", totalGroupsTest );
-    unsigned int numEdges = 0;
-    unsigned int numNonEdges = 0;
-    for ( int i = 0; i < totalGroupsTest; i++ ) {
-        unsigned int group1 = filteredGroups[i];
-        for ( int j = i + 1; j < totalGroupsTest; j++ ) {
-            unsigned int group2 = filteredGroups[j];
-            if ( ( group1 & group2 ) != 0 ) {
-                numNonEdges++;
-                continue;
+
+    for ( int i = 2; i <= 8; i++ ) {
+        int count = filteredGroupsWithXRollsCount[i];
+        unsigned int collisions = 0;
+        for ( int j = 0; j < count; j++ ) {
+            unsigned int group1 = filteredGroupsWithXRolls[i][j];
+            for ( int k = j + 1; k < count; k++ ) {
+                unsigned int group2 = filteredGroupsWithXRolls[i][k];
+                if ( ( group1 & group2 ) != 0 ) {
+                    continue;
+                }
+                collisions++;
             }
-            numEdges++;
         }
-    }
-
-    printf( "Number of edges with the filter: %u\n", numEdges ); 
-    printf( "Number of non-edges with the filter: %u\n", numNonEdges ); 
-
+        printf( "There are %i groups with %i rolls, and %u pairs that don't have any rolls in common\n", count, i, collisions );
+    }   
 
     diff = clock() - start;
     int msec = diff * 1000 / CLOCKS_PER_SEC;
