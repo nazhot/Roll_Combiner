@@ -13,6 +13,11 @@ struct Roll {
     float length;
 };
 
+struct AdjacencyNode {
+    int rollNumber;
+    struct AdjacencyNode *next;
+};
+
 
 void printRollsFromInt( struct Roll *rolls, unsigned int integer, int numberOfRolls ) {
     printf( "----------GROUP----------\n" );
@@ -280,8 +285,6 @@ int main( int argc, char* argv[] ) {
         } while ( incrementArray( rollsInGroupArray, groupSize, numberOfRolls - 1 ) );
     }
 
-    diff = clock() - start;
-    int msec = diff * 1000 / CLOCKS_PER_SEC;
     printf( "Total Number of Actual Groups: %u\n", numberOfGroups );
 
     printf( "-------------------------------------------\n" );
@@ -294,95 +297,73 @@ int main( int argc, char* argv[] ) {
             printf( "Number of groups with %i rolls: %u\n", i, groupsWithXRollsCount[i] );
         }
     }
+/*
+    unsigned int numEdges = 0;
+    for ( int i = 0; i < numberOfGroups; i++ ) {
+        unsigned int group1 = groupArray[i];
+        for ( int j = i + 1; j < numberOfGroups; j++ ) {
+            unsigned int group2 = groupArray[j];
+            if ( ( group1 & group2 ) != 0 ) {
+                continue;
+            }
+            numEdges++;
+        }
+    }   
+
+    printf( "Total edges found: %u\n", numEdges );
+*/
+
+
+    unsigned int orderWith17Rolls = 330127329;
+    unsigned int orderWith21Rolls = 11010047;
+    unsigned int orderWith27Rolls = 503054335;
+    int totalGroupsTest = 0;
+    unsigned int *filteredGroups = malloc( sizeof( unsigned int ) * 1024 );
+    int           filteredGroupSize = 1024;
+    printf( "For an order with 27 rolls, the breakdown is:\n" );
+    for ( int groupSize = minRollsInGroup; groupSize <= maxSplices + 1; groupSize++ ) {
+        int numGroups = groupsWithXRollsCount[groupSize];
+        int counter = 0;
+        for ( int i = 0; i < numGroups; i++ ) {
+            unsigned int group = groupsWithXRolls[groupSize][i];
+            if ( ( orderWith27Rolls & group ) != group ) {
+                continue;
+            }
+            if ( filteredGroupSize == totalGroupsTest ) {
+                filteredGroupSize *= 2;
+                filteredGroups = realloc( filteredGroups, sizeof( unsigned int ) * filteredGroupSize );
+            }
+            filteredGroups[totalGroupsTest] = group;
+            totalGroupsTest++;
+            counter++;
+        }
+        printf( "\t%i: %i\n", groupSize, counter );
+    }
+    printf( "Which is a total of %i groups\n", totalGroupsTest );
+    unsigned int numEdges = 0;
+    unsigned int numNonEdges = 0;
+    for ( int i = 0; i < totalGroupsTest; i++ ) {
+        unsigned int group1 = filteredGroups[i];
+        for ( int j = i + 1; j < totalGroupsTest; j++ ) {
+            unsigned int group2 = filteredGroups[j];
+            if ( ( group1 & group2 ) != 0 ) {
+                numNonEdges++;
+                continue;
+            }
+            numEdges++;
+        }
+    }
+
+    printf( "Number of edges with the filter: %u\n", numEdges ); 
+    printf( "Number of non-edges with the filter: %u\n", numNonEdges ); 
+
+
+    diff = clock() - start;
+    int msec = diff * 1000 / CLOCKS_PER_SEC;
 
     printf( "Total Groups when seperated: %u\n", totalGroupsCount );
     printf( "%d second %d milliseconds\n", msec/1000, msec%1000 );
-    int totalOrders = 0;
-    for ( int i = minRollsInOrder; i <= maxRollsInOrder; i++ ) {
-        int numValidOrders = 0;
-        int numRollsToTest = i;
-        int orderIndexArray[numRollsToTest];
-        for ( int i = 0; i < numRollsToTest; i++ ){
-            orderIndexArray[i] = i;
-        }
 
-
-        do { 
-            unsigned int order = arrayToInt( orderIndexArray, numRollsToTest ); 
-            float orderLength = rollsLength( rollList, order, numberOfRolls );
-            if ( orderLength >= minOrderLength && orderLength <= maxOrderLength ) {
-                unsigned int *filteredGroups = malloc( sizeof( unsigned int ) * 1024 );
-                int numberOfGroupsForOrder = 0;
-                int filteredSize = 1024;
-                for ( int j = 0; j < numberOfGroups; j++ ){
-                   if ( ( order & groupArray[j] ) != groupArray[j] ) {
-                        continue;
-                   }
-                   if ( numberOfGroupsForOrder == filteredSize ) {
-                        filteredSize *= 2;
-                        filteredGroups = realloc( filteredGroups, sizeof( unsigned int ) * filteredSize );
-                   }
-                   filteredGroups[numberOfGroupsForOrder] = groupArray[j];
-                   numberOfGroupsForOrder++;
-                }
-
-                free(filteredGroups);
-                //printf( "For first order with %i rolls, there are %i groups that could be in it\n", numRollsToTest, numberOfGroupsForOrder );
-                //break;
-                numValidOrders++;
-            }
-
-        } while ( incrementArray( orderIndexArray, numRollsToTest, numberOfRolls - 1 ) );
-
-        printf( "Number of orders with %i rolls: %i\n", numRollsToTest, numValidOrders );
-        totalOrders += numValidOrders;
-    }
-    printf( "Number of valid orders: %i\n", totalOrders );
-    int numRepeatsToTest = 4;
-    int numRollsToTest = 2;
-    int testArray[numRepeatsToTest];
-    int numGroupings = 0;
-    unsigned int uniqueGroups[1024];
-    int numUniqueGroups = 0;
-
-    for ( int i = 0; i < numRepeatsToTest; i++ ) {
-        testArray[i] = i;
-    }
-
-    do {
-        unsigned int order = 0;
-        int allUnique = 1;
-        for ( int i = 0; i < numRepeatsToTest; i++ ) {
-            unsigned int group = groupsWithXRolls[numRollsToTest][testArray[i]];
-            if ( ( order & group ) != 0 ) {
-                allUnique = 0;
-                break;
-            }
-            order = order | group;
-        }
-
-        if ( !allUnique ) {
-            continue;
-        }
-        numGroupings++;
-        int alreadyMade = 0;
-        for ( int i = 0; i < numUniqueGroups; i++ ) {
-            if ( uniqueGroups[i] == order ) {
-                alreadyMade = 1;
-                break;
-            }
-        }
-
-        if ( alreadyMade ) {
-            continue;
-        }
-        uniqueGroups[numUniqueGroups] = order;
-        numUniqueGroups++;
-
-        //printRollsFromInt( rollList, order, numberOfRolls );
-    } while ( incrementArray( testArray, numRepeatsToTest, groupsWithXRollsCount[numRollsToTest] - 1) );
-    printf( "Number of valid groupings (not unique): %i\n", numGroupings );
-    printf( "Number of valid groupings (unique): %i\n", numUniqueGroups );
     free(groupArray);
 
     return 0;
