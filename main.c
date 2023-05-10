@@ -234,17 +234,12 @@ int main( int argc, char* argv[] ) {
     int          minGroupsInOrder      = ceil( minOrderLength / maxGroupLength );
     int          maxGroupsInOrder      = floor( maxOrderLength / minGroupLength );
     unsigned int numberOfGroups        = 0;    //how many total groups are found
-    unsigned int *groupArray           = malloc( sizeof(unsigned int) * 1024 );
-    int          groupArraySize        = 1024;
+    unsigned int *groupArray           = createArray( 1024 ); //malloc( sizeof(unsigned int) * 1024 );
 
     unsigned int groupsContainRoll[numberOfRolls]; 
     unsigned int **groupsWithXRolls = malloc( (maxSplices + 2 ) * sizeof( int* ) );
-    unsigned int groupsWithXRollsCount[maxSplices + 2];
-    unsigned int groupsWithXRollsSize[maxSplices + 2];
     for ( int i = 0; i <= maxSplices + 1; i++ ) {
-        groupsWithXRollsCount[i] = 0;
-        groupsWithXRolls[i] = malloc( sizeof( unsigned int ) * 1024 );
-        groupsWithXRollsSize[i] = 1024;
+        groupsWithXRolls[i] = createArray( 1024 );//malloc( sizeof( unsigned int ) * 1024 );
     }
 
     //set up maxNumber, and initialize groupContainsRoll array
@@ -300,20 +295,8 @@ int main( int argc, char* argv[] ) {
                         groupsContainRoll[j]++; 
                     }
                 }
-                
-                if ( groupsWithXRollsCount[groupSize] == groupsWithXRollsSize[groupSize]) {
-                    groupsWithXRollsSize[groupSize] *= 2;
-                    groupsWithXRolls[groupSize] = realloc( groupsWithXRolls[groupSize], sizeof(unsigned int) * groupsWithXRollsSize[groupSize]);
-                }
-                groupsWithXRolls[groupSize][groupsWithXRollsCount[groupSize]] = groupRolls;
-                groupsWithXRollsCount[groupSize]++;
-
-                if ( numberOfGroups == groupArraySize ) {
-                    groupArraySize *= 2;
-                    groupArray = realloc( groupArray, sizeof(unsigned int) * groupArraySize );
-                }
-
-                groupArray[numberOfGroups] = groupRolls;
+                groupsWithXRolls[groupSize] = addToArray( groupsWithXRolls[groupSize], groupRolls ); 
+                groupArray = addToArray( groupArray, groupRolls ); 
                 numberOfGroups++;
             }
         } while ( incrementArray( rollsInGroupArray, groupSize, numberOfRolls - 1 ) );
