@@ -110,6 +110,38 @@ float rollsLength( struct Roll *rolls, unsigned int num, int numRolls ) {
     return totalLength;
 }
 
+//standard way to create an array, keeping track of its size/length
+//the first element of the array is 1 + index of the final element
+//the second element of the array is how large the array is
+unsigned int* createArray( int initialSize ) {
+    unsigned int *array    = malloc( sizeof( unsigned int ) * initialSize );
+                  array[0] = 2;
+                  array[1] = initialSize;
+
+    return array;
+}
+
+
+//standard way to add to an array, keeping track of its size/length
+//the first element of the array is 1 + index of the final element
+//the second element of the array is how large the array is
+unsigned int* addToArray( unsigned int array[], unsigned int intToAdd ) {
+    int arrayLength = array[0];
+    int arraySize   = array[1];
+    
+    if ( arrayLength == arraySize ) {
+        arraySize *= 2;
+        array      = realloc( array, sizeof( unsigned int ) * arraySize );
+        array[1]  *= 2;
+    }
+
+    array[arrayLength] = intToAdd;
+    array[0]++;
+
+    return array;
+}
+
+
 /*
  * go from an array where elements are the rolls that make up a group to the 
  *  equivalent unsigned int
@@ -246,7 +278,9 @@ int main( int argc, char* argv[] ) {
 
     clock_t start = clock(), diff; 
     //changed so that it is only gathering groups now
-    
+    //go through all possible combinations of rolls, from the minimum to maximum to create a group
+    //when a valid group is found, it will add it to a general array for all groups,
+    //as well as an array of arrays, with the array at index is made up of groups that contain (index) rolls
     for ( int groupSize = minRollsInGroup; groupSize <= maxSplices + 1; groupSize++ ) {
         int rollsInGroupArray[groupSize];
 
@@ -294,7 +328,7 @@ int main( int argc, char* argv[] ) {
         printf( "Number of groups that contain roll %i: %u\n", i, groupsContainRoll[i] );
         totalGroupsCount += groupsContainRoll[i];
         if (i <= maxSplices + 1) {
-            printf( "Number of groups with %i rolls: %u\n", i, groupsWithXRollsCount[i] );
+            //printf( "Number of groups with %i rolls: %u\n", i, groupsWithXRollsCount[i] );
         }
     }
 /*
@@ -313,7 +347,7 @@ int main( int argc, char* argv[] ) {
     printf( "Total edges found: %u\n", numEdges );
 */
 
-
+/*
     unsigned int orderWith17Rolls = 330127329;
     unsigned int orderWith21Rolls = 11010047;
     unsigned int orderWith27Rolls = 503054335;
@@ -365,7 +399,7 @@ int main( int argc, char* argv[] ) {
         }
         printf( "There are %i groups with %i rolls, and %u pairs that don't have any rolls in common\n", count, i, collisions );
     }   
-
+*/
     diff = clock() - start;
     int msec = diff * 1000 / CLOCKS_PER_SEC;
 
