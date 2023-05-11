@@ -157,6 +157,16 @@ unsigned int arrayToInt( int array[], int arraySize ) {
     return integer;
 }
 
+
+//have to give it an array of arrays
+//the indexes are the different roll numbers
+//the second arrays are all of the groups that contain the roll of index
+//the arrays are in ascending order of their size
+//
+void solve( unsigned int **groups, int cur[], int **solutions, int position, int count, unsigned int seen, int skipped ){
+    
+}
+
 int main( int argc, char* argv[] ) {
 
     if ( argc != 2 ) {
@@ -302,17 +312,55 @@ int main( int argc, char* argv[] ) {
         } while ( incrementArray( rollsInGroupArray, groupSize, numberOfRolls - 1 ) );
     }
 
+
+    int sortedRollNumbersByGroupCount[numberOfRolls];
+    int sortedGroupSizes[numberOfRolls];
+    int tempIndex = 0;
+    
+    for ( int i = 0; i < numberOfRolls; i++ ) {
+        int groupSize = groupsContainRoll[i];
+        for ( int j = 0; j < numberOfRolls; j++ ) {
+            if (  j == tempIndex ) {
+                sortedRollNumbersByGroupCount[j] = i;
+                sortedGroupSizes[j] = groupSize - 2;
+                tempIndex++;
+                break;
+            }
+            if ( groupSize > sortedGroupSizes[j] ) {
+                for ( int k = tempIndex; k > j; k-- ) {
+                    sortedRollNumbersByGroupCount[k] = sortedRollNumbersByGroupCount[k -1];
+                    sortedGroupSizes[k] = sortedGroupSizes[k - 1];
+                }
+                sortedRollNumbersByGroupCount[j] = i;
+                sortedGroupSizes[j] = groupSize - 2;
+                tempIndex++;
+                break;
+            }
+        }
+    }
+    int totalGroupsCount = 0;
+    for ( int i = 0; i < numberOfRolls; i++ ) {
+        printf( "Groups that contain roll %i: %i\n", sortedRollNumbersByGroupCount[i], sortedGroupSizes[i] );
+        totalGroupsCount += sortedGroupSizes[i];
+    }
+
     printf( "Total Number of Actual Groups: %u\n", numberOfGroups );
 
     printf( "-------------------------------------------\n" );
+    printf( "Total Groups when seperated: %u\n", totalGroupsCount );
 
-    unsigned int totalGroupsCount = 0;
-    for ( int i = 0; i < numberOfRolls; i++ ){
-        printf( "Number of groups that contain roll %i: %u\n", i, groupsContainRoll[i] );
-        totalGroupsCount += groupsContainRoll[i];
-        if (i <= maxSplices + 1) {
-            //printf( "Number of groups with %i rolls: %u\n", i, groupsWithXRollsCount[i] );
+
+    unsigned int allRolls = 0;
+    for ( int i = 0; i < numberOfRolls; i++ ) {
+        int rollToTest = sortedRollNumbersByGroupCount[i];
+        allRolls |= 1 << rollToTest;
+        int tempNumGroups = 0;
+        for ( int j = 0; j < numberOfGroups; j++ ) {
+            if ( ( groupArray[j] & allRolls ) != 0 ) {
+                tempNumGroups++;
+            }
         }
+        printf( "Roll %i, cumulative groups: %i/%i\n", rollToTest, tempNumGroups, numberOfGroups );
     }
 /*
     unsigned int numEdges = 0;
@@ -386,7 +434,6 @@ int main( int argc, char* argv[] ) {
     diff = clock() - start;
     int msec = diff * 1000 / CLOCKS_PER_SEC;
 
-    printf( "Total Groups when seperated: %u\n", totalGroupsCount );
     printf( "%d second %d milliseconds\n", msec/1000, msec%1000 );
 
     free(groupArray);
