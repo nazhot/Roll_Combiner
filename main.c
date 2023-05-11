@@ -178,13 +178,21 @@ unsigned int arrayToInt( int array[], int arraySize ) {
 }
 
 
+unsigned int** pruneGroups( unsigned int **groups, int numberOfRolls, int numberPrevAllowed ) {
+    
+}
+
+
 //have to give it an array of arrays
 //the indexes are the different roll numbers
 //the second arrays are all of the groups that contain the roll of index
 //the arrays are in ascending order of their size
 //
-void solve( unsigned int **groups, int cur[], int **solutions, int position, int count, unsigned int seen, int skipped ){
+void solve( unsigned int **groups, int cur[], unsigned int **solutions, int position, int count, unsigned int seen, int skipped, int numberOfRolls ){
     
+    while ( position < numberOfRolls ) {
+
+    }
 }
 
 int main( int argc, char* argv[] ) {
@@ -321,7 +329,7 @@ int main( int argc, char* argv[] ) {
 
             if ( groupLength >= minGroupLength && groupLength <= maxGroupLength ) {
                 for ( int j = 0; j <= currentMaxRoll; j++ ) { 
-                    if ( groupRolls >> j & 1) {
+                    if ( groupRolls >> j & 1 ) {
                         groupsContainRoll[j]++; 
                     }
                 }
@@ -342,32 +350,55 @@ int main( int argc, char* argv[] ) {
         for ( int j = 0; j < numberOfRolls; j++ ) {
             if (  j == tempIndex ) {
                 sortedRollNumbersByGroupCount[j] = i;
-                sortedGroupSizes[j] = groupSize - 2;
+                sortedGroupSizes[j] = groupSize;
                 tempIndex++;
                 break;
             }
-            if ( groupSize > sortedGroupSizes[j] ) {
+            if ( groupSize <  sortedGroupSizes[j] ) {
                 for ( int k = tempIndex; k > j; k-- ) {
                     sortedRollNumbersByGroupCount[k] = sortedRollNumbersByGroupCount[k -1];
                     sortedGroupSizes[k] = sortedGroupSizes[k - 1];
                 }
                 sortedRollNumbersByGroupCount[j] = i;
-                sortedGroupSizes[j] = groupSize - 2;
+                sortedGroupSizes[j] = groupSize;
                 tempIndex++;
                 break;
             }
         }
     }
+
+    unsigned int collectiveRolls = 0;
+    unsigned int **sortedGroupsArray = malloc( sizeof( unsigned int ) * numberOfRolls );
+    int prevCollisionsAllowed = 0;
+
+    for ( int i = 0; i < numberOfRolls; i++ ) {
+        sortedGroupsArray[i] = createArray( 1024 );
+        int rollNumber = 1 << sortedRollNumbersByGroupCount[i];
+        
+        for ( int j = 0; j < numberOfGroups; j++ ) {
+            unsigned int group = groupArray[j];
+            //group contains the roll number, and doesn't have too many rolls that have already been checked
+            if ( ( rollNumber & group ) != 0 && rollsCount( ( group & collectiveRolls ), numberOfRolls ) <= prevCollisionsAllowed ) {
+                sortedGroupsArray[i] = addToArray( sortedGroupsArray[i], group );
+            }
+        }
+
+        collectiveRolls |= 1 << rollNumber;
+    }
     int totalGroupsCount = 0;
+    int totalPrunedGroupsCount = 0;
     for ( int i = 0; i < numberOfRolls; i++ ) {
         printf( "Groups that contain roll %i: %i\n", sortedRollNumbersByGroupCount[i], sortedGroupSizes[i] );
+        printf( "Check: %i\n", (  sortedGroupsArray[i][0] - 2 ) );
         totalGroupsCount += sortedGroupSizes[i];
+        totalPrunedGroupsCount += sortedGroupsArray[i][0] - 2;
     }
 
     printf( "Total Number of Actual Groups: %u\n", numberOfGroups );
 
     printf( "-------------------------------------------\n" );
     printf( "Total Groups when seperated: %u\n", totalGroupsCount );
+    printf( "Total Groups when pruned: %u\n", totalPrunedGroupsCount );
 
 
     unsigned int allRolls = 0;
