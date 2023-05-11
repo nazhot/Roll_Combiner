@@ -13,11 +13,6 @@ struct Roll {
     float length;
 };
 
-struct AdjacencyNode {
-    int rollNumber;
-    struct AdjacencyNode *next;
-};
-
 
 void printRollsFromInt( struct Roll *rolls, unsigned int integer, int numberOfRolls ) {
     printf( "----------GROUP----------\n" );
@@ -131,7 +126,14 @@ unsigned int* addToArray( unsigned int array[], unsigned int intToAdd ) {
     
     if ( arrayLength == arraySize ) {
         arraySize *= 2;
-        array      = realloc( array, sizeof( unsigned int ) * arraySize );
+        unsigned int *temp;
+        temp      = realloc( array, sizeof( unsigned int ) * arraySize );
+        if ( temp == NULL ) {
+            free( array );
+            printf( "Not able to realloc memory, exiting\n" );
+            exit(0);
+        }
+        array = temp;
         array[1]  *= 2;
     }
 
