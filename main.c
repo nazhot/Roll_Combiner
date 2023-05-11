@@ -144,6 +144,24 @@ unsigned int* addToArray( unsigned int array[], unsigned int intToAdd ) {
 }
 
 
+unsigned int* shrinkArray( unsigned int array[] ) {
+    int arrayLength = array[0];
+    int arraySize   = array[1];
+
+    unsigned int *temp;
+    temp = realloc( array, sizeof( unsigned int ) * arrayLength );
+    if ( temp == NULL ) {
+        free( array );
+        printf( "Not able to shrink array, exiting\n" );
+        exit(0);
+    }
+    array = temp;
+    array[1] = arrayLength;
+
+    return array;
+}
+
+
 /*
  * go from an array where elements are the rolls that make up a group to the 
  *  equivalent unsigned int
