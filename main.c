@@ -178,20 +178,59 @@ unsigned int arrayToInt( int array[], int arraySize ) {
 }
 
 
-unsigned int** pruneGroups( unsigned int **groups, int numberOfRolls, int numberPrevAllowed ) {
-    
-}
-
-
-//have to give it an array of arrays
 //the indexes are the different roll numbers
 //the second arrays are all of the groups that contain the roll of index
 //the arrays are in ascending order of their size
 //
-void solve( unsigned int **groups, int cur[], unsigned int **solutions, int position, int count, unsigned int seen, int skipped, int numberOfRolls ){
+void solve( struct Roll rolls[], float minOrderLength, float maxOrderLength, unsigned int **groups, int rollNumbers[], unsigned int cur[], unsigned int **solutions, int position, int count, unsigned int seen, int skipsLeft, int numberOfRolls, int isFirst ){
+    //groups: sorted array of array of groups
+    //cur: partial solution, array of group numbers
+    //solutions: array of array of solutions (groups)
+    //position: current index of groups first array
+    //count: how many groups are in partial solution
+    //seen: unsigned int representation of current 
+    //skipped: how many more rolls the program can skip
     
-    while ( position < numberOfRolls ) {
 
+    float orderLength = rollsLength( rolls, seen, numberOfRolls );
+    if ( orderLength > maxOrderLength ) {
+        return;
+    }
+    if ( orderLength >= minOrderLength && orderLength <= maxOrderLength ) {
+        printRollsFromInt( rolls, seen, numberOfRolls );
+    }
+
+    while ( 1 ) {
+        if ( position >= numberOfRolls ) {
+            return;
+        }
+
+        if ( isFirst ) {
+            printf( "Position: %i\n", position );
+        }
+        unsigned int rollNumber = 1 << rollNumbers[position];
+        if ( ! ( seen & rollNumber ) ) {
+            break;
+        }
+        position++;
+
+    }
+
+
+    for ( int i = 2; i < groups[position][0]; i++ ) {
+        unsigned int group = groups[position][i];
+
+        if ( seen & group ) {
+            continue;
+        }
+
+        cur[count] = group;
+        solve( rolls, minOrderLength, maxOrderLength, groups, rollNumbers, cur, solutions, position + 1, count + 1, ( seen | group ) , skipsLeft, numberOfRolls, 0 );
+    }
+
+
+    if ( skipsLeft ) {
+        solve( rolls, minOrderLength, maxOrderLength, groups, rollNumbers, cur, solutions, position + 1, count, seen, skipsLeft - 1, numberOfRolls, 0 );
     }
 }
 
@@ -395,93 +434,14 @@ int main( int argc, char* argv[] ) {
     }
 
     printf( "Total Number of Actual Groups: %u\n", numberOfGroups );
-
     printf( "-------------------------------------------\n" );
     printf( "Total Groups when seperated: %u\n", totalGroupsCount );
     printf( "Total Groups when pruned: %u\n", totalPrunedGroupsCount );
 
+    unsigned int cur[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+    unsigned int **solns;
+    solve( rollList, minOrderLength,  maxOrderLength, sortedGroupsArray, sortedRollNumbersByGroupCount, cur, solns, 0, 0, 0, numberOfRolls - minRollsInOrder, numberOfRolls, 1);
 
-    unsigned int allRolls = 0;
-    for ( int i = 0; i < numberOfRolls; i++ ) {
-        int rollToTest = sortedRollNumbersByGroupCount[i];
-        allRolls |= 1 << rollToTest;
-        int tempNumGroups = 0;
-        for ( int j = 0; j < numberOfGroups; j++ ) {
-            if ( ( groupArray[j] & allRolls ) != 0 ) {
-                tempNumGroups++;
-            }
-        }
-        printf( "Roll %i, cumulative groups: %i/%i\n", rollToTest, tempNumGroups, numberOfGroups );
-    }
-/*
-    unsigned int numEdges = 0;
-    for ( int i = 0; i < numberOfGroups; i++ ) {
-        unsigned int group1 = groupArray[i];
-        for ( int j = i + 1; j < numberOfGroups; j++ ) {
-            unsigned int group2 = groupArray[j];
-            if ( ( group1 & group2 ) != 0 ) {
-                continue;
-            }
-            numEdges++;
-        }
-    }   
-
-    printf( "Total edges found: %u\n", numEdges );
-*/
-
-/*
-    unsigned int orderWith17Rolls = 330127329;
-    unsigned int orderWith21Rolls = 11010047;
-    unsigned int orderWith27Rolls = 503054335;
-    int totalGroupsTest = 0;
-    unsigned int **filteredGroupsWithXRolls = malloc( sizeof( unsigned int ) * ( maxSplices + 2 ) );
-    int            filteredGroupsWithXRollsCount[maxSplices + 2];
-    int            filteredGroupsWithXRollsSize[maxSplices + 2];
-
-    for ( int i = 0; i < maxSplices + 2; i++ ) {
-        filteredGroupsWithXRolls[i] = malloc( sizeof( unsigned int ) * 1024 );
-        filteredGroupsWithXRollsSize[i] = 1024;
-        filteredGroupsWithXRollsCount[i] = 0;
-
-    }
-    printf( "For an order with 27 rolls, the breakdown is:\n" );
-    for ( int groupSize = minRollsInGroup; groupSize <= maxSplices + 1; groupSize++ ) {
-        int numGroups = groupsWithXRollsCount[groupSize];
-        int counter = 0;
-        for ( int i = 0; i < numGroups; i++ ) {
-            unsigned int group = groupsWithXRolls[groupSize][i];
-            if ( ( orderWith27Rolls & group ) != group ) {
-                continue;
-            }
-                if ( filteredGroupsWithXRollsSize[groupSize]  == filteredGroupsWithXRollsCount[groupSize] ) {
-                filteredGroupsWithXRollsSize[groupSize] *= 2;
-                filteredGroupsWithXRolls[groupSize] = realloc( filteredGroupsWithXRolls[groupSize], sizeof( unsigned int ) * filteredGroupsWithXRollsSize[groupSize] );
-            }
-            filteredGroupsWithXRolls[groupSize][filteredGroupsWithXRollsCount[groupSize]] = group;
-            filteredGroupsWithXRollsCount[groupSize]++;
-            totalGroupsTest++;
-            counter++;
-        }
-        printf( "\t%i: %i\n", groupSize, counter );
-    }
-    printf( "Which is a total of %i groups\n", totalGroupsTest );
-
-    for ( int i = 2; i <= 8; i++ ) {
-        int count = filteredGroupsWithXRollsCount[i];
-        unsigned int collisions = 0;
-        for ( int j = 0; j < count; j++ ) {
-            unsigned int group1 = filteredGroupsWithXRolls[i][j];
-            for ( int k = j + 1; k < count; k++ ) {
-                unsigned int group2 = filteredGroupsWithXRolls[i][k];
-                if ( ( group1 & group2 ) != 0 ) {
-                    continue;
-                }
-                collisions++;
-            }
-        }
-        printf( "There are %i groups with %i rolls, and %u pairs that don't have any rolls in common\n", count, i, collisions );
-    }   
-*/
     diff = clock() - start;
     int msec = diff * 1000 / CLOCKS_PER_SEC;
 
