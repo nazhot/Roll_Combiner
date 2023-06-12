@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <locale.h>
 
 #define MAX_ID_LEN 15 //how long the id in each roll can be
                       //guarded by strncpy
@@ -197,7 +198,20 @@ void solve( struct Roll rolls[], float minOrderLength, float maxOrderLength, uns
         return;
     }
     if ( orderLength >= minOrderLength && orderLength <= maxOrderLength ) {
-        printRollsFromInt( rolls, seen, numberOfRolls );
+        //return;
+        //printf( "-----------------------------------\n" );
+        //printf( "[" );
+        //for ( int i = 0; i < count; i++ ) {
+           // printRollsFromInt( rolls, cur[i], numberOfRolls );
+        //   printf( "%i", cur[i] );
+        //   if ( i < count - 1 ) {
+        //    printf( ", " );
+        //   }
+        //}
+        //printf( "]\n" );
+        //printf( "-----------------------------------\n" );
+        //printRollsFromInt( rolls, seen, numberOfRolls );
+        return;
     }
 
     while ( 1 ) {
@@ -224,13 +238,14 @@ void solve( struct Roll rolls[], float minOrderLength, float maxOrderLength, uns
             continue;
         }
 
-        cur[count] = group;
+        cur[count] = i;
         solve( rolls, minOrderLength, maxOrderLength, groups, rollNumbers, cur, solutions, position + 1, count + 1, ( seen | group ) , skipsLeft, numberOfRolls, 0 );
     }
 
 
     if ( skipsLeft ) {
-        solve( rolls, minOrderLength, maxOrderLength, groups, rollNumbers, cur, solutions, position + 1, count, seen, skipsLeft - 1, numberOfRolls, 0 );
+        skipsLeft--;
+        solve( rolls, minOrderLength, maxOrderLength, groups, rollNumbers, cur, solutions, position + 1, count, seen, skipsLeft, numberOfRolls, 0 );
     }
 }
 
@@ -240,6 +255,7 @@ int main( int argc, char* argv[] ) {
         printf( "Not the correct number of arguments (1 expected)\n" );
         return 1;
     }
+    setlocale(LC_NUMERIC, "");
 
     FILE *p_rollFile;
     const char *fileName = argv[1];
@@ -378,8 +394,27 @@ int main( int argc, char* argv[] ) {
             }
         } while ( incrementArray( rollsInGroupArray, groupSize, numberOfRolls - 1 ) );
     }
+/* 
+    long num2Groups = 0;
+    unsigned int numPairsArray[numberOfGroups];
 
+    for ( int i = 0; i < numberOfGroups; i++ ) {
+        numPairsArray[i] = 0;
+    }
 
+    for ( int i = 2; i < groupArray[0]; i++ ) {
+        for ( int j = i + 1; j < groupArray[0]; j++ ) {
+            if ( groupArray[i] & groupArray[j] ) {
+                continue;
+            }
+            numPairsArray[i]++;
+            numPairsArray[j]++;
+            num2Groups++;
+        }
+    }
+    printf("Number of valid pairs of groups: %'ld\n", num2Groups );
+    //printArray( numPairsArray, numberOfGroups ); 
+*/
     int sortedRollNumbersByGroupCount[numberOfRolls];
     int sortedGroupSizes[numberOfRolls];
     int tempIndex = 0;
@@ -414,15 +449,15 @@ int main( int argc, char* argv[] ) {
         sortedGroupsArray[i] = createArray( 1024 );
         int rollNumber = 1 << sortedRollNumbersByGroupCount[i];
         
-        for ( int j = 0; j < numberOfGroups; j++ ) {
+        for ( int j = 2; j < numberOfGroups; j++ ) {
             unsigned int group = groupArray[j];
             //group contains the roll number, and doesn't have too many rolls that have already been checked
-            if ( ( rollNumber & group ) != 0 && rollsCount( ( group & collectiveRolls ), numberOfRolls ) <= prevCollisionsAllowed ) {
+            if ( ( rollNumber & group ) && rollsCount( ( group & collectiveRolls ), numberOfRolls ) <= prevCollisionsAllowed ) {
                 sortedGroupsArray[i] = addToArray( sortedGroupsArray[i], group );
             }
         }
 
-        collectiveRolls |= 1 << rollNumber;
+        collectiveRolls |= rollNumber;
     }
     int totalGroupsCount = 0;
     int totalPrunedGroupsCount = 0;
@@ -433,9 +468,9 @@ int main( int argc, char* argv[] ) {
         totalPrunedGroupsCount += sortedGroupsArray[i][0] - 2;
     }
 
-    printf( "Total Number of Actual Groups: %u\n", numberOfGroups );
+    printf( "Total Number of Actual Groups: %'u\n", numberOfGroups );
     printf( "-------------------------------------------\n" );
-    printf( "Total Groups when seperated: %u\n", totalGroupsCount );
+    printf( "Total Groups when separated: %'u\n", totalGroupsCount );
     printf( "Total Groups when pruned: %u\n", totalPrunedGroupsCount );
 
     unsigned int cur[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
