@@ -331,12 +331,15 @@ int main( int argc, char* argv[] ) {
 
     unsigned int groupsContainRoll[numberOfRolls]; 
     unsigned int **groupsWithXRolls = malloc( (maxSplices + 2 ) * sizeof( int* ) );
+    unsigned int **groupsThatStartWithRoll = malloc( sizeof( unsigned int ) * numberOfRolls );
+
     for ( int i = 0; i <= maxSplices + 1; i++ ) {
         groupsWithXRolls[i] = createArray( 1024 );//malloc( sizeof( unsigned int ) * 1024 );
     }
 
     //set up maxNumber, and initialize groupContainsRoll array
     for ( int i = 0; i < numberOfRolls; i++ ) { 
+        groupsThatStartWithRoll[i] = createArray( 1024 );
         tempLengthSum += ascendingLengthsArray[i];
         if ( tempLengthSum <= maxOrderLength ) {
             maxRollsInOrder++;
@@ -383,9 +386,14 @@ int main( int argc, char* argv[] ) {
             float groupLength       = rollsLength( rollList, groupRolls, currentMaxRoll );
 
             if ( groupLength >= minGroupLength && groupLength <= maxGroupLength ) {
+                int alreadyAdded = 0;
                 for ( int j = 0; j <= currentMaxRoll; j++ ) { 
                     if ( groupRolls >> j & 1 ) {
                         groupsContainRoll[j]++; 
+                        if ( !alreadyAdded ) {
+                            groupsThatStartWithRoll[j] = addToArray( groupsThatStartWithRoll[j], groupRolls );
+                            alreadyAdded = 1;
+                        }
                     }
                 }
                 groupsWithXRolls[groupSize] = addToArray( groupsWithXRolls[groupSize], groupRolls ); 
@@ -394,7 +402,39 @@ int main( int argc, char* argv[] ) {
             }
         } while ( incrementArray( rollsInGroupArray, groupSize, numberOfRolls - 1 ) );
     }
-/* 
+
+    int total = 0;
+    
+    for ( int i = 0; i < numberOfRolls; i++ ) { 
+        printf( "Roll %i Count: %i\n", i, groupsThatStartWithRoll[i][0] - 2 );
+        total += groupsThatStartWithRoll[i][0] - 2;
+    }
+    printf( "Total: %'i\n", total );
+ 
+    long numPairs = 0;
+    
+
+    for ( int i = 0; i < numberOfRolls; i++ ) {
+        for ( int j = 2; j < groupsThatStartWithRoll[i][0]; j++ ) {
+            unsigned int group1 = groupsThatStartWithRoll[i][j];
+            for ( int k = i + 1; k < numberOfRolls; k++ ) {
+                if ( group1 >> k & 1 ) {
+                    continue;
+                }
+                for ( int l = 2; l < groupsThatStartWithRoll[k][0]; l++ ) {
+                    unsigned int group2 = groupsThatStartWithRoll[k][l];
+                    if ( group2 & group1 ) {
+                        continue;
+                    }
+                    numPairs++;
+                }
+            }
+        }
+
+    }
+    printf( "Number of pairs: %'ld\n", numPairs );
+
+/*
     long num2Groups = 0;
     unsigned int numPairsArray[numberOfGroups];
 
@@ -414,7 +454,8 @@ int main( int argc, char* argv[] ) {
     }
     printf("Number of valid pairs of groups: %'ld\n", num2Groups );
     //printArray( numPairsArray, numberOfGroups ); 
-*/
+
+/*
     int sortedRollNumbersByGroupCount[numberOfRolls];
     int sortedGroupSizes[numberOfRolls];
     int tempIndex = 0;
@@ -440,11 +481,11 @@ int main( int argc, char* argv[] ) {
             }
         }
     }
-
+/*
     unsigned int collectiveRolls = 0;
     unsigned int **sortedGroupsArray = malloc( sizeof( unsigned int ) * numberOfRolls );
     int prevCollisionsAllowed = 0;
-
+    //pruning the groups
     for ( int i = 0; i < numberOfRolls; i++ ) {
         sortedGroupsArray[i] = createArray( 1024 );
         int rollNumber = 1 << sortedRollNumbersByGroupCount[i];
@@ -467,15 +508,15 @@ int main( int argc, char* argv[] ) {
         totalGroupsCount += sortedGroupSizes[i];
         totalPrunedGroupsCount += sortedGroupsArray[i][0] - 2;
     }
-
+*
     printf( "Total Number of Actual Groups: %'u\n", numberOfGroups );
     printf( "-------------------------------------------\n" );
     printf( "Total Groups when separated: %'u\n", totalGroupsCount );
     printf( "Total Groups when pruned: %u\n", totalPrunedGroupsCount );
-
+*/
     unsigned int cur[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
     unsigned int **solns;
-    solve( rollList, minOrderLength,  maxOrderLength, sortedGroupsArray, sortedRollNumbersByGroupCount, cur, solns, 0, 0, 0, numberOfRolls - minRollsInOrder, numberOfRolls, 1);
+    //solve( rollList, minOrderLength,  maxOrderLength, sortedGroupsArray, sortedRollNumbersByGroupCount, cur, solns, 0, 0, 0, numberOfRolls - minRollsInOrder, numberOfRolls, 1);
 
     diff = clock() - start;
     int msec = diff * 1000 / CLOCKS_PER_SEC;
