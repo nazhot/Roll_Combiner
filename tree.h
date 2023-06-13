@@ -8,8 +8,10 @@ struct node {
 };
 
 
-int searchTree( struct node*, unsigned int);
+int searchTree( struct node*, unsigned int );
 
-int addNode( struct node*, unsigned int);
+struct node* addNode( struct node*, unsigned int );
+
+long getTreeSize( struct node* , long );
 
 #endif
