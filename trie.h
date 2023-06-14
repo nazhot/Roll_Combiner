@@ -7,11 +7,9 @@ struct trieNode {
     struct trieNode *one;
 };
 
-
-int searchTrie( struct trieNode*, unsigned int, int );
-
-struct trieNode* addTrieNode( struct trieNode*, unsigned int, int );
-
-long getTrieSize( struct node* , long );
+int lastOnePosition( unsigned int );
+int searchTrie( struct trieNode*, unsigned int );
+int addTrieNode( struct trieNode*, unsigned int );
+struct trieNode* getTrieNode();
 
 #endif
