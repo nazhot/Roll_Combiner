@@ -5,6 +5,7 @@
 #include <math.h>
 #include <locale.h>
 #include "tree.h"
+#include "trie.h"
 
 #define MAX_ID_LEN 15 //how long the id in each roll can be
                       //guarded by strncpy
@@ -411,9 +412,10 @@ int main( int argc, char* argv[] ) {
         total += groupsThatStartWithRoll[i][0] - 2;
     }
     printf( "Total: %'i\n", total );
-    struct node binarySearchTree = {1048064, NULL, NULL};
+    //struct node binarySearchTree = {1048064, NULL, NULL};
     long numPairs = 0;
-    
+    long numAdded = 0;
+    struct trieNode *root = getTrieNode();
 
     for ( int i = 0; i < numberOfRolls; i++ ) {
         printf(" count: %i\n", i );
@@ -428,7 +430,8 @@ int main( int argc, char* argv[] ) {
                     if ( group2 & group1 ) {
                         continue;
                     }
-                    addNode( &binarySearchTree, group2 ^ group1 );
+                    numAdded += addTrieNode( root, group1 ^ group2 );
+                    //addNode( &binarySearchTree, group2 ^ group1 );
                     numPairs++;
                 }
             }
@@ -436,8 +439,9 @@ int main( int argc, char* argv[] ) {
 
     }
     printf( "Number of pairs: %'ld\n", numPairs );
-    long numAdded = getTreeSize( &binarySearchTree, 0 );
-    printf( "Added/Didn't Added: %'ld/%'ld\n", numAdded, numPairs - numAdded );
+    printf( "Number of pairs added: %ld\n", numAdded );
+    //long numAdded = getTreeSize( &binarySearchTree, 0 );
+    //printf( "Added/Didn't Added: %'ld/%'ld\n", numAdded, numPairs - numAdded );
 
 /*
     long num2Groups = 0;

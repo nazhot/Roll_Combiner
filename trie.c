@@ -45,6 +45,7 @@ struct trieNode* getTrieNode(){
 int addTrieNode( struct trieNode *root, unsigned int value ) {
     struct trieNode *child = root;
     int lastOnePos = lastOnePosition( value );
+
     for ( int i = 0; i <= lastOnePos; i++ ) {
         int isOne = value >> i & 1;
         if ( isOne ) {
@@ -64,3 +65,40 @@ int addTrieNode( struct trieNode *root, unsigned int value ) {
     return isAdded;
     
 }
+
+int deleteTrie( struct trieNode *trieNode ) {
+    
+    if ( trieNode->one ) {
+        deleteTrie( trieNode->one );
+    }
+
+    if ( trieNode->zero ) {
+        deleteTrie( trieNode->zero );
+    }
+
+    free( trieNode );
+
+
+    return 1;
+}
+
+int findCompatibleGroups( struct trieNode *root, unsigned int value, unsigned int nodeValue, int nodeLevel ) {
+
+    if ( root == NULL ) {
+        return 0;
+    }
+
+    int searchBoth = ! (value & 1 );
+
+    if ( root->isEndpoint ) {
+        //printf( "Found a match! %u\n", nodeValue );
+    }
+
+    if ( searchBoth ) {
+        findCompatibleGroups( root->one, value >> 1, nodeValue ^ ( 1 << nodeLevel ), nodeLevel + 1 );
+    }
+    
+    findCompatibleGroups( root->zero, value >> 1, nodeValue, nodeLevel + 1 );
+    return 1;
+}
+

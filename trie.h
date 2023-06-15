@@ -1,8 +1,9 @@
 #ifndef TRIE_H_
 #define TRIE_H_
+#include <stdint.h>
 
 struct trieNode {
-    int isEndpoint;
+    int8_t isEndpoint;
     struct trieNode *zero;
     struct trieNode *one;
 };
@@ -10,6 +11,8 @@ struct trieNode {
 int lastOnePosition( unsigned int );
 int searchTrie( struct trieNode*, unsigned int );
 int addTrieNode( struct trieNode*, unsigned int );
+int deleteTrie( struct trieNode* );
+int findCompatibleGroups( struct trieNode*, unsigned int, unsigned int, int );
 struct trieNode* getTrieNode();
 
 #endif
