@@ -417,13 +417,17 @@ int main( int argc, char* argv[] ) {
     printf( "Trie Node total: %'i\n", numAdded );
 
 
+    struct trieNode *secondTrieRoot = getTrieNode();
+    int numPairs = 0;
+
     for ( int i = 2; i < groupArray[0]; i++ ) {
         if ( i % 10000 == 0 ) {
             printf( "%i\n", i );
         }
-        findCompatibleGroups( trieRoot, groupArray[i], 0, 0 );
+        findCompatibleGroups( trieRoot, groupArray[i], 0, 0, &numPairs, secondTrieRoot );
     }
 
+    printf( "Number of unique pairs: %'i\n", numPairs );
 /*
     long numPairs = 0;
     long numAdded = 0;

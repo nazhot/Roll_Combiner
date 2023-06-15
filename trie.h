@@ -12,7 +12,7 @@ int lastOnePosition( unsigned int );
 int searchTrie( struct trieNode*, unsigned int );
 int addTrieNode( struct trieNode*, unsigned int );
 int deleteTrie( struct trieNode* );
-int findCompatibleGroups( struct trieNode*, unsigned int, unsigned int, int );
+int findCompatibleGroups( struct trieNode*, unsigned int, unsigned int, int, int*, struct trieNode* );
 struct trieNode* getTrieNode();
 
 #endif
