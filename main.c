@@ -4,7 +4,6 @@
 #include <time.h>
 #include <math.h>
 #include <locale.h>
-#include "tree.h"
 #include "trie.h"
 
 #define MAX_ID_LEN 15 //how long the id in each roll can be
@@ -330,6 +329,8 @@ int main( int argc, char* argv[] ) {
     int          maxGroupsInOrder      = floor( maxOrderLength / minGroupLength );
     unsigned int numberOfGroups        = 0;    //how many total groups are found
     unsigned int *groupArray           = createArray( 1024 ); //malloc( sizeof(unsigned int) * 1024 );
+    struct trieNode *trieRoot          = getTrieNode();
+    int numAdded                       = 0;
 
     unsigned int groupsContainRoll[numberOfRolls]; 
     unsigned int **groupsWithXRolls = malloc( (maxSplices + 2 ) * sizeof( int* ) );
@@ -400,6 +401,7 @@ int main( int argc, char* argv[] ) {
                 }
                 groupsWithXRolls[groupSize] = addToArray( groupsWithXRolls[groupSize], groupRolls ); 
                 groupArray = addToArray( groupArray, groupRolls ); 
+                numAdded += addTrieNode( trieRoot, groupRolls );
                 numberOfGroups++;
             }
         } while ( incrementArray( rollsInGroupArray, groupSize, numberOfRolls - 1 ) );
@@ -412,7 +414,17 @@ int main( int argc, char* argv[] ) {
         total += groupsThatStartWithRoll[i][0] - 2;
     }
     printf( "Total: %'i\n", total );
-    //struct node binarySearchTree = {1048064, NULL, NULL};
+    printf( "Trie Node total: %'i\n", numAdded );
+
+
+    for ( int i = 2; i < groupArray[0]; i++ ) {
+        if ( i % 10000 == 0 ) {
+            printf( "%i\n", i );
+        }
+        findCompatibleGroups( trieRoot, groupArray[i], 0, 0 );
+    }
+
+/*
     long numPairs = 0;
     long numAdded = 0;
     struct trieNode *root = getTrieNode();
@@ -440,88 +452,6 @@ int main( int argc, char* argv[] ) {
     }
     printf( "Number of pairs: %'ld\n", numPairs );
     printf( "Number of pairs added: %ld\n", numAdded );
-    //long numAdded = getTreeSize( &binarySearchTree, 0 );
-    //printf( "Added/Didn't Added: %'ld/%'ld\n", numAdded, numPairs - numAdded );
-
-/*
-    long num2Groups = 0;
-    unsigned int numPairsArray[numberOfGroups];
-
-    for ( int i = 0; i < numberOfGroups; i++ ) {
-        numPairsArray[i] = 0;
-    }
-
-    for ( int i = 2; i < groupArray[0]; i++ ) {
-        for ( int j = i + 1; j < groupArray[0]; j++ ) {
-            if ( groupArray[i] & groupArray[j] ) {
-                continue;
-            }
-            numPairsArray[i]++;
-            numPairsArray[j]++;
-            num2Groups++;
-        }
-    }
-    printf("Number of valid pairs of groups: %'ld\n", num2Groups );
-    //printArray( numPairsArray, numberOfGroups ); 
-
-/*
-    int sortedRollNumbersByGroupCount[numberOfRolls];
-    int sortedGroupSizes[numberOfRolls];
-    int tempIndex = 0;
-    
-    for ( int i = 0; i < numberOfRolls; i++ ) {
-        int groupSize = groupsContainRoll[i];
-        for ( int j = 0; j < numberOfRolls; j++ ) {
-            if (  j == tempIndex ) {
-                sortedRollNumbersByGroupCount[j] = i;
-                sortedGroupSizes[j] = groupSize;
-                tempIndex++;
-                break;
-            }
-            if ( groupSize <  sortedGroupSizes[j] ) {
-                for ( int k = tempIndex; k > j; k-- ) {
-                    sortedRollNumbersByGroupCount[k] = sortedRollNumbersByGroupCount[k -1];
-                    sortedGroupSizes[k] = sortedGroupSizes[k - 1];
-                }
-                sortedRollNumbersByGroupCount[j] = i;
-                sortedGroupSizes[j] = groupSize;
-                tempIndex++;
-                break;
-            }
-        }
-    }
-/*
-    unsigned int collectiveRolls = 0;
-    unsigned int **sortedGroupsArray = malloc( sizeof( unsigned int ) * numberOfRolls );
-    int prevCollisionsAllowed = 0;
-    //pruning the groups
-    for ( int i = 0; i < numberOfRolls; i++ ) {
-        sortedGroupsArray[i] = createArray( 1024 );
-        int rollNumber = 1 << sortedRollNumbersByGroupCount[i];
-        
-        for ( int j = 2; j < numberOfGroups; j++ ) {
-            unsigned int group = groupArray[j];
-            //group contains the roll number, and doesn't have too many rolls that have already been checked
-            if ( ( rollNumber & group ) && rollsCount( ( group & collectiveRolls ), numberOfRolls ) <= prevCollisionsAllowed ) {
-                sortedGroupsArray[i] = addToArray( sortedGroupsArray[i], group );
-            }
-        }
-
-        collectiveRolls |= rollNumber;
-    }
-    int totalGroupsCount = 0;
-    int totalPrunedGroupsCount = 0;
-    for ( int i = 0; i < numberOfRolls; i++ ) {
-        printf( "Groups that contain roll %i: %i\n", sortedRollNumbersByGroupCount[i], sortedGroupSizes[i] );
-        printf( "Check: %i\n", (  sortedGroupsArray[i][0] - 2 ) );
-        totalGroupsCount += sortedGroupSizes[i];
-        totalPrunedGroupsCount += sortedGroupsArray[i][0] - 2;
-    }
-*
-    printf( "Total Number of Actual Groups: %'u\n", numberOfGroups );
-    printf( "-------------------------------------------\n" );
-    printf( "Total Groups when separated: %'u\n", totalGroupsCount );
-    printf( "Total Groups when pruned: %u\n", totalPrunedGroupsCount );
 */
     unsigned int cur[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
     unsigned int **solns;
