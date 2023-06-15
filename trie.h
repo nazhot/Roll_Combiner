@@ -1,6 +1,7 @@
 #ifndef TRIE_H_
 #define TRIE_H_
 #include <stdint.h>
+#include "smallarray.h"
 
 struct trieNode {
     int8_t isEndpoint;
@@ -12,7 +13,7 @@ int lastOnePosition( unsigned int );
 int searchTrie( struct trieNode*, unsigned int );
 int addTrieNode( struct trieNode*, unsigned int );
 int deleteTrie( struct trieNode* );
-int findCompatibleGroups( struct trieNode*, unsigned int, unsigned int, int, int*, struct trieNode* );
+int findCompatibleGroups( struct trieNode*, unsigned int, unsigned int, int, int*, struct trieNode*, struct smallarray* );
 struct trieNode* getTrieNode();
 
 #endif

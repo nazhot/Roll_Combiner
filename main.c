@@ -5,6 +5,7 @@
 #include <math.h>
 #include <locale.h>
 #include "trie.h"
+#include "smallarray.h"
 
 #define MAX_ID_LEN 15 //how long the id in each roll can be
                       //guarded by strncpy
@@ -331,6 +332,8 @@ int main( int argc, char* argv[] ) {
     unsigned int *groupArray           = createArray( 1024 ); //malloc( sizeof(unsigned int) * 1024 );
     struct trieNode *trieRoot          = getTrieNode();
     int numAdded                       = 0;
+    printf( "%f\n", pow( 2, numberOfRolls - 1 ) + 1 );
+    struct smallarray *smallarray      = createSmallArray( pow( 2, numberOfRolls - 1) + 1 );
 
     unsigned int groupsContainRoll[numberOfRolls]; 
     unsigned int **groupsWithXRolls = malloc( (maxSplices + 2 ) * sizeof( int* ) );
@@ -424,7 +427,7 @@ int main( int argc, char* argv[] ) {
         if ( i % 10000 == 0 ) {
             printf( "%i\n", i );
         }
-        findCompatibleGroups( trieRoot, groupArray[i], 0, 0, &numPairs, secondTrieRoot );
+        findCompatibleGroups( trieRoot, groupArray[i], 0, 0, &numPairs, secondTrieRoot, smallarray );
     }
 
     printf( "Number of unique pairs: %'i\n", numPairs );

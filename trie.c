@@ -1,4 +1,5 @@
 #include "trie.h"
+#include "smallarray.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -82,7 +83,7 @@ int deleteTrie( struct trieNode *trieNode ) {
     return 1;
 }
 
-int findCompatibleGroups( struct trieNode *root, unsigned int value, unsigned int nodeValue, int nodeLevel, int *numAdded, struct trieNode *secondRoot ) {
+int findCompatibleGroups( struct trieNode *root, unsigned int value, unsigned int nodeValue, int nodeLevel, int *numAdded, struct trieNode *secondRoot, struct smallarray *smallarray ) {
 
     if ( root == NULL ) {
         return 0;
@@ -91,15 +92,19 @@ int findCompatibleGroups( struct trieNode *root, unsigned int value, unsigned in
     int searchBoth = ! (value & 1 );
 
     if ( root->isEndpoint ) {
-        *numAdded = *numAdded + addTrieNode( secondRoot, value ^ nodeValue );
+        if ( !getSmallArrayValue( smallarray, value ^ nodeValue ) ) {
+            setSmallArrayValue( smallarray, value ^ nodeValue );
+            *numAdded = *numAdded + 1;
+            addTrieNode( secondRoot, value ^ nodeValue ); 
+        }
         //printf( "Found a match! %u\n", nodeValue );
     }
 
     if ( searchBoth ) {
-        findCompatibleGroups( root->one, value >> 1, nodeValue ^ ( 1 << nodeLevel ), nodeLevel + 1, numAdded, secondRoot );
+        findCompatibleGroups( root->one, value >> 1, nodeValue ^ ( 1 << nodeLevel ), nodeLevel + 1, numAdded, secondRoot, smallarray );
     }
     
-    findCompatibleGroups( root->zero, value >> 1, nodeValue, nodeLevel + 1, numAdded, secondRoot );
+    findCompatibleGroups( root->zero, value >> 1, nodeValue, nodeLevel + 1, numAdded, secondRoot, smallarray );
     return 1;
 }
 

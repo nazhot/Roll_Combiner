@@ -10,13 +10,16 @@ struct smallarray* createSmallArray( int size ) {
 
     temp->size = convertedSize;
 
-    int32_t *array = ( int32_t* ) malloc( 32 * sizeof( convertedSize ) );
+    int32_t *array = ( int32_t* ) malloc( 4 * convertedSize );
+    if ( array == NULL ) {
+        printf( "Could not allocate smallarray of that size!\n" );
+        return NULL;
+    }
     for ( int i = 0; i < convertedSize; i++ ){
         array[i] = 0;
     }
     temp->contents = array;
     temp->numElements = 0;
-
     return temp;
 }
 
