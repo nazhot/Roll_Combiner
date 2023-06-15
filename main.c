@@ -251,6 +251,21 @@ void solve( struct Roll rolls[], float minOrderLength, float maxOrderLength, uns
     }
 }
 
+
+unsigned nextSetOfNBits( unsigned x ) {
+    unsigned smallest, ripple, new_smallest, ones;
+
+    if ( x == 0 ) return 0;
+    smallest     = ( x & -x );
+    ripple       = x + smallest;
+    new_smallest = ( ripple & -ripple );
+    ones         = ( ( new_smallest / smallest ) >> 1 ) - 1;
+    return ripple | ones;
+
+}
+
+
+
 int main( int argc, char* argv[] ) {
 
     if ( argc != 2 ) {
@@ -419,6 +434,55 @@ int main( int argc, char* argv[] ) {
     printf( "Total: %'i\n", total );
     printf( "Trie Node total: %'i\n", numAdded );
 
+    int sectionsNeeded = ceil( 1.0 * numberOfRolls / 8 );
+    printf( "Number of sections needed: %i\n", sectionsNeeded );
+    int sections[sectionsNeeded][256];
+    int sectionIndexes[sectionsNeeded];
+    
+    for ( int i = 0; i < sectionsNeeded; i++ ) {
+        sectionIndexes[i] = 1;
+        for ( int j = 0; j < 256; j++ ) {
+            sections[i][j] = 0;
+        }
+    }
+
+    for ( int bits = 1; bits <= maxSplices + 1; bits++ ) {
+        unsigned number = pow( 2, bits ) - 1;
+
+        while ( number < 256 ) {
+            int sectionAdded[sectionsNeeded];
+            for ( int i = 0; i < sectionsNeeded; i++ ) {
+                sectionAdded[i] = 0;
+            }
+
+            for ( int i = 2; i < groupArray[0]; i++ ) {
+                int allAdded = 1;
+                for ( int section = 0; section < sectionsNeeded; section++ ) {
+                    if ( sectionAdded[section] ) {
+                        continue;
+                    }
+                    if ( ( ( groupArray[i] >> ( 8 * section ) ) & number ) == number ) {
+                        sectionAdded[section] = 1;
+                        sections[section][sectionIndexes[section]++] = number;
+                        continue;
+                    }
+                    allAdded = 0;
+                }
+                if ( allAdded ) {
+                    break;
+                }
+            }
+
+            number = nextSetOfNBits( number );
+        }
+    }
+
+    int multiplied = 1;
+    for ( int i = 0; i < sectionsNeeded; i++ ) {
+        printf( "Number of %ith sections: %i\n", i, sectionIndexes[i] );
+        multiplied *= sectionIndexes[i];
+    }
+    printf( "Total multiplied: %'i\n", multiplied );
 
     struct trieNode *secondTrieRoot = getTrieNode();
     int numPairs = 0;
