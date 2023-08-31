@@ -29,18 +29,41 @@ unsigned long binomial(unsigned long n, unsigned long k) {
 }
 
 void ob_makeFirstArray( struct oppositeBits *ob, int maxRollsInGroup ) {
+    //Go through all of the possible numbers based on number of bits
+    //First, make the second array (size: maxRollsInGroup)
+    //Second, for 0 - maxRollsInGroup, make each of the third arrays
+    //
+    //After all arrays are initiallized, go through all of the possible numbers and actually do comparisons
     int  firstArraySize  = 1 << ob->numBits;
     int  ***totalArray = malloc( sizeof( int ) * firstArraySize );
+
     for ( int i = 0; i < firstArraySize; i++ ) {
-        int secondArraySize = maxRollsInGroup;
+        //initialize the second array
+        int numBitsInNumber = countBits( i, ob->numBits );
+        int secondArraySize = maxRollsInGroup - numBitsInNumber;
         int **secondArray = malloc( sizeof( int ) * secondArraySize );        
+        int secondArrayIndexes[secondArraySize];
+        //initialize all of the third arrays
         for ( int j = 0; j < secondArraySize; j++ ) {
-            int  thirdArraySize = 2 << ( maxRollsInGroup - countBits( i, maxRollsInGroup ) );
+            int  thirdArraySize = binomial( ob->numBits - numBitsInNumber, j ); //#unset bits choose #bits defined by third array index
             int *thirdArray = malloc( sizeof( int ) * thirdArraySize );
+            secondArray[j] = thirdArray;
+            secondArrayIndexes[j] = 0;
         }
 
         totalArray[i] = secondArray;
+        //end of setup
+        
+        for ( int j = 0; j < firstArraySize; j++ ) {
+           if ( i & j ) {
+               continue;
+           }
+           int numBits = countBits( j,  ob->numBits );
+           totalArray[i][numBits][secondArrayIndexes[numBits]] = j;
+           secondArrayIndexes[numBits]++;
+        }
     }
+    ob->array = totalArray;
 }
 
 
@@ -48,6 +71,6 @@ void ob_makeFirstArray( struct oppositeBits *ob, int maxRollsInGroup ) {
 struct oppositeBits* ob_makeOppositeBits( int numBits ) {
     struct oppositeBits *ob = malloc( sizeof( struct oppositeBits ) );
     ob->numBits = numBits; 
-    ob_makeFirstArray( ob );
+    ob_makeFirstArray( ob, 5 );
     return ob;
 }
