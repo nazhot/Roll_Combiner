@@ -28,7 +28,7 @@ unsigned long binomial(unsigned long n, unsigned long k) {
   return c;
 }
 
-void ob_makeFirstArray( struct oppositeBits *ob, int maxRollsInGroup ) {
+void ob_makeArray( struct oppositeBits *ob, int maxRollsInGroup ) {
     //Go through all of the possible numbers based on number of bits
     //First, make the second array (size: maxRollsInGroup)
     //Second, for 0 - maxRollsInGroup, make each of the third arrays
@@ -68,6 +68,7 @@ void ob_makeFirstArray( struct oppositeBits *ob, int maxRollsInGroup ) {
            if ( i & j ) {
                continue;
            }
+
            int numBits = countBits( j,  ob->numBits );
            if ( numBits >= secondArraySize ) {
                continue;
@@ -92,6 +93,6 @@ void ob_makeFirstArray( struct oppositeBits *ob, int maxRollsInGroup ) {
 struct oppositeBits* ob_makeOppositeBits( int numBits ) {
     struct oppositeBits *ob = malloc( sizeof( struct oppositeBits ) );
     ob->numBits = numBits; 
-    ob_makeFirstArray( ob, 5 );
+    ob_makeArray( ob, 5 );
     return ob;
 }

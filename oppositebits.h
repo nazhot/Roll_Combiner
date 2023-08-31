@@ -10,9 +10,7 @@ struct oppositeBits {
 
 
 struct oppositeBits* ob_makeOppositeBits( int numBits );
-void ob_makeFirstArray( struct oppositeBits*, int );
-int* ob_makeSecondArray( struct oppositeBits*, int );
-int* ob_makeThirdArray( struct oppositeBits*, int, int );
+void ob_makeArray( struct oppositeBits*, int );
 unsigned long binomial( unsigned long, unsigned long );
 
 
