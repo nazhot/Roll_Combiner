@@ -105,14 +105,20 @@ int* ob_getValidOppositeBits( struct oppositeBits* ob, long num, int numBits ) {
     if ( numGroups % ob->numBits ) {
         numGroups++;
     }
-    
+    int numbers[numGroups];
+    int numValidOppositeBits = 1; 
     for ( int i = 0; i < numGroups; i++ ) {
         bitMask <<= ( i * ob->numBits );
         int comparisonNumber = ( num & bitMask ) >> ( i * ob->numBits ); 
         //DEBUG
-        printf( "%i ", comparisonNumber );
+        numbers[i] = comparisonNumber;
+        int temp = 0;
+        for ( int j = 0; j < ob->secondArraySizes[comparisonNumber]; j++ ) {
+            temp += ob->thirdArraySizes[comparisonNumber][j];
+        }
+        numValidOppositeBits *= temp;
     }
-    printf( "\n" );
+    printf( "Number of valid options: %i\n", numValidOppositeBits );
 
     return validOppositeBits;
 }
