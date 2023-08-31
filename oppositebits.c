@@ -42,7 +42,7 @@ void ob_makeFirstArray( struct oppositeBits *ob, int maxRollsInGroup ) {
     for ( int i = 0; i < firstArraySize; i++ ) {
         //initialize the second array
         int numBitsInNumber = countBits( i, ob->numBits );
-        int secondArraySize = maxRollsInGroup - numBitsInNumber;
+        int secondArraySize = maxRollsInGroup - numBitsInNumber + 1;
         int **secondArray = malloc( sizeof( int* ) * secondArraySize );        
         int thirdArrayIndexes[secondArraySize];
         int *thirdArraySizes = malloc ( sizeof( int ) * secondArraySize );
