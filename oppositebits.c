@@ -96,3 +96,23 @@ struct oppositeBits* ob_makeOppositeBits( int numBits ) {
     ob_makeArray( ob, 5 );
     return ob;
 }
+
+
+int* ob_getValidOppositeBits( struct oppositeBits* ob, long num, int numBits ) {
+    int* validOppositeBits;
+    int numGroups = numBits / ob->numBits;
+    int bitMask = ( 1 << ob->numBits ) - 1;
+    if ( numGroups % ob->numBits ) {
+        numGroups++;
+    }
+    
+    for ( int i = 0; i < numGroups; i++ ) {
+        bitMask <<= ( i * ob->numBits );
+        int comparisonNumber = ( num & bitMask ) >> ( i * ob->numBits ); 
+        //DEBUG
+        printf( "%i ", comparisonNumber );
+    }
+    printf( "\n" );
+
+    return validOppositeBits;
+}

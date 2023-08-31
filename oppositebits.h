@@ -12,6 +12,6 @@ struct oppositeBits {
 struct oppositeBits* ob_makeOppositeBits( int numBits );
 void ob_makeArray( struct oppositeBits*, int );
 unsigned long binomial( unsigned long, unsigned long );
-
+int* ob_getValidOppositeBits( struct oppositeBits*, long, int );
 
 #endif
