@@ -13,9 +13,6 @@ int countBits( int num, int numBits ) {
 }
 
 unsigned long binomial(unsigned long n, unsigned long k) {
-  if ( k == 0 ) {
-    return 0;
-  }
   unsigned long c = 1, i;
 
   if (k > n-k) // take advantage of symmetry
@@ -38,7 +35,9 @@ void ob_makeFirstArray( struct oppositeBits *ob, int maxRollsInGroup ) {
     //
     //After all arrays are initiallized, go through all of the possible numbers and actually do comparisons
     int firstArraySize = 1 << ob->numBits;
-    int ***totalArray = malloc( sizeof( int ) * firstArraySize );
+    ob->secondArraySizes = malloc( sizeof( int ) * firstArraySize );
+    ob->thirdArraySizes  = malloc( sizeof( int* ) * firstArraySize );
+    int ***totalArray = malloc( sizeof( int* ) * firstArraySize );
 
     for ( int i = 0; i < firstArraySize; i++ ) {
         //initialize the second array
@@ -46,7 +45,10 @@ void ob_makeFirstArray( struct oppositeBits *ob, int maxRollsInGroup ) {
         int secondArraySize = maxRollsInGroup - numBitsInNumber;
         int **secondArray = malloc( sizeof( int* ) * secondArraySize );        
         int thirdArrayIndexes[secondArraySize];
-        int thirdArraySizes[secondArraySize];
+        int *thirdArraySizes = malloc ( sizeof( int ) * secondArraySize );
+
+        ob->secondArraySizes[i] = secondArraySize;
+
         //initialize all of the third arrays
         for ( int j = 0; j < secondArraySize; j++ ) {
             int  thirdArraySize = binomial( ob->numBits - numBitsInNumber, j ); //#unset bits choose #bits defined by third array index
@@ -55,6 +57,9 @@ void ob_makeFirstArray( struct oppositeBits *ob, int maxRollsInGroup ) {
             thirdArrayIndexes[j] = 0;
             thirdArraySizes[j] = thirdArraySize;
         }
+
+
+        ob->thirdArraySizes[i] = thirdArraySizes;
 
         totalArray[i] = secondArray;
         //end of setup
@@ -70,14 +75,14 @@ void ob_makeFirstArray( struct oppositeBits *ob, int maxRollsInGroup ) {
            totalArray[i][numBits][thirdArrayIndexes[numBits]] = j;
            thirdArrayIndexes[numBits]++;
         }
-        printf( "Number: %i\n", i );
-        for ( int j = 0; j < secondArraySize; j++ ) {
-            printf( " -%i: ", j );
-            for ( int k = 0; k < thirdArraySizes[j]; k++ ) {
-                printf( "%i, ", totalArray[i][j][k] );
-            }
-            printf( "\n" );
-        }
+        //printf( "Number: %i\n", i );
+        //for ( int j = 0; j < secondArraySize; j++ ) {
+        //    printf( " -%i: ", j );
+        //    for ( int k = 0; k < thirdArraySizes[j]; k++ ) {
+        //        printf( "%i, ", totalArray[i][j][k] );
+        //    }
+        //    printf( "\n" );
+        //}
     }
     ob->array = totalArray;
 }

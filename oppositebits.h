@@ -4,6 +4,8 @@
 struct oppositeBits { 
     int numBits;
     int ***array;
+    int *secondArraySizes;
+    int **thirdArraySizes;
 };
 
 
