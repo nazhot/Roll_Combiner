@@ -434,6 +434,24 @@ int main( int argc, char* argv[] ) {
     printf( "Total: %'i\n", total );
     printf( "Trie Node total: %'i\n", numAdded );
 
+    unsigned long temp_totalSize = 0;
+    for ( int i = 2; i < groupArray[0]; i++ ) {
+        unsigned long group1 = groupArray[i];
+        unsigned long temp_smallSize = 0;
+        for ( int j = 2; j < groupArray[0]; j++ ) {
+            unsigned long group2 = groupArray[j];
+            if ( group1 & group2 ) {
+                continue;
+            }
+            temp_smallSize++;
+            temp_totalSize++;
+        }
+        if ( groupArray[0] - ( i - 2 ) < 1000 ) {
+            printf( "Group %i has %lu other groups that it could be added to\n", i, temp_smallSize );
+        }
+    }
+    printf( "In total, there are %'lu groups\n", temp_totalSize );
+
     int sectionsNeeded = ceil( 1.0 * numberOfRolls / 8 );
     printf( "Number of sections needed: %i\n", sectionsNeeded );
     int sections[sectionsNeeded][256];

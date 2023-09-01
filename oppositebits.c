@@ -110,7 +110,6 @@ int* ob_getValidOppositeBits( struct oppositeBits* ob, long num, int numBits ) {
     for ( int i = 0; i < numGroups; i++ ) {
         bitMask <<= ( i * ob->numBits );
         int comparisonNumber = ( num & bitMask ) >> ( i * ob->numBits ); 
-        //DEBUG
         numbers[i] = comparisonNumber;
         int temp = 0;
         for ( int j = 0; j < ob->secondArraySizes[comparisonNumber]; j++ ) {
