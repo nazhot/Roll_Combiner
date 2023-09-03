@@ -281,7 +281,18 @@ int getSmallestIntArrayIndex( unsigned int currentGroup, int numRolls, struct in
     return smallestLengthIndex;
 }
 
-void recursiveSolve( unsigned long currentGroup, int numRolls, struct int_array **groupsWithRoll ) {
+void recursiveSolve( unsigned long currentGroup, int numGroupsInOrder, int numRolls, struct int_array **groupsWithRoll, int minGroupsInOrder, int minOrderLength, int maxOrderLength, struct Roll *rolls ) {
+    if ( numGroupsInOrder >= minGroupsInOrder ) {
+        float currentLength = rollsLength( rolls, currentGroup, numRolls );
+        if ( currentLength >= minOrderLength && currentLength <= maxOrderLength ) {
+            printf( "Hit valid order: " );
+            printNumberBits( currentGroup );
+            printf( "   Length: %f\n", currentLength );
+        }
+        if ( currentLength >= maxOrderLength ) {
+            return;
+        }
+    }
     int numValidGroups = 0;
     int numValidRolls = 0;
     for ( int i = 0; i < numRolls; i++ ) {
@@ -290,18 +301,19 @@ void recursiveSolve( unsigned long currentGroup, int numRolls, struct int_array 
             numValidRolls++;
         }
     }
-    int averageGroupsPerRoll = numValidGroups / numValidRolls;
-    printf( "_rs_ Stats for group " );
-    printNumberBits( currentGroup );
-    printf( "\n Number of valid groups: %i\n", numValidGroups );
-    printf( "Number of valid rolls: %i\n", numValidRolls );
-    printf( "Average groups per roll: %i\n", averageGroupsPerRoll );
+    if ( numValidRolls == 0 || numValidGroups == 0 ) {
+        return;
+    }
+    int averageGroupsPerRoll = numValidGroups / numValidRolls + 1;
+//    printf( "_rs_ Stats for group " );
+//    printNumberBits( currentGroup );
+//    printf( "\n Number of valid groups: %i\n", numValidGroups );
+//    printf( "Number of valid rolls: %i\n", numValidRolls );
+//    printf( "Average groups per roll: %i\n", averageGroupsPerRoll );
     struct int_array **newGroupsWithRoll = malloc( sizeof( struct int_array* ) * numRolls ); 
     for ( int i = 0; i < numRolls; i++ ) {
         newGroupsWithRoll[i] = createIntArray( averageGroupsPerRoll, 0, 1.1 );
     }
-
-    numValidGroups = 0;
 
     for ( int i = 0; i < numRolls; i++ ) {
         if ( currentGroup >> i & 1 ) {
@@ -312,25 +324,22 @@ void recursiveSolve( unsigned long currentGroup, int numRolls, struct int_array 
                 continue;
             }
             int index = getSmallestIntArrayIndex( groupsWithRoll[i]->content[j], numRolls, newGroupsWithRoll );
-            if ( currentGroup >> index & 1 ) {
-                printf( "Going to index %i for some reason??\n", index );
-                printNumberBits( groupsWithRoll[i]->content[j] );
-            }
-            numValidGroups++;
             newGroupsWithRoll[index] = addToIntArray( newGroupsWithRoll[index], groupsWithRoll[i]->content[j] );
         }
     }
 
-    for ( int i = 0; i < numRolls; i++ ) {
-        printf( "Size of balanced array for roll %i: %i\n", i, newGroupsWithRoll[i]->length );
-    }
-    
-    printf( "_rs_ Total number of valid groups for given group: %i\n", numValidGroups );
+//    for ( int i = 0; i < numRolls; i++ ) {
+//        printf( "Size of balanced array for roll %i: %i\n", i, newGroupsWithRoll[i]->length );
+//    }
 
     for ( int i = 0; i < numRolls; i++ ) {
-        
+        if ( currentGroup >> i & 1  ) {
+            continue;
+        }
+        for ( int j = 0; j < newGroupsWithRoll[i]->length; j++ ) {
+            recursiveSolve( currentGroup | newGroupsWithRoll[i]->content[j], numGroupsInOrder + 1, numRolls, newGroupsWithRoll, minGroupsInOrder, minOrderLength, maxOrderLength, rolls );
+        }
     }
-
     for ( int i = 0; i < numRolls; i++ ) {
         freeIntArray( newGroupsWithRoll[i] );
     }
@@ -517,7 +526,7 @@ int main( int argc, char* argv[] ) {
         temp_total += balancedGroupsContainRoll[i]->length;
     }
 
-    recursiveSolve( groupArray[2], numberOfRolls, balancedGroupsContainRoll );
+    recursiveSolve( groupArray[2], 1, numberOfRolls, balancedGroupsContainRoll, minGroupsInOrder, minOrderLength, maxOrderLength, rollList );
     printf( "And the total is: %i\n", temp_total );
     
     
