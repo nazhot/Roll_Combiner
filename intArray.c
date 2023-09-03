@@ -44,3 +44,8 @@ struct int_array* addToIntArray( struct int_array *intArray, unsigned int toAdd 
     
     return intArray;
 }
+
+void freeIntArray( struct int_array *intArray ) {
+    free( intArray->content );
+    free( intArray );
+}

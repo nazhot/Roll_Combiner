@@ -266,6 +266,10 @@ unsigned nextSetOfNBits( unsigned x ) {
 
 }
 
+void recursiveSolve( unsigned long currentGroup, struct int_array **groupsWithRoll ) {
+
+}
+
 
 
 int main( int argc, char* argv[] ) {
@@ -446,6 +450,8 @@ int main( int argc, char* argv[] ) {
     }
     printf( "And the total is: %i\n", temp_total );
     
+    
+
 
     int total = 0;
     
