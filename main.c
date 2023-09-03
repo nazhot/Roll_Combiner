@@ -358,6 +358,8 @@ int main( int argc, char* argv[] ) {
         groupsWithXRolls[i] = createArray( 1024 );//malloc( sizeof( unsigned int ) * 1024 );
     }
 
+
+
     //set up maxNumber, and initialize groupContainsRoll array
     for ( int i = 0; i < numberOfRolls; i++ ) { 
         groupsThatStartWithRoll[i] = createArray( 1024 );
