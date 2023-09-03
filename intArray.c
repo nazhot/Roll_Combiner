@@ -40,6 +40,7 @@ struct int_array* addToIntArray( struct int_array *intArray, unsigned int toAdd 
     }
 
     intArray->content[intArray->length] = toAdd;
+    intArray->length++;
     
     return intArray;
 }

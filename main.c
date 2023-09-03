@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -6,6 +7,7 @@
 #include <locale.h>
 #include "trie.h"
 #include "smallarray.h"
+#include "intArray.h"
 
 #define MAX_ID_LEN 15 //how long the id in each roll can be
                       //guarded by strncpy
@@ -358,6 +360,8 @@ int main( int argc, char* argv[] ) {
         groupsWithXRolls[i] = createArray( 1024 );//malloc( sizeof( unsigned int ) * 1024 );
     }
 
+    
+    struct int_array **balancedGroupsContainRoll = malloc( sizeof( struct int_array ) * numberOfRolls );
 
 
     //set up maxNumber, and initialize groupContainsRoll array
@@ -367,6 +371,7 @@ int main( int argc, char* argv[] ) {
         if ( tempLengthSum <= maxOrderLength ) {
             maxRollsInOrder++;
         }
+        balancedGroupsContainRoll[i] = createIntArray( 10000, 0, 1.1 );
         groupsContainRoll[i] = 0;
     }
 
@@ -410,8 +415,14 @@ int main( int argc, char* argv[] ) {
 
             if ( groupLength >= minGroupLength && groupLength <= maxGroupLength ) {
                 int alreadyAdded = 0;
+                int minBalancedLength = INT32_MAX;
+                int minBalancedIndex = -1;
                 for ( int j = 0; j <= currentMaxRoll; j++ ) { 
                     if ( groupRolls >> j & 1 ) {
+                        if ( balancedGroupsContainRoll[j]->length < minBalancedLength ) {
+                            minBalancedLength = balancedGroupsContainRoll[j]->length;
+                            minBalancedIndex = j;
+                        }
                         groupsContainRoll[j]++; 
                         if ( !alreadyAdded ) {
                             groupsThatStartWithRoll[j] = addToArray( groupsThatStartWithRoll[j], groupRolls );
@@ -419,6 +430,7 @@ int main( int argc, char* argv[] ) {
                         }
                     }
                 }
+                balancedGroupsContainRoll[minBalancedIndex] = addToIntArray( balancedGroupsContainRoll[minBalancedIndex], groupRolls );
                 groupsWithXRolls[groupSize] = addToArray( groupsWithXRolls[groupSize], groupRolls ); 
                 groupArray = addToArray( groupArray, groupRolls ); 
                 numAdded += addTrieNode( trieRoot, groupRolls );
@@ -426,6 +438,14 @@ int main( int argc, char* argv[] ) {
             }
         } while ( incrementArray( rollsInGroupArray, groupSize, numberOfRolls - 1 ) );
     }
+
+    int temp_total = 0;
+    for ( int i = 0; i < numberOfRolls; i++ ) {
+        printf( "Size of array for roll %i: %i\n", i, balancedGroupsContainRoll[i]->length );
+        temp_total += balancedGroupsContainRoll[i]->length;
+    }
+    printf( "And the total is: %i\n", temp_total );
+    
 
     int total = 0;
     
