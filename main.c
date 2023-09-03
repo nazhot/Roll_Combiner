@@ -266,7 +266,27 @@ unsigned nextSetOfNBits( unsigned x ) {
 
 }
 
-void recursiveSolve( unsigned long currentGroup, struct int_array **groupsWithRoll ) {
+void recursiveSolve( unsigned long currentGroup, int numRolls, struct int_array **groupsWithRoll ) {
+    int numValidGroups = 0;
+    int numValidRolls = 0;
+    for ( int i = 0; i < numRolls; i++ ) {
+        if ( currentGroup >> i & 1 ) {
+            numValidGroups += groupsWithRoll[i]->length;
+            numValidRolls++;
+        }
+    }
+    int averageGroupsPerRoll = numValidGroups / numValidRolls;
+    struct int_array **newGroupsWithRoll = malloc( sizeof( struct int_array* ) * numRolls ); 
+    for ( int i = 0; i < numRolls; i++ ) {
+        newGroupsWithRoll[i] = createIntArray( averageGroupsPerRoll, 0, 1.1 );
+    }
+
+    
+
+    for ( int i = 0; i < numRolls; i++ ) {
+        freeIntArray( newGroupsWithRoll[i] );
+    }
+    free( newGroupsWithRoll );
 
 }
 
