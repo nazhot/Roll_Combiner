@@ -266,22 +266,70 @@ unsigned nextSetOfNBits( unsigned x ) {
 
 }
 
+int getSmallestIntArrayIndex( unsigned int currentGroup, int numRolls, struct int_array **groupsWithRoll ) {
+    int smallestLength = INT32_MAX;
+    int smallestLengthIndex = -1;
+    for ( int i = 0; i < numRolls; i++ ) {
+        if ( !( currentGroup >> i & 1 ) ) {
+            continue;
+        }
+        if ( groupsWithRoll[i]->length < smallestLength ) {
+            smallestLength = groupsWithRoll[i]->length;
+            smallestLengthIndex = i;
+        }
+    }
+    return smallestLengthIndex;
+}
+
 void recursiveSolve( unsigned long currentGroup, int numRolls, struct int_array **groupsWithRoll ) {
     int numValidGroups = 0;
     int numValidRolls = 0;
     for ( int i = 0; i < numRolls; i++ ) {
-        if ( currentGroup >> i & 1 ) {
+        if ( !( currentGroup >> i & 1 ) ) {
             numValidGroups += groupsWithRoll[i]->length;
             numValidRolls++;
         }
     }
     int averageGroupsPerRoll = numValidGroups / numValidRolls;
+    printf( "_rs_ Stats for group " );
+    printNumberBits( currentGroup );
+    printf( "\n Number of valid groups: %i\n", numValidGroups );
+    printf( "Number of valid rolls: %i\n", numValidRolls );
+    printf( "Average groups per roll: %i\n", averageGroupsPerRoll );
     struct int_array **newGroupsWithRoll = malloc( sizeof( struct int_array* ) * numRolls ); 
     for ( int i = 0; i < numRolls; i++ ) {
         newGroupsWithRoll[i] = createIntArray( averageGroupsPerRoll, 0, 1.1 );
     }
 
+    numValidGroups = 0;
+
+    for ( int i = 0; i < numRolls; i++ ) {
+        if ( currentGroup >> i & 1 ) {
+            continue; 
+        }
+        for ( int j = 0; j < groupsWithRoll[i]->length; j++ ) {
+            if ( currentGroup & groupsWithRoll[i]->content[j] ) {
+                continue;
+            }
+            int index = getSmallestIntArrayIndex( groupsWithRoll[i]->content[j], numRolls, newGroupsWithRoll );
+            if ( currentGroup >> index & 1 ) {
+                printf( "Going to index %i for some reason??\n", index );
+                printNumberBits( groupsWithRoll[i]->content[j] );
+            }
+            numValidGroups++;
+            newGroupsWithRoll[index] = addToIntArray( newGroupsWithRoll[index], groupsWithRoll[i]->content[j] );
+        }
+    }
+
+    for ( int i = 0; i < numRolls; i++ ) {
+        printf( "Size of balanced array for roll %i: %i\n", i, newGroupsWithRoll[i]->length );
+    }
     
+    printf( "_rs_ Total number of valid groups for given group: %i\n", numValidGroups );
+
+    for ( int i = 0; i < numRolls; i++ ) {
+        
+    }
 
     for ( int i = 0; i < numRolls; i++ ) {
         freeIntArray( newGroupsWithRoll[i] );
@@ -468,6 +516,8 @@ int main( int argc, char* argv[] ) {
         printf( "Size of array for roll %i: %i\n", i, balancedGroupsContainRoll[i]->length );
         temp_total += balancedGroupsContainRoll[i]->length;
     }
+
+    recursiveSolve( groupArray[2], numberOfRolls, balancedGroupsContainRoll );
     printf( "And the total is: %i\n", temp_total );
     
     
