@@ -13,6 +13,9 @@
                       //guarded by strncpy
 
 
+FILE *g_outputFile;
+
+
 struct Roll {
     char id[MAX_ID_LEN];
     float length;
@@ -282,7 +285,7 @@ int getSmallestIntArrayIndex( unsigned int currentGroup, int numRolls, struct in
 }
 
 void recursiveSolve( unsigned int currentGroup, int numGroupsInOrder, int numRolls, struct int_array **groupsWithRoll, int minGroupsInOrder, int minOrderLength, int maxOrderLength, struct Roll *rolls, struct smallarray *alreadyFound, int isFirstRun, int *numFound ) {
-
+    //Id, Length, Number of Groups, Number of Rolls, Order Groups, Average Remaining Roll Length
     if ( getSmallArrayValue( alreadyFound, currentGroup ) ) {
         return;
     }
@@ -294,6 +297,30 @@ void recursiveSolve( unsigned int currentGroup, int numGroupsInOrder, int numRol
         if ( currentLength >= minOrderLength && currentLength <= maxOrderLength ) {
             *numFound += 1;
             printf( "Found %i\n", *numFound );
+
+            char orderNumber[256];
+            sprintf( orderNumber, "%d", currentGroup );
+            fputs( orderNumber, g_outputFile );
+            fputc( ',', g_outputFile );
+
+            char orderLength[256];
+            sprintf( orderLength, "%f", currentLength );
+            fputs( orderLength, g_outputFile );
+            fputc( ',', g_outputFile ); 
+
+            char numGroups[256];
+            sprintf( numGroups, "%d", numGroupsInOrder );
+            fputs( numGroups, g_outputFile );
+            fputc( ',', g_outputFile );
+
+            char numberOfRolls[256];
+            sprintf( numberOfRolls, "%d", rollsCount( currentGroup, numRolls ) );
+            fputs( numberOfRolls, g_outputFile );
+            fputc( ',', g_outputFile );
+
+            fputc( ',', g_outputFile );
+            fputc( ',', g_outputFile );
+            fputc( '\n', g_outputFile );
 //            printf( "Hit valid order: " );
 //            printNumberBits( currentGroup );
 //            printf( "   Length: %f\n", currentLength );
@@ -370,6 +397,8 @@ int main( int argc, char* argv[] ) {
     setlocale(LC_NUMERIC, "");
 
     FILE *p_rollFile;
+    g_outputFile = fopen( "output.csv", "w" );
+    fputs( "Id,Length,Number of Groups,Number of Rolls,Order Groups,Remaining Rolls,Average Remaining Roll Length\n", g_outputFile );
     const char *fileName = argv[1];
 
     p_rollFile = fopen( fileName, "r" );
@@ -544,8 +573,28 @@ int main( int argc, char* argv[] ) {
     int *p_numFound = &numFound;
     recursiveSolve( groupArray[2], 1, numberOfRolls, balancedGroupsContainRoll, minGroupsInOrder, minOrderLength, maxOrderLength, rollList, smallArray, 1, p_numFound );
     printf( "And the total is: %i\n", temp_total );
-    
-    
+    fclose( g_outputFile );
+//    long temp_numPairs = 0;
+//    for ( int i = 2; i < groupArray[0]; i++ ) {
+//        unsigned int group1 = groupArray[i];
+//        for ( int j = 0; j < numberOfRolls; j++ ) {
+//            if ( group1 >> j & 1 ){
+//                continue;
+//            }
+//            for ( int k = 0; k < balancedGroupsContainRoll[j]->length; k++ ) {
+//                if ( group1 & balancedGroupsContainRoll[j]->content[k] ) {
+//                    continue;
+//                }
+//                unsigned pair = group1 | balancedGroupsContainRoll[j]->content[k];
+//                if ( getSmallArrayValue( smallArray, pair ) ) {
+//                    continue;
+//                }
+//                setSmallArrayValue( smallArray, pair );
+//                temp_numPairs++;
+//            }
+//        }
+//    }
+//    printf( "Using balanced array, total pairs is %ld\n", temp_numPairs );
 
 
     int total = 0;
