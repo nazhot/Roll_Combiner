@@ -562,168 +562,21 @@ int main( int argc, char* argv[] ) {
     }
 
     int temp_total = 0;
-    for ( int i = 0; i < numberOfRolls; i++ ) {
-        printf( "Size of array for roll %i: %i\n", i, balancedGroupsContainRoll[i]->length );
-        temp_total += balancedGroupsContainRoll[i]->length;
-    }
-
     long smallArraySize = ( 1 << numberOfRolls ) - 1;
     struct smallarray *smallArray = createSmallArray( smallArraySize );
     int numFound = 0;
-    int *p_numFound = &numFound;
-    recursiveSolve( groupArray[2], 1, numberOfRolls, balancedGroupsContainRoll, minGroupsInOrder, minOrderLength, maxOrderLength, rollList, smallArray, 1, p_numFound );
+
+    recursiveSolve( groupArray[2], 1, numberOfRolls, balancedGroupsContainRoll, minGroupsInOrder, minOrderLength, maxOrderLength, rollList, smallArray, 1, &numFound );
+
     printf( "And the total is: %i\n", temp_total );
     fclose( g_outputFile );
-//    long temp_numPairs = 0;
-//    for ( int i = 2; i < groupArray[0]; i++ ) {
-//        unsigned int group1 = groupArray[i];
-//        for ( int j = 0; j < numberOfRolls; j++ ) {
-//            if ( group1 >> j & 1 ){
-//                continue;
-//            }
-//            for ( int k = 0; k < balancedGroupsContainRoll[j]->length; k++ ) {
-//                if ( group1 & balancedGroupsContainRoll[j]->content[k] ) {
-//                    continue;
-//                }
-//                unsigned pair = group1 | balancedGroupsContainRoll[j]->content[k];
-//                if ( getSmallArrayValue( smallArray, pair ) ) {
-//                    continue;
-//                }
-//                setSmallArrayValue( smallArray, pair );
-//                temp_numPairs++;
-//            }
-//        }
-//    }
-//    printf( "Using balanced array, total pairs is %ld\n", temp_numPairs );
-
-
-    int total = 0;
-    
-    for ( int i = 0; i < numberOfRolls; i++ ) { 
-        printf( "Roll %i Count: %i\n", i, groupsThatStartWithRoll[i][0] - 2 );
-        total += groupsThatStartWithRoll[i][0] - 2;
-    }
-    printf( "Total: %'i\n", total );
-    printf( "Trie Node total: %'i\n", numAdded );
-
-    unsigned long temp_totalSize = 0;
-    for ( int i = 2; i < groupArray[0]; i++ ) {
-        unsigned long group1 = groupArray[i];
-        unsigned long temp_smallSize = 0;
-        for ( int j = 2; j < groupArray[0]; j++ ) {
-            unsigned long group2 = groupArray[j];
-            if ( group1 & group2 ) {
-                continue;
-            }
-            temp_smallSize++;
-            temp_totalSize++;
-        }
-        if ( groupArray[0] - ( i - 2 ) < 1000 ) {
-            printf( "Group %i has %lu other groups that it could be added to\n", i, temp_smallSize );
-        }
-    }
-    printf( "In total, there are %'lu groups\n", temp_totalSize );
-
-    int sectionsNeeded = ceil( 1.0 * numberOfRolls / 8 );
-    printf( "Number of sections needed: %i\n", sectionsNeeded );
-    int sections[sectionsNeeded][256];
-    int sectionIndexes[sectionsNeeded];
-    
-    for ( int i = 0; i < sectionsNeeded; i++ ) {
-        sectionIndexes[i] = 1;
-        for ( int j = 0; j < 256; j++ ) {
-            sections[i][j] = 0;
-        }
-    }
-
-    for ( int bits = 1; bits <= maxSplices + 1; bits++ ) {
-        unsigned number = pow( 2, bits ) - 1;
-
-        while ( number < 256 ) {
-            int sectionAdded[sectionsNeeded];
-            for ( int i = 0; i < sectionsNeeded; i++ ) {
-                sectionAdded[i] = 0;
-            }
-
-            for ( int i = 2; i < groupArray[0]; i++ ) {
-                int allAdded = 1;
-                for ( int section = 0; section < sectionsNeeded; section++ ) {
-                    if ( sectionAdded[section] ) {
-                        continue;
-                    }
-                    if ( ( ( groupArray[i] >> ( 8 * section ) ) & number ) == number ) {
-                        sectionAdded[section] = 1;
-                        sections[section][sectionIndexes[section]++] = number;
-                        continue;
-                    }
-                    allAdded = 0;
-                }
-                if ( allAdded ) {
-                    break;
-                }
-            }
-
-            number = nextSetOfNBits( number );
-        }
-    }
-
-    int multiplied = 1;
-    for ( int i = 0; i < sectionsNeeded; i++ ) {
-        printf( "Number of %ith sections: %i\n", i, sectionIndexes[i] );
-        multiplied *= sectionIndexes[i];
-    }
-    printf( "Total multiplied: %'i\n", multiplied );
-
-    struct trieNode *secondTrieRoot = getTrieNode();
-    int numPairs = 0;
-
-    for ( int i = 2; i < groupArray[0]; i++ ) {
-        if ( i % 10000 == 0 ) {
-            printf( "%i\n", i );
-        }
-        findCompatibleGroups( trieRoot, groupArray[i], 0, 0, &numPairs, secondTrieRoot, smallarray );
-    }
-
-    printf( "Number of unique pairs: %'i\n", numPairs );
-/*
-    long numPairs = 0;
-    long numAdded = 0;
-    struct trieNode *root = getTrieNode();
-
-    for ( int i = 0; i < numberOfRolls; i++ ) {
-        printf(" count: %i\n", i );
-        for ( int j = 2; j < groupsThatStartWithRoll[i][0]; j++ ) {
-            unsigned int group1 = groupsThatStartWithRoll[i][j];
-            for ( int k = i + 1; k < numberOfRolls; k++ ) {
-                if ( group1 >> k & 1 ) {
-                    continue;
-                }
-                for ( int l = 2; l < groupsThatStartWithRoll[k][0]; l++ ) {
-                    unsigned int group2 = groupsThatStartWithRoll[k][l];
-                    if ( group2 & group1 ) {
-                        continue;
-                    }
-                    numAdded += addTrieNode( root, group1 ^ group2 );
-                    //addNode( &binarySearchTree, group2 ^ group1 );
-                    numPairs++;
-                }
-            }
-        }
-
-    }
-    printf( "Number of pairs: %'ld\n", numPairs );
-    printf( "Number of pairs added: %ld\n", numAdded );
-*/
-    unsigned int cur[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-    unsigned int **solns;
-    //solve( rollList, minOrderLength,  maxOrderLength, sortedGroupsArray, sortedRollNumbersByGroupCount, cur, solns, 0, 0, 0, numberOfRolls - minRollsInOrder, numberOfRolls, 1);
 
     diff = clock() - start;
     int msec = diff * 1000 / CLOCKS_PER_SEC;
 
     printf( "%d second %d milliseconds\n", msec/1000, msec%1000 );
 
-    free(groupArray);
+    free( groupArray );
 
     return 0;
 }
