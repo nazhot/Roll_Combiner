@@ -469,7 +469,6 @@ int main( int argc, char* argv[] ) {
     int          maxGroupsInOrder      = floor( maxOrderLength / minGroupLength );
     unsigned int numberOfGroups        = 0;    //how many total groups are found
     unsigned int *groupArray           = createArray( 1024 ); //malloc( sizeof(unsigned int) * 1024 );
-    struct trieNode *trieRoot          = getTrieNode();
     int numAdded                       = 0;
     printf( "%f\n", pow( 2, numberOfRolls - 1 ) + 1 );
     struct smallarray *smallarray      = createSmallArray( pow( 2, numberOfRolls - 1) + 1 );
@@ -555,7 +554,6 @@ int main( int argc, char* argv[] ) {
                 balancedGroupsContainRoll[minBalancedIndex] = addToIntArray( balancedGroupsContainRoll[minBalancedIndex], groupRolls );
                 groupsWithXRolls[groupSize] = addToArray( groupsWithXRolls[groupSize], groupRolls ); 
                 groupArray = addToArray( groupArray, groupRolls ); 
-                numAdded += addTrieNode( trieRoot, groupRolls );
                 numberOfGroups++;
             }
         } while ( incrementArray( rollsInGroupArray, groupSize, numberOfRolls - 1 ) );
