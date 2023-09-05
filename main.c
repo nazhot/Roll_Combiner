@@ -155,6 +155,14 @@ int getSmallestIntArrayIndex( unsigned int currentGroup, int numRolls, struct in
     return smallestLengthIndex;
 }
 
+char* getGroupsString( unsigned int *groups, int numGroups, int numRolls, struct Roll *rollList ) {
+   char *string = malloc( sizeof( char ) * 1024 ); 
+
+   return string;
+}
+
+
+
 void recursiveSolve( unsigned int currentGroup, int numGroupsInOrder, int numRolls, struct int_array **groupsWithRoll, int minGroupsInOrder, int minOrderLength, int maxOrderLength, struct Roll *rolls, struct smallarray *alreadyFound, int *numFound ) {
     //Id, Length, Number of Groups, Number of Rolls, Order Groups,Remaining Rolls, Average Remaining Roll Length
     if ( getSmallArrayValue( alreadyFound, currentGroup ) ) {
