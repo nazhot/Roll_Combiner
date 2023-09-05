@@ -155,8 +155,8 @@ int getSmallestIntArrayIndex( unsigned int currentGroup, int numRolls, struct in
     return smallestLengthIndex;
 }
 
-void recursiveSolve( unsigned int currentGroup, int numGroupsInOrder, int numRolls, struct int_array **groupsWithRoll, int minGroupsInOrder, int minOrderLength, int maxOrderLength, struct Roll *rolls, struct smallarray *alreadyFound, int isFirstRun, int *numFound ) {
-    //Id, Length, Number of Groups, Number of Rolls, Order Groups, Average Remaining Roll Length
+void recursiveSolve( unsigned int currentGroup, int numGroupsInOrder, int numRolls, struct int_array **groupsWithRoll, int minGroupsInOrder, int minOrderLength, int maxOrderLength, struct Roll *rolls, struct smallarray *alreadyFound, int *numFound ) {
+    //Id, Length, Number of Groups, Number of Rolls, Order Groups,Remaining Rolls, Average Remaining Roll Length
     if ( getSmallArrayValue( alreadyFound, currentGroup ) ) {
         return;
     }
@@ -167,7 +167,7 @@ void recursiveSolve( unsigned int currentGroup, int numGroupsInOrder, int numRol
         float currentLength = rollsLength( rolls, currentGroup, numRolls );
         if ( currentLength >= minOrderLength && currentLength <= maxOrderLength ) {
             *numFound += 1;
-            printf( "Found %i\n", *numFound );
+            //printf( "Found %i\n", *numFound );
 
             char orderNumber[256];
             sprintf( orderNumber, "%d", currentGroup );
@@ -189,6 +189,9 @@ void recursiveSolve( unsigned int currentGroup, int numGroupsInOrder, int numRol
             fputs( numberOfRolls, g_outputFile );
             fputc( ',', g_outputFile );
 
+            //add Order Groups
+            //add Remaining Rolls
+            //add Average Remaining Roll Length
             fputc( ',', g_outputFile );
             fputc( ',', g_outputFile );
             fputc( '\n', g_outputFile );
@@ -197,20 +200,25 @@ void recursiveSolve( unsigned int currentGroup, int numGroupsInOrder, int numRol
             return;
         }
     }
-    int numValidGroups = 0;
-    int numValidRolls = 0;
+
+    int numValidGroups = 0; //how many groups don't share any rolls with currentGroup
+    int numValidRolls  = 0; //how many rolls aren't already a part of currentGroup
+                            //
     for ( int i = 0; i < numRolls; i++ ) {
         if ( !( currentGroup >> i & 1 ) ) {
             numValidGroups += groupsWithRoll[i]->length;
             numValidRolls++;
         }
     }
-    if ( numValidRolls == 0 || numValidGroups == 0 ) {
+
+    if ( numValidRolls == 0 || numValidGroups == 0 ) { //prevents divide by 0 error, and is also a valid end point for the function
         return;
     }
-    int averageGroupsPerRoll = numValidGroups / numValidRolls + 1;
-    struct int_array **newGroupsWithRoll = malloc( sizeof( struct int_array* ) * numRolls ); 
-    for ( int i = 0; i < numRolls; i++ ) {
+
+    int averageGroupsPerRoll             = numValidGroups / numValidRolls + 1;
+    struct int_array **newGroupsWithRoll = malloc( sizeof( struct int_array* ) * numRolls ); //holds the groups that can go with currentGroup
+
+    for ( int i = 0; i < numRolls; i++ ) { //initialize the int_arrays
         newGroupsWithRoll[i] = createIntArray( averageGroupsPerRoll, 0, 1.1 );
     }
 
@@ -219,7 +227,7 @@ void recursiveSolve( unsigned int currentGroup, int numGroupsInOrder, int numRol
             continue; 
         }
         for ( int j = 0; j < groupsWithRoll[i]->length; j++ ) {
-            if ( currentGroup & groupsWithRoll[i]->content[j] ) {
+            if ( currentGroup & groupsWithRoll[i]->content[j] ) { //make sure group could be added
                 continue;
             }
             int index = getSmallestIntArrayIndex( groupsWithRoll[i]->content[j], numRolls, newGroupsWithRoll );
@@ -228,14 +236,14 @@ void recursiveSolve( unsigned int currentGroup, int numGroupsInOrder, int numRol
     }
 
     for ( int i = 0; i < numRolls; i++ ) {
-        if ( isFirstRun ) {
-            printf( "%i\n", i );
+        if ( !currentGroup ) {
+            printf( "%d\n", i );
         }
         if ( currentGroup >> i & 1  ) {
             continue;
         }
         for ( int j = 0; j < newGroupsWithRoll[i]->length; j++ ) {
-            recursiveSolve( currentGroup | newGroupsWithRoll[i]->content[j], numGroupsInOrder + 1, numRolls, newGroupsWithRoll, minGroupsInOrder, minOrderLength, maxOrderLength, rolls, alreadyFound, 0, numFound );
+            recursiveSolve( currentGroup | newGroupsWithRoll[i]->content[j], numGroupsInOrder + 1, numRolls, newGroupsWithRoll, minGroupsInOrder, minOrderLength, maxOrderLength, rolls, alreadyFound, numFound );
         }
     }
 
@@ -400,7 +408,7 @@ int main( int argc, char* argv[] ) {
     int numFound                  = 0;
     struct smallarray *smallArray = createSmallArray( smallArraySize );
 
-    recursiveSolve( groupArray->content[0], 1, numberOfRolls, groupsWithRoll, minGroupsInOrder, minOrderLength, maxOrderLength, rollList, smallArray, 1, &numFound );
+    recursiveSolve( 0, 1, numberOfRolls, groupsWithRoll, minGroupsInOrder, minOrderLength, maxOrderLength, rollList, smallArray, &numFound );
 
     fclose( g_outputFile );
 
