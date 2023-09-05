@@ -142,9 +142,7 @@ void setGroupsString( unsigned int *groups, int numGroups ) {
         char groupLengthString[256];
         sprintf( groupLengthString, "%.2f", groupLength );
 
-        char title[256]; 
-        sprintf( title, "--------------Group %i------------\n", i + 1 ); 
-        fputs( title, g_outputFile );
+        fputs( "-\n", g_outputFile );
 
         for ( int j = 0; j < g_numberOfRolls; j++ ) {
             if ( !(  group >> j & 1  ) ) {
@@ -157,11 +155,43 @@ void setGroupsString( unsigned int *groups, int numGroups ) {
             fputs( rollLength, g_outputFile );
             fputc( '\n', g_outputFile );
         }
-        fputs( "----------------------------------\n", g_outputFile ); 
+        fputs( "-\n", g_outputFile ); 
     }
     fputc( '\"', g_outputFile );
 }
 
+void setRemainingRollsString( unsigned int order ) {
+    int numRemainingRolls = 0;
+    float remainingRollsLength = 0;
+    float average;
+    fputc( '\"', g_outputFile );
+    for ( int i = 0; i < g_numberOfRolls; i++ ) {
+        if ( order >> i & 1 ) {
+            continue;
+        }
+        numRemainingRolls++;
+        remainingRollsLength += g_rollList[i].length;
+        char rollLength[256];
+        sprintf( rollLength, "%.2f", g_rollList[i].length ); 
+        fputs( g_rollList[i].id, g_outputFile );
+        fputs( ": ", g_outputFile );
+        fputs( rollLength, g_outputFile );
+        fputc( '\n', g_outputFile );
+
+    }
+    fputs( "\",", g_outputFile );
+
+    if ( numRemainingRolls == 0 ) {
+        average = 0;
+    } else {
+        average = remainingRollsLength / numRemainingRolls;
+    }
+
+    char averageLengthRemaining[256];
+    sprintf( averageLengthRemaining, "%.2f", average);
+    fputs( averageLengthRemaining, g_outputFile );
+    fputc( '\n', g_outputFile );
+}
 
 
 void recursiveSolve( unsigned int currentGroup, unsigned int *groups, int numGroupsInOrder, struct int_array **groupsWithRoll, int minGroupsInOrder, int minOrderLength, int maxOrderLength, struct smallarray *alreadyFound, int *numFound ) {
@@ -203,8 +233,7 @@ void recursiveSolve( unsigned int currentGroup, unsigned int *groups, int numGro
             //add Remaining Rolls
             //add Average Remaining Roll Length
             fputc( ',', g_outputFile );
-            fputc( ',', g_outputFile );
-            fputc( '\n', g_outputFile );
+            setRemainingRollsString( currentGroup );
         }
         if ( currentLength >= maxOrderLength ) {
             return;
