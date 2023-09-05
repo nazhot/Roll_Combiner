@@ -137,15 +137,27 @@ int getSmallestIntArrayIndex( unsigned int currentGroup, struct int_array **grou
 void setGroupsString( unsigned int *groups, int numGroups ) {
     fputc( '\"', g_outputFile );
     for ( int i = 0; i < numGroups; i++ ){
-       float groupLength = rollsLength( groups[i] );
-       char groupId[256];
-       sprintf( groupId, "%d", groups[i] );
-       fputs( groupId, g_outputFile );
-       fputs( ": ", g_outputFile );
-       char groupLengthString[256];
-       sprintf( groupLengthString, "%.2f", groupLength );
-       fputs( groupLengthString, g_outputFile );
-       fputc( '\n', g_outputFile );
+        unsigned int group = groups[i];
+        float groupLength = rollsLength( group );
+        char groupLengthString[256];
+        sprintf( groupLengthString, "%.2f", groupLength );
+
+        char title[256]; 
+        sprintf( title, "--------------Group %i------------\n", i + 1 ); 
+        fputs( title, g_outputFile );
+
+        for ( int j = 0; j < g_numberOfRolls; j++ ) {
+            if ( !(  group >> j & 1  ) ) {
+               continue; 
+            }
+            char rollLength[256];
+            sprintf( rollLength, "%.2f", g_rollList[j].length ); 
+            fputs( g_rollList[j].id, g_outputFile );
+            fputs( ": ", g_outputFile );
+            fputs( rollLength, g_outputFile );
+            fputc( '\n', g_outputFile );
+        }
+        fputs( "----------------------------------\n", g_outputFile ); 
     }
     fputc( '\"', g_outputFile );
 }
