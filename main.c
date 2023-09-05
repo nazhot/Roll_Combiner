@@ -142,7 +142,7 @@ char* getGroupsString( unsigned int *groups, int numGroups ) {
 
 
 
-void recursiveSolve( unsigned int currentGroup, int numGroupsInOrder, struct int_array **groupsWithRoll, int minGroupsInOrder, int minOrderLength, int maxOrderLength, struct smallarray *alreadyFound, int *numFound ) {
+void recursiveSolve( unsigned int currentGroup, unsigned int *groups, int numGroupsInOrder, struct int_array **groupsWithRoll, int minGroupsInOrder, int minOrderLength, int maxOrderLength, struct smallarray *alreadyFound, int *numFound ) {
     //Id, Length, Number of Groups, Number of Rolls, Order Groups,Remaining Rolls, Average Remaining Roll Length
     if ( getSmallArrayValue( alreadyFound, currentGroup ) ) {
         return;
@@ -230,7 +230,8 @@ void recursiveSolve( unsigned int currentGroup, int numGroupsInOrder, struct int
             continue;
         }
         for ( int j = 0; j < newGroupsWithRoll[i]->length; j++ ) {
-            recursiveSolve( currentGroup | newGroupsWithRoll[i]->content[j], numGroupsInOrder + 1, newGroupsWithRoll, minGroupsInOrder, minOrderLength, maxOrderLength, alreadyFound, numFound );
+            groups[numGroupsInOrder] = newGroupsWithRoll[i]->content[j];
+            recursiveSolve( currentGroup | newGroupsWithRoll[i]->content[j], groups, numGroupsInOrder + 1, newGroupsWithRoll, minGroupsInOrder, minOrderLength, maxOrderLength, alreadyFound, numFound );
         }
     }
 
@@ -387,8 +388,10 @@ int main( int argc, char* argv[] ) {
     int smallArraySize            = ( 1 << g_numberOfRolls ) - 1;
     int numFound                  = 0;
     struct smallarray *smallArray = createSmallArray( smallArraySize );
+    unsigned int *groups          = malloc( sizeof( unsigned int ) * g_numberOfRolls );
 
-    recursiveSolve( 0, 1, groupsWithRoll, minGroupsInOrder, minOrderLength, maxOrderLength, smallArray, &numFound );
+
+    recursiveSolve( 0, groups, 0, groupsWithRoll, minGroupsInOrder, minOrderLength, maxOrderLength, smallArray, &numFound );
 
     fclose( g_outputFile );
     free( groupArray );
