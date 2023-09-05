@@ -373,6 +373,7 @@ int main( int argc, char* argv[] ) {
     int                maxRollsInOrder       = 0;    //maximum number of rolls needed to form an order
     int                minGroupsInOrder      = ceil( minOrderLength / maxGroupLength );
     int                maxGroupsInOrder      = floor( maxOrderLength / minGroupLength );
+    int                numPotentialOrders    = 0;
     struct int_array  *groupArray            = createIntArray( 1024, 0, 2 ); //malloc( sizeof(unsigned int) * 1024 );
     struct int_array **groupsWithRoll        = malloc( sizeof( struct int_array* ) * g_numberOfRolls );
 
@@ -405,7 +406,7 @@ int main( int argc, char* argv[] ) {
     printf( "Maximum number of rolls needed to make order: %i\n", maxRollsInOrder );
     printf( "Minimum number of groups to make an order: %i\n", minGroupsInOrder );
     printf( "Maximum number of groups to make an order: %i\n", maxGroupsInOrder );
-
+    printf( "Generating list of groups..." );
     clock_t start = clock(), diff; 
     //changed so that it is only gathering groups now
     //go through all possible combinations of rolls, from the minimum to maximum to create a group
@@ -428,14 +429,33 @@ int main( int argc, char* argv[] ) {
             groupsWithRoll[minSizeIndex] = addToIntArray( groupsWithRoll[minSizeIndex], group );
             groupArray                   = addToIntArray( groupArray, group );
             group                        = nextSetOfNBits( group );
-        } while( group <= largestNumber );
+        } while ( group <= largestNumber );
     }
+
+    printf( "Done!\nFound %i groups\nGenerating potential orders... ", groupArray->length );
+
+    for ( int orderSize = minRollsInOrder; orderSize <= maxRollsInOrder; orderSize++ ) {
+        int order         = ( 1 << orderSize ) - 1;
+        int largestNumber = order << ( g_numberOfRolls - orderSize );
+
+        do {
+            float orderLength = rollsLength( order );
+
+            if ( orderLength < minOrderLength || orderLength > maxOrderLength ) {
+                order = nextSetOfNBits( order );
+                continue;
+            }
+            numPotentialOrders++; 
+            order = nextSetOfNBits( order );
+        } while ( order <= largestNumber );
+    }
+
 
 //    diff = clock() - start;
 //    int msec = diff * 1000 / CLOCKS_PER_SEC;
 //
 //    printf( "%d second %d milliseconds\n", msec/1000, msec%1000 );
-    printf( "%i groups found\n", groupArray->length );
+    printf( "Done!\nFound %i potential orders\n", numPotentialOrders );
 
     int smallArraySize            = ( 1 << g_numberOfRolls ) - 1;
     int numFound                  = 0;
