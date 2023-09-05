@@ -134,10 +134,20 @@ int getSmallestIntArrayIndex( unsigned int currentGroup, struct int_array **grou
     return smallestLengthIndex;
 }
 
-char* getGroupsString( unsigned int *groups, int numGroups ) {
-   char *string = malloc( sizeof( char ) * 1024 ); 
-
-   return string;
+void setGroupsString( unsigned int *groups, int numGroups ) {
+    fputc( '\"', g_outputFile );
+    for ( int i = 0; i < numGroups; i++ ){
+       float groupLength = rollsLength( groups[i] );
+       char groupId[256];
+       sprintf( groupId, "%d", groups[i] );
+       fputs( groupId, g_outputFile );
+       fputs( ": ", g_outputFile );
+       char groupLengthString[256];
+       sprintf( groupLengthString, "%.2f", groupLength );
+       fputs( groupLengthString, g_outputFile );
+       fputc( '\n', g_outputFile );
+    }
+    fputc( '\"', g_outputFile );
 }
 
 
@@ -176,6 +186,7 @@ void recursiveSolve( unsigned int currentGroup, unsigned int *groups, int numGro
             fputs( numberOfRolls, g_outputFile );
             fputc( ',', g_outputFile );
 
+            setGroupsString( groups, numGroupsInOrder );
             //add Order Groups
             //add Remaining Rolls
             //add Average Remaining Roll Length
