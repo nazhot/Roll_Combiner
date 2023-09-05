@@ -380,37 +380,31 @@ int main( int argc, char* argv[] ) {
     //when a valid group is found, it will add it to a general array for all groups,
     //as well as an array of arrays, with the array at index is made up of groups that contain (index) rolls
     for ( int groupSize = minRollsInGroup; groupSize <= maxSplices + 1; groupSize++ ) {
-        int rollsInGroupArray[groupSize];
-
-        //initialize the array with each index = index
-        for ( int i = 0; i < groupSize; i++ ){
-            rollsInGroupArray[i] = i;
-        }
+        int group         = ( 1 << groupSize ) - 1; //starts at the smallest possible number for a group with groupSize bits set
+        int largestNumber = group << ( numberOfRolls - groupSize ); //largest number that could represent a group with groupSize bits set
 
         do {
-            int currentMaxRoll      = rollsInGroupArray[groupSize - 1];
-            unsigned int groupRolls = arrayToInt( rollsInGroupArray, groupSize );
-            float groupLength       = rollsLength( rollList, groupRolls, currentMaxRoll );
+            float groupLength = rollsLength( rollList, group, numberOfRolls ); 
 
             if ( groupLength < minGroupLength || groupLength > maxGroupLength ) {
+                group = nextSetOfNBits( group );
                 continue;
             }
+            
+            int minSizeIndex = getSmallestIntArrayIndex( group, numberOfRolls, groupsWithRoll );
 
-            int minBalancedLength = INT32_MAX;
-            int minBalancedIndex = -1;
-            for ( int j = 0; j <= currentMaxRoll; j++ ) { 
-                if ( !( groupRolls >> j & 1 ) ) {
-                    continue;
-                }
-                if ( groupsWithRoll[j]->length < minBalancedLength ) {
-                    minBalancedLength = groupsWithRoll[j]->length;
-                    minBalancedIndex = j;
-                }
-            }
-            groupsWithRoll[minBalancedIndex] = addToIntArray( groupsWithRoll[minBalancedIndex], groupRolls );
-            groupArray = addToIntArray( groupArray, groupRolls ); 
-        } while ( incrementArray( rollsInGroupArray, groupSize, numberOfRolls - 1 ) );
+            groupsWithRoll[minSizeIndex] = addToIntArray( groupsWithRoll[minSizeIndex], group );
+            groupArray                   = addToIntArray( groupArray, group );
+            group                        = nextSetOfNBits( group );
+
+        } while( group <= largestNumber );
     }
+
+    diff = clock() - start;
+    int msec = diff * 1000 / CLOCKS_PER_SEC;
+
+    printf( "%d second %d milliseconds\n", msec/1000, msec%1000 );
+    printf( "%i groups found\n", groupArray->length );
 
     int smallArraySize            = ( 1 << numberOfRolls ) - 1;
     int numFound                  = 0;
@@ -420,10 +414,6 @@ int main( int argc, char* argv[] ) {
 
     fclose( g_outputFile );
 
-    diff = clock() - start;
-    int msec = diff * 1000 / CLOCKS_PER_SEC;
-
-    printf( "%d second %d milliseconds\n", msec/1000, msec%1000 );
 
     free( groupArray );
     freeIntArray( groupArray );
