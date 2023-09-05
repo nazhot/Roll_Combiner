@@ -10,10 +10,11 @@
 
 #define MAX_ID_LEN 15 //how long the id in each roll can be
                       //guarded by strncpy
-
+#define MAX_NUM_ROLLS 32;
 
 FILE *g_outputFile;
 int   g_numberOfRolls;
+struct Roll *g_rollList;
 
 
 struct Roll {
@@ -22,12 +23,12 @@ struct Roll {
 };
 
 
-void printRollsFromInt( struct Roll *rolls, unsigned int integer ) {
+void printRollsFromInt(  unsigned int integer ) {
     printf( "----------GROUP----------\n" );
     float totalLength = 0;
     for ( int i = 0; i < g_numberOfRolls; i++ ) {
        if ( integer >> i & 1 ) {
-           struct Roll roll = rolls[i];
+           struct Roll roll = g_rollList[i];
            printf( "Roll %d: %s, %.2f\n", i, roll.id, roll.length );
            totalLength += roll.length;
        }
@@ -80,11 +81,11 @@ int rollsCount( unsigned int num ) {
  *      num:      number representation of the set of rolls
  *      numRolls: maximum number of bits to check
 */
-float rollsLength( struct Roll *rolls, unsigned int num ) {
+float rollsLength(  unsigned int num ) {
     float totalLength = 0;
     for ( int i = 0; i <= g_numberOfRolls; i++ ) {
         if ( num >> i & 1 ) {
-            totalLength += rolls[i].length;
+            totalLength += g_rollList[i].length;
         }
     }
     return totalLength;
@@ -133,7 +134,7 @@ int getSmallestIntArrayIndex( unsigned int currentGroup, struct int_array **grou
     return smallestLengthIndex;
 }
 
-char* getGroupsString( unsigned int *groups, int numGroups, struct Roll *rollList ) {
+char* getGroupsString( unsigned int *groups, int numGroups ) {
    char *string = malloc( sizeof( char ) * 1024 ); 
 
    return string;
@@ -141,7 +142,7 @@ char* getGroupsString( unsigned int *groups, int numGroups, struct Roll *rollLis
 
 
 
-void recursiveSolve( unsigned int currentGroup, int numGroupsInOrder, struct int_array **groupsWithRoll, int minGroupsInOrder, int minOrderLength, int maxOrderLength, struct Roll *rolls, struct smallarray *alreadyFound, int *numFound ) {
+void recursiveSolve( unsigned int currentGroup, int numGroupsInOrder, struct int_array **groupsWithRoll, int minGroupsInOrder, int minOrderLength, int maxOrderLength, struct smallarray *alreadyFound, int *numFound ) {
     //Id, Length, Number of Groups, Number of Rolls, Order Groups,Remaining Rolls, Average Remaining Roll Length
     if ( getSmallArrayValue( alreadyFound, currentGroup ) ) {
         return;
@@ -150,7 +151,7 @@ void recursiveSolve( unsigned int currentGroup, int numGroupsInOrder, struct int
     setSmallArrayValue( alreadyFound, currentGroup );
 
     if ( numGroupsInOrder >= minGroupsInOrder ) {
-        float currentLength = rollsLength( rolls, currentGroup );
+        float currentLength = rollsLength( currentGroup );
         if ( currentLength >= minOrderLength && currentLength <= maxOrderLength ) {
             *numFound += 1;
             //printf( "Found %i\n", *numFound );
@@ -229,7 +230,7 @@ void recursiveSolve( unsigned int currentGroup, int numGroupsInOrder, struct int
             continue;
         }
         for ( int j = 0; j < newGroupsWithRoll[i]->length; j++ ) {
-            recursiveSolve( currentGroup | newGroupsWithRoll[i]->content[j], numGroupsInOrder + 1, newGroupsWithRoll, minGroupsInOrder, minOrderLength, maxOrderLength, rolls, alreadyFound, numFound );
+            recursiveSolve( currentGroup | newGroupsWithRoll[i]->content[j], numGroupsInOrder + 1, newGroupsWithRoll, minGroupsInOrder, minOrderLength, maxOrderLength, alreadyFound, numFound );
         }
     }
 
@@ -265,7 +266,7 @@ int main( int argc, char* argv[] ) {
     int         maxFileLineLength          = 100;
 
     char        fileLine[maxFileLineLength];
-    struct Roll rollList[maxNumberOfRolls];
+    g_rollList = malloc( sizeof( struct Roll ) * maxNumberOfRolls );
     float       ascendingLengthsArray[maxNumberOfRolls];
 
     while ( fgets( fileLine, maxFileLineLength, p_rollFile ) ) {
@@ -305,7 +306,7 @@ int main( int argc, char* argv[] ) {
             printf( "You attempted to add more than the maximum allowable rolls (%d)!\nRunning as if you only input %d.\n", maxNumberOfRolls, maxNumberOfRolls );
             break;
         }
-        rollList[g_numberOfRolls++] = roll;
+        g_rollList[g_numberOfRolls++] = roll;
     }
 
     float              minOrderLength        = 1800; //meters
@@ -362,7 +363,7 @@ int main( int argc, char* argv[] ) {
         int largestNumber = group << ( g_numberOfRolls - groupSize ); //largest number that could represent a group with groupSize bits set
 
         do {
-            float groupLength = rollsLength( rollList, group ); 
+            float groupLength = rollsLength(  group ); 
 
             if ( groupLength < minGroupLength || groupLength > maxGroupLength ) {
                 group = nextSetOfNBits( group );
@@ -377,21 +378,19 @@ int main( int argc, char* argv[] ) {
         } while( group <= largestNumber );
     }
 
-    diff = clock() - start;
-    int msec = diff * 1000 / CLOCKS_PER_SEC;
-
-    printf( "%d second %d milliseconds\n", msec/1000, msec%1000 );
+//    diff = clock() - start;
+//    int msec = diff * 1000 / CLOCKS_PER_SEC;
+//
+//    printf( "%d second %d milliseconds\n", msec/1000, msec%1000 );
     printf( "%i groups found\n", groupArray->length );
 
     int smallArraySize            = ( 1 << g_numberOfRolls ) - 1;
     int numFound                  = 0;
     struct smallarray *smallArray = createSmallArray( smallArraySize );
 
-    recursiveSolve( 0, 1, groupsWithRoll, minGroupsInOrder, minOrderLength, maxOrderLength, rollList, smallArray, &numFound );
+    recursiveSolve( 0, 1, groupsWithRoll, minGroupsInOrder, minOrderLength, maxOrderLength, smallArray, &numFound );
 
     fclose( g_outputFile );
-
-
     free( groupArray );
     freeIntArray( groupArray );
     for ( int i = 0; i < g_numberOfRolls; i++ ) {
