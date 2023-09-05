@@ -5,7 +5,6 @@
 #include <time.h>
 #include <math.h>
 #include <locale.h>
-#include "trie.h"
 #include "smallarray.h"
 #include "intArray.h"
 
@@ -113,62 +112,6 @@ float rollsLength( struct Roll *rolls, unsigned int num, int numRolls ) {
     return totalLength;
 }
 
-//standard way to create an array, keeping track of its size/length
-//the first element of the array is 1 + index of the final element
-//the second element of the array is how large the array is
-unsigned int* createArray( int initialSize ) {
-    unsigned int *array    = malloc( sizeof( unsigned int ) * initialSize );
-                  array[0] = 2;
-                  array[1] = initialSize;
-
-    return array;
-}
-
-
-//standard way to add to an array, keeping track of its size/length
-//the first element of the array is 1 + index of the final element
-//the second element of the array is how large the array is
-unsigned int* addToArray( unsigned int array[], unsigned int intToAdd ) {
-    int arrayLength = array[0];
-    int arraySize   = array[1];
-    
-    if ( arrayLength == arraySize ) {
-        arraySize *= 2;
-        unsigned int *temp;
-        temp      = realloc( array, sizeof( unsigned int ) * arraySize );
-        if ( temp == NULL ) {
-            free( array );
-            printf( "Not able to realloc memory, exiting\n" );
-            exit(0);
-        }
-        array = temp;
-        array[1]  *= 2;
-    }
-
-    array[arrayLength] = intToAdd;
-    array[0]++;
-
-    return array;
-}
-
-
-unsigned int* shrinkArray( unsigned int array[] ) {
-    int arrayLength = array[0];
-    int arraySize   = array[1];
-
-    unsigned int *temp;
-    temp = realloc( array, sizeof( unsigned int ) * arrayLength );
-    if ( temp == NULL ) {
-        free( array );
-        printf( "Not able to shrink array, exiting\n" );
-        exit(0);
-    }
-    array = temp;
-    array[1] = arrayLength;
-
-    return array;
-}
-
 
 /*
  * go from an array where elements are the rolls that make up a group to the 
@@ -184,78 +127,6 @@ unsigned int arrayToInt( int array[], int arraySize ) {
     }
     return integer;
 }
-
-
-//the indexes are the different roll numbers
-//the second arrays are all of the groups that contain the roll of index
-//the arrays are in ascending order of their size
-//
-void solve( struct Roll rolls[], float minOrderLength, float maxOrderLength, unsigned int **groups, int rollNumbers[], unsigned int cur[], unsigned int **solutions, int position, int count, unsigned int seen, int skipsLeft, int numberOfRolls, int isFirst ){
-    //groups: sorted array of array of groups
-    //cur: partial solution, array of group numbers
-    //solutions: array of array of solutions (groups)
-    //position: current index of groups first array
-    //count: how many groups are in partial solution
-    //seen: unsigned int representation of current 
-    //skipped: how many more rolls the program can skip
-    
-
-    float orderLength = rollsLength( rolls, seen, numberOfRolls );
-    if ( orderLength > maxOrderLength ) {
-        return;
-    }
-    if ( orderLength >= minOrderLength && orderLength <= maxOrderLength ) {
-        //return;
-        //printf( "-----------------------------------\n" );
-        //printf( "[" );
-        //for ( int i = 0; i < count; i++ ) {
-           // printRollsFromInt( rolls, cur[i], numberOfRolls );
-        //   printf( "%i", cur[i] );
-        //   if ( i < count - 1 ) {
-        //    printf( ", " );
-        //   }
-        //}
-        //printf( "]\n" );
-        //printf( "-----------------------------------\n" );
-        //printRollsFromInt( rolls, seen, numberOfRolls );
-        return;
-    }
-
-    while ( 1 ) {
-        if ( position >= numberOfRolls ) {
-            return;
-        }
-
-        if ( isFirst ) {
-            printf( "Position: %i\n", position );
-        }
-        unsigned int rollNumber = 1 << rollNumbers[position];
-        if ( ! ( seen & rollNumber ) ) {
-            break;
-        }
-        position++;
-
-    }
-
-
-    for ( int i = 2; i < groups[position][0]; i++ ) {
-        unsigned int group = groups[position][i];
-
-        if ( seen & group ) {
-            continue;
-        }
-
-        cur[count] = i;
-        solve( rolls, minOrderLength, maxOrderLength, groups, rollNumbers, cur, solutions, position + 1, count + 1, ( seen | group ) , skipsLeft, numberOfRolls, 0 );
-    }
-
-
-    if ( skipsLeft ) {
-        skipsLeft--;
-        solve( rolls, minOrderLength, maxOrderLength, groups, rollNumbers, cur, solutions, position + 1, count, seen, skipsLeft, numberOfRolls, 0 );
-    }
-}
-
 
 unsigned nextSetOfNBits( unsigned x ) {
     unsigned smallest, ripple, new_smallest, ones;
@@ -364,10 +235,6 @@ void recursiveSolve( unsigned int currentGroup, int numGroupsInOrder, int numRol
         }
     }
 
-//    for ( int i = 0; i < numRolls; i++ ) {
-//        printf( "Size of balanced array for roll %i: %i\n", i, newGroupsWithRoll[i]->length );
-//    }
-
     for ( int i = 0; i < numRolls; i++ ) {
         if ( isFirstRun ) {
             printf( "%i\n", i );
@@ -379,14 +246,13 @@ void recursiveSolve( unsigned int currentGroup, int numGroupsInOrder, int numRol
             recursiveSolve( currentGroup | newGroupsWithRoll[i]->content[j], numGroupsInOrder + 1, numRolls, newGroupsWithRoll, minGroupsInOrder, minOrderLength, maxOrderLength, rolls, alreadyFound, 0, numFound );
         }
     }
+
     for ( int i = 0; i < numRolls; i++ ) {
         freeIntArray( newGroupsWithRoll[i] );
     }
+
     free( newGroupsWithRoll );
-
 }
-
-
 
 int main( int argc, char* argv[] ) {
 
@@ -468,32 +334,18 @@ int main( int argc, char* argv[] ) {
     int          minGroupsInOrder      = ceil( minOrderLength / maxGroupLength );
     int          maxGroupsInOrder      = floor( maxOrderLength / minGroupLength );
     unsigned int numberOfGroups        = 0;    //how many total groups are found
-    unsigned int *groupArray           = createArray( 1024 ); //malloc( sizeof(unsigned int) * 1024 );
+    struct int_array *groupArray       = createIntArray( 1024, 0, 2 ); //malloc( sizeof(unsigned int) * 1024 );
     int numAdded                       = 0;
-    printf( "%f\n", pow( 2, numberOfRolls - 1 ) + 1 );
-    struct smallarray *smallarray      = createSmallArray( pow( 2, numberOfRolls - 1) + 1 );
-
-    unsigned int groupsContainRoll[numberOfRolls]; 
-    unsigned int **groupsWithXRolls = malloc( (maxSplices + 2 ) * sizeof( int* ) );
-    unsigned int **groupsThatStartWithRoll = malloc( sizeof( unsigned int ) * numberOfRolls );
-
-    for ( int i = 0; i <= maxSplices + 1; i++ ) {
-        groupsWithXRolls[i] = createArray( 1024 );//malloc( sizeof( unsigned int ) * 1024 );
-    }
-
-    
-    struct int_array **balancedGroupsContainRoll = malloc( sizeof( struct int_array ) * numberOfRolls );
+    struct int_array **groupsWithRoll  = malloc( sizeof( struct int_array* ) * numberOfRolls );
 
 
     //set up maxNumber, and initialize groupContainsRoll array
     for ( int i = 0; i < numberOfRolls; i++ ) { 
-        groupsThatStartWithRoll[i] = createArray( 1024 );
         tempLengthSum += ascendingLengthsArray[i];
         if ( tempLengthSum <= maxOrderLength ) {
             maxRollsInOrder++;
         }
-        balancedGroupsContainRoll[i] = createIntArray( 10000, 0, 1.1 );
-        groupsContainRoll[i] = 0;
+        groupsWithRoll[i] = createIntArray( 10000, 0, 1.1 );
     }
 
     tempLengthSum = 0;
@@ -535,25 +387,18 @@ int main( int argc, char* argv[] ) {
             float groupLength       = rollsLength( rollList, groupRolls, currentMaxRoll );
 
             if ( groupLength >= minGroupLength && groupLength <= maxGroupLength ) {
-                int alreadyAdded = 0;
                 int minBalancedLength = INT32_MAX;
                 int minBalancedIndex = -1;
                 for ( int j = 0; j <= currentMaxRoll; j++ ) { 
                     if ( groupRolls >> j & 1 ) {
-                        if ( balancedGroupsContainRoll[j]->length < minBalancedLength ) {
-                            minBalancedLength = balancedGroupsContainRoll[j]->length;
+                        if ( groupsWithRoll[j]->length < minBalancedLength ) {
+                            minBalancedLength = groupsWithRoll[j]->length;
                             minBalancedIndex = j;
-                        }
-                        groupsContainRoll[j]++; 
-                        if ( !alreadyAdded ) {
-                            groupsThatStartWithRoll[j] = addToArray( groupsThatStartWithRoll[j], groupRolls );
-                            alreadyAdded = 1;
                         }
                     }
                 }
-                balancedGroupsContainRoll[minBalancedIndex] = addToIntArray( balancedGroupsContainRoll[minBalancedIndex], groupRolls );
-                groupsWithXRolls[groupSize] = addToArray( groupsWithXRolls[groupSize], groupRolls ); 
-                groupArray = addToArray( groupArray, groupRolls ); 
+                groupsWithRoll[minBalancedIndex] = addToIntArray( groupsWithRoll[minBalancedIndex], groupRolls );
+                groupArray = addToIntArray( groupArray, groupRolls ); 
                 numberOfGroups++;
             }
         } while ( incrementArray( rollsInGroupArray, groupSize, numberOfRolls - 1 ) );
@@ -563,8 +408,8 @@ int main( int argc, char* argv[] ) {
     long smallArraySize = ( 1 << numberOfRolls ) - 1;
     struct smallarray *smallArray = createSmallArray( smallArraySize );
     int numFound = 0;
-
-    recursiveSolve( groupArray[2], 1, numberOfRolls, balancedGroupsContainRoll, minGroupsInOrder, minOrderLength, maxOrderLength, rollList, smallArray, 1, &numFound );
+    printf( "Starting recursion\n" );
+    recursiveSolve( groupArray->content[0], 1, numberOfRolls, groupsWithRoll, minGroupsInOrder, minOrderLength, maxOrderLength, rollList, smallArray, 1, &numFound );
 
     printf( "And the total is: %i\n", temp_total );
     fclose( g_outputFile );

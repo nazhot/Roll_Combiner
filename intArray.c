@@ -24,19 +24,20 @@ struct int_array* createIntArray( int size, int sizeAddConstant, float sizeAddMu
 
 
 struct int_array* addToIntArray( struct int_array *intArray, unsigned int toAdd ) { 
-    if ( intArray->length == intArray->size ) {
+    if ( intArray->length >= intArray->size ) {
         int newSize = intArray->size * intArray->sizeAddMultiplier + intArray->sizeAddConstant;
         if ( newSize == intArray->size ) {
             printf( "New size of int_array is the same as the previous: %i\n", newSize );
             exit( 0 );
         }
-        struct int_array *temp = realloc( intArray, newSize );
+        unsigned int *temp = realloc( intArray->content, sizeof( unsigned int ) * newSize );
         if ( temp == NULL ) {
             printf( "Couldn't re-allocate the memory needed for an int_array, new size: %i\n", newSize );
             free( temp );
             exit( 0 );
         }
-        intArray = temp;
+        intArray->content = temp;
+        intArray->size = newSize;
     }
 
     intArray->content[intArray->length] = toAdd;
