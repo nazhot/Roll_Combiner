@@ -36,29 +36,6 @@ void printRollsFromInt( struct Roll *rolls, unsigned int integer, int numberOfRo
 }
 
 
-/*
- * increment an array through all possible numbers up to maxValue
- * array starts at [0, 1, 2, 3, ..., n]
- * array ends at   [maxValue - 3, maxValue - 2, maxValue - 1, maxValue]
- *      array:       array to increment
- *      arrayLength: how long the array is
- *      maxValue:    highest value the final element in the array will go to (inclusive)
-*/
-int incrementArray( int array[], int arrayLength, int maxValue ) {
-    for ( int i = arrayLength - 1; i >= 0; i-- ) {
-        int difference = (arrayLength - 1) - i;
-        if ( array[i] < maxValue - difference ) {
-            array[i] += 1;
-            for ( int j = 1; i + j < arrayLength; j++ ) {
-                array[i + j] = array[i] + j;
-            }
-            return 1;
-        }
-    }
-    return 0;
-}
-
-
 void printArray( unsigned int array[], int arrayLength ) {
     printf( "[" );
     for ( int i = 0; i < arrayLength; i++ ) {
@@ -330,19 +307,19 @@ int main( int argc, char* argv[] ) {
         rollList[numberOfRolls++] = roll;
     }
 
-    float        minOrderLength        = 1800; //meters
-    float        maxOrderLength        = 2000; //meters
-    int          maxSplices            = 7;    //how many splices allowed when putting rolls together for a group
-    float        minGroupLength        = 250;  //meters
-    float        maxGroupLength        = 350;  //meters
-    float        tempLengthSum         = 0;    //accumulates the length
-    int          minRollsInGroup       = 0;    //minimum number of rolls needed to form a group
-    int          minRollsInOrder       = 0;    //minimum number of rolls needed to form an order
-    int          maxRollsInOrder       = 0;    //maximum number of rolls needed to form an order
-    int          minGroupsInOrder      = ceil( minOrderLength / maxGroupLength );
-    int          maxGroupsInOrder      = floor( maxOrderLength / minGroupLength );
-    struct int_array *groupArray       = createIntArray( 1024, 0, 2 ); //malloc( sizeof(unsigned int) * 1024 );
-    struct int_array **groupsWithRoll  = malloc( sizeof( struct int_array* ) * numberOfRolls );
+    float              minOrderLength        = 1800; //meters
+    float              maxOrderLength        = 2000; //meters
+    int                maxSplices            = 7;    //how many splices allowed when putting rolls together for a group
+    float              minGroupLength        = 250;  //meters
+    float              maxGroupLength        = 350;  //meters
+    float              tempLengthSum         = 0;    //accumulates the length
+    int                minRollsInGroup       = 0;    //minimum number of rolls needed to form a group
+    int                minRollsInOrder       = 0;    //minimum number of rolls needed to form an order
+    int                maxRollsInOrder       = 0;    //maximum number of rolls needed to form an order
+    int                minGroupsInOrder      = ceil( minOrderLength / maxGroupLength );
+    int                maxGroupsInOrder      = floor( maxOrderLength / minGroupLength );
+    struct int_array  *groupArray            = createIntArray( 1024, 0, 2 ); //malloc( sizeof(unsigned int) * 1024 );
+    struct int_array **groupsWithRoll        = malloc( sizeof( struct int_array* ) * numberOfRolls );
 
 
     //set up maxNumber, and initialize groupContainsRoll array
@@ -396,7 +373,6 @@ int main( int argc, char* argv[] ) {
             groupsWithRoll[minSizeIndex] = addToIntArray( groupsWithRoll[minSizeIndex], group );
             groupArray                   = addToIntArray( groupArray, group );
             group                        = nextSetOfNBits( group );
-
         } while( group <= largestNumber );
     }
 
