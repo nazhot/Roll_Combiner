@@ -46,6 +46,17 @@ struct int_array* addToIntArray( struct int_array *intArray, unsigned int toAdd 
     return intArray;
 }
 
+void shrinkIntArray( struct int_array *intArray ) {
+    unsigned int *temp = realloc( intArray->content, sizeof( unsigned int ) * intArray->length );
+    if ( temp == NULL ) {
+        printf( "Couldn't re-allocate the memory to shrink the int_array: %i\n", intArray->length );
+        free( temp );
+        exit( 0 );
+    }
+    intArray->content = temp;
+    intArray->size = intArray->length;
+}
+
 void freeIntArray( struct int_array *intArray ) {
     free( intArray->content );
     free( intArray );

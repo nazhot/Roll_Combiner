@@ -375,6 +375,7 @@ int main( int argc, char* argv[] ) {
     int                numPotentialOrders    = 0;
     struct int_array  *groupArray            = createIntArray( 1024, 0, 2 ); //malloc( sizeof(unsigned int) * 1024 );
     struct int_array **groupsWithRoll        = malloc( sizeof( struct int_array* ) * g_numberOfRolls );
+    struct int_array **loadedGroupsWithRoll[g_numberOfRolls];
 
 
     //set up maxNumber, and initialize groupContainsRoll array
@@ -384,6 +385,10 @@ int main( int argc, char* argv[] ) {
             maxRollsInOrder++;
         }
         groupsWithRoll[i] = createIntArray( 10000, 0, 1.1 );
+        loadedGroupsWithRoll[i] = malloc( sizeof( struct int_array* ) * g_numberOfRolls );
+        for ( int j = 0; j < g_numberOfRolls; j++ ) {
+            loadedGroupsWithRoll[i][j] = createIntArray( 10000, 0, 1.1 );
+        }
     }
 
     tempLengthSum = 0;
