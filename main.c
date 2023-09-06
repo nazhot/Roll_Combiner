@@ -194,7 +194,7 @@ void setRemainingRollsString( unsigned int order ) {
 }
 
 
-void recursiveSolve( unsigned int currentGroup, unsigned int *groups, int numGroupsInOrder, struct int_array **groupsWithRoll, int minGroupsInOrder, int minOrderLength, int maxOrderLength, struct smallarray *alreadyFound, int *numFound ) {
+void recursiveSolve( unsigned int currentGroup, unsigned int *groups, int numGroupsInOrder, struct int_array **groupsWithRoll, int minGroupsInOrder, int minOrderLength, int maxOrderLength, struct smallarray *alreadyFound, int *numFound, int numPotentialOrders ) {
     //Id, Length, Number of Groups, Number of Rolls, Order Groups,Remaining Rolls, Average Remaining Roll Length
     if ( getSmallArrayValue( alreadyFound, currentGroup ) ) {
         return;
@@ -206,6 +206,8 @@ void recursiveSolve( unsigned int currentGroup, unsigned int *groups, int numGro
         float currentLength = rollsLength( currentGroup );
         if ( currentLength >= minOrderLength && currentLength <= maxOrderLength ) {
             *numFound += 1;
+            printf( "\rOrders found: %'i/%'i (%.2f%%)", *numFound, numPotentialOrders, *numFound * 1.0 / numPotentialOrders * 100 );
+            fflush( stdout );
             //printf( "Found %i\n", *numFound );
 
             char orderNumber[256];
@@ -275,15 +277,12 @@ void recursiveSolve( unsigned int currentGroup, unsigned int *groups, int numGro
     }
 
     for ( int i = 0; i < g_numberOfRolls; i++ ) {
-        if ( !currentGroup ) {
-            printf( "%d\n", i );
-        }
         if ( currentGroup >> i & 1  ) {
             continue;
         }
         for ( int j = 0; j < newGroupsWithRoll[i]->length; j++ ) {
             groups[numGroupsInOrder] = newGroupsWithRoll[i]->content[j];
-            recursiveSolve( currentGroup | newGroupsWithRoll[i]->content[j], groups, numGroupsInOrder + 1, newGroupsWithRoll, minGroupsInOrder, minOrderLength, maxOrderLength, alreadyFound, numFound );
+            recursiveSolve( currentGroup | newGroupsWithRoll[i]->content[j], groups, numGroupsInOrder + 1, newGroupsWithRoll, minGroupsInOrder, minOrderLength, maxOrderLength, alreadyFound, numFound, numPotentialOrders );
         }
     }
 
@@ -432,7 +431,8 @@ int main( int argc, char* argv[] ) {
         } while ( group <= largestNumber );
     }
 
-    printf( "Done!\nFound %i groups\nGenerating potential orders... ", groupArray->length );
+    printf( "Done!\nFound %'d groups\nGenerating potential orders...", groupArray->length );
+    fflush( stdout );
 
     for ( int orderSize = minRollsInOrder; orderSize <= maxRollsInOrder; orderSize++ ) {
         int order         = ( 1 << orderSize ) - 1;
@@ -455,7 +455,7 @@ int main( int argc, char* argv[] ) {
 //    int msec = diff * 1000 / CLOCKS_PER_SEC;
 //
 //    printf( "%d second %d milliseconds\n", msec/1000, msec%1000 );
-    printf( "Done!\nFound %i potential orders\n", numPotentialOrders );
+    printf( "Done!\nFound %'d potential orders\n", numPotentialOrders );
 
     int smallArraySize            = ( 1 << g_numberOfRolls ) - 1;
     int numFound                  = 0;
@@ -463,7 +463,7 @@ int main( int argc, char* argv[] ) {
     unsigned int *groups          = malloc( sizeof( unsigned int ) * g_numberOfRolls );
 
 
-    recursiveSolve( 0, groups, 0, groupsWithRoll, minGroupsInOrder, minOrderLength, maxOrderLength, smallArray, &numFound );
+    recursiveSolve( 0, groups, 0, groupsWithRoll, minGroupsInOrder, minOrderLength, maxOrderLength, smallArray, &numFound, numPotentialOrders );
 
     fclose( g_outputFile );
     free( groupArray );
