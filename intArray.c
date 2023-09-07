@@ -46,9 +46,9 @@ struct int_array* addToIntArray( struct int_array *intArray, unsigned int toAdd 
     return intArray;
 }
 
-void shrinkIntArray( struct int_array *intArray ) {
+struct int_array* shrinkIntArray( struct int_array *intArray ) {
     if ( intArray->length == 0 ) {
-        return;
+        return intArray;
     }
     unsigned int *temp = realloc( intArray->content, sizeof( unsigned int ) * intArray->length );
     if ( temp == NULL ) {
@@ -58,6 +58,7 @@ void shrinkIntArray( struct int_array *intArray ) {
     }
     intArray->content = temp;
     intArray->size = intArray->length;
+    return intArray;
 }
 
 void freeIntArray( struct int_array *intArray ) {

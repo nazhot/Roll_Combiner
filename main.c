@@ -437,6 +437,7 @@ int main( int argc, char* argv[] ) {
 
             for ( int i = 0; i < g_numberOfRolls; i++ ) {
                 int biasedMinSizeIndex = getSmallestIntArrayIndexWithBias( group, i, biasedGroupsWithRoll[i] );
+                biasedGroupsWithRoll[i][biasedMinSizeIndex] = addToIntArray( biasedGroupsWithRoll[i][biasedMinSizeIndex], group );
             }
             
             int minSizeIndex = getSmallestIntArrayIndex( group, groupsWithRoll );
@@ -448,11 +449,62 @@ int main( int argc, char* argv[] ) {
     }
 
     for ( int i = 0; i < g_numberOfRolls; i++ ) {
-        shrinkIntArray( groupsWithRoll[i] );
+        //printf( "Biased towards group %i\n", i );
+        groupsWithRoll[i] = shrinkIntArray( groupsWithRoll[i] );
         for ( int j = 0; j < g_numberOfRolls; j++ ) {
-            shrinkIntArray( biasedGroupsWithRoll[i][j] );
+            biasedGroupsWithRoll[i][j] = shrinkIntArray( biasedGroupsWithRoll[i][j] );
+            //printf( "Group %i: length of %i, size of %i\n", j, biasedGroupsWithRoll[i][j]->length, biasedGroupsWithRoll[i][j]->size );
         }
     }
+
+    long numGroups = 0;
+    start = clock();
+
+    for ( int i = 0; i < groupArray->length; i++ ) {
+        unsigned int group = groupArray->content[i];
+        for ( int j = 0; j < g_numberOfRolls; j++ ) {
+            if ( group >> j & 1 ){
+                continue;
+            }
+            for ( int k = 0; k < groupsWithRoll[j]->length; k++ ) {
+                if ( group & groupsWithRoll[j]->content[k] ) {
+                    continue;
+                }
+                numGroups++;
+            }
+        }
+    }
+
+//    for ( int i = 0; i < groupArray->length; i++ ) {
+//        unsigned int group = groupArray->content[i];
+//        int largestSize = 0;
+//        int largestSizeIndex = -1;
+//        for ( int j = 0; j < g_numberOfRolls; j++ ) {
+//            if ( !( group >> j & 1 ) ) {
+//                continue;
+//            }
+//            if ( biasedGroupsWithRoll[j][j]->length > largestSize ) {
+//                largestSize = biasedGroupsWithRoll[j][j]->length;
+//                largestSizeIndex = j;
+//            }
+//        }
+//        struct int_array **temp_groupsWithRoll = biasedGroupsWithRoll[largestSizeIndex];
+//        for ( int j = 0; j < g_numberOfRolls; j++ ) {
+//            if ( group >> j & 1 ) {
+//                continue;
+//            }
+//            for ( int k = 0; k < temp_groupsWithRoll[j]->length; k++ ) {
+//                if ( group & temp_groupsWithRoll[j]->content[k] ) {
+//                    continue;
+//                }
+//                numGroups++;
+//            }
+//        }
+//    }
+    diff = clock() - start;
+    int msec = diff * 1000 / CLOCKS_PER_SEC;
+    printf( "Took %i seconds, %i millis\n", msec/1000, msec%1000 );
+    printf( "Found %'lu pairs\n", numGroups );
 
     printf( "Done!\nFound %'d groups\nGenerating potential orders...", groupArray->length );
     fflush( stdout );
