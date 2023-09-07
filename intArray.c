@@ -47,6 +47,9 @@ struct int_array* addToIntArray( struct int_array *intArray, unsigned int toAdd 
 }
 
 void shrinkIntArray( struct int_array *intArray ) {
+    if ( intArray->length == 0 ) {
+        return;
+    }
     unsigned int *temp = realloc( intArray->content, sizeof( unsigned int ) * intArray->length );
     if ( temp == NULL ) {
         printf( "Couldn't re-allocate the memory to shrink the int_array: %i\n", intArray->length );

@@ -134,6 +134,13 @@ int getSmallestIntArrayIndex( unsigned int currentGroup, struct int_array **grou
     return smallestLengthIndex;
 }
 
+int getSmallestIntArrayIndexWithBias( unsigned int currentGroup, int rollBias, struct int_array **groupsWithRoll ) {
+    if ( currentGroup >> rollBias & 1 ) {
+        return rollBias;
+    }
+    return getSmallestIntArrayIndex( currentGroup, groupsWithRoll );
+}
+
 void setGroupsString( unsigned int *groups, int numGroups ) {
     fputc( '\"', g_outputFile );
     for ( int i = 0; i < numGroups; i++ ){
@@ -375,7 +382,7 @@ int main( int argc, char* argv[] ) {
     int                numPotentialOrders    = 0;
     struct int_array  *groupArray            = createIntArray( 1024, 0, 2 ); //malloc( sizeof(unsigned int) * 1024 );
     struct int_array **groupsWithRoll        = malloc( sizeof( struct int_array* ) * g_numberOfRolls );
-    struct int_array **loadedGroupsWithRoll[g_numberOfRolls];
+    struct int_array **biasedGroupsWithRoll[g_numberOfRolls];
 
 
     //set up maxNumber, and initialize groupContainsRoll array
@@ -385,9 +392,9 @@ int main( int argc, char* argv[] ) {
             maxRollsInOrder++;
         }
         groupsWithRoll[i] = createIntArray( 10000, 0, 1.1 );
-        loadedGroupsWithRoll[i] = malloc( sizeof( struct int_array* ) * g_numberOfRolls );
+        biasedGroupsWithRoll[i] = malloc( sizeof( struct int_array* ) * g_numberOfRolls );
         for ( int j = 0; j < g_numberOfRolls; j++ ) {
-            loadedGroupsWithRoll[i][j] = createIntArray( 10000, 0, 1.1 );
+            biasedGroupsWithRoll[i][j] = createIntArray( 10000, 0, 1.1 );
         }
     }
 
@@ -427,6 +434,10 @@ int main( int argc, char* argv[] ) {
                 group = nextSetOfNBits( group );
                 continue;
             }
+
+            for ( int i = 0; i < g_numberOfRolls; i++ ) {
+                int biasedMinSizeIndex = getSmallestIntArrayIndexWithBias( group, i, biasedGroupsWithRoll[i] );
+            }
             
             int minSizeIndex = getSmallestIntArrayIndex( group, groupsWithRoll );
 
@@ -434,6 +445,13 @@ int main( int argc, char* argv[] ) {
             groupArray                   = addToIntArray( groupArray, group );
             group                        = nextSetOfNBits( group );
         } while ( group <= largestNumber );
+    }
+
+    for ( int i = 0; i < g_numberOfRolls; i++ ) {
+        shrinkIntArray( groupsWithRoll[i] );
+        for ( int j = 0; j < g_numberOfRolls; j++ ) {
+            shrinkIntArray( biasedGroupsWithRoll[i][j] );
+        }
     }
 
     printf( "Done!\nFound %'d groups\nGenerating potential orders...", groupArray->length );
