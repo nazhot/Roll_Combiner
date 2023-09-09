@@ -497,6 +497,7 @@ int main( int argc, char* argv[] ) {
     unsigned long numChecks = 0;
 
     struct check_t *normalPairsCheck = checkNormalPairs( groupArray );
+    struct check_t *unbiasedPairsCheck = checkUnbiasedIntArray( groupArray, groupsWithRoll, g_numberOfRolls );
     
 
 

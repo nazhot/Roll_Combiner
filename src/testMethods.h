@@ -10,7 +10,7 @@ struct check_t {
 
 
 struct check_t* checkNormalPairs( struct int_array* );
-struct check_t* checkUnbiasedIntArray( struct int_array** );
+struct check_t* checkUnbiasedIntArray( struct int_array*, struct int_array**, int );
 struct check_t* checkBiasedIntArray( struct int_array** );
 
 #endif
