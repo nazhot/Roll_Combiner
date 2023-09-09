@@ -310,7 +310,7 @@ int main( int argc, char* argv[] ) {
     setlocale(LC_NUMERIC, "");
 
     FILE *p_rollFile;
-    g_outputFile = fopen( "output.csv", "w" );
+    g_outputFile = fopen( "outputs/output.csv", "w" );
     g_numberOfRolls = 0;
     fputs( "Id,Length,Number of Groups,Number of Rolls,Order Groups,Remaining Rolls,Average Remaining Roll Length\n", g_outputFile );
     const char *fileName = argv[1];
