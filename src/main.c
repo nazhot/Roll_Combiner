@@ -614,7 +614,6 @@ int main( int argc, char* argv[] ) {
     recursiveSolve( 0, groups, 0, groupsWithRoll, minGroupsInOrder, minOrderLength, maxOrderLength, smallArray, &numFound, numPotentialOrders );
 
     fclose( g_outputFile );
-    free( groupArray );
     freeIntArray( groupArray );
     for ( int i = 0; i < g_numberOfRolls; i++ ) {
         freeIntArray( groupsWithRoll[i] );
