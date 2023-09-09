@@ -97,7 +97,7 @@ struct check_t* checkBiasedIntArray( struct int_array *groupArray, struct int_ar
             }
         }
         struct int_array **temp_groupsWithRoll = biasedGroupsWithRoll[largestSizeIndex];
-        for ( int j = 0; j < numberOfRolls; j++ ) {
+        for ( int j = i + 1; j < numberOfRolls; j++ ) {
             if ( group >> j & 1 ) {
                 continue;
             }
@@ -110,6 +110,33 @@ struct check_t* checkBiasedIntArray( struct int_array *groupArray, struct int_ar
             }
         }
     }
+//    for ( int i = 0; i < groupArray->length; i++ ) {
+//        unsigned int group = groupArray->content[i];
+//        int largestSize = 0;
+//        int largestSizeIndex = -1;
+//        for ( int j = 0; j < numberOfRolls; j++ ) {
+//            if ( !( group >> j & 1 ) ) {
+//                continue;
+//            }
+//            if ( biasedGroupsWithRoll[j][j]->length > largestSize ) {
+//                largestSize = biasedGroupsWithRoll[j][j]->length;
+//                largestSizeIndex = j;
+//            }
+//        }
+//        struct int_array **temp_groupsWithRoll = biasedGroupsWithRoll[largestSizeIndex];
+//        for ( int j = 0; j < numberOfRolls; j++ ) {
+//            if ( group >> j & 1 ) {
+//                continue;
+//            }
+//            for ( int k = 0; k < temp_groupsWithRoll[j]->length; k++ ) {
+//                numChecks++;
+//                if ( group & temp_groupsWithRoll[j]->content[k] ) {
+//                    continue;
+//                }
+//                numGroups++;
+//            }
+//        }
+//    }
     diff = clock() - start;
     checks->msecs = diff * 1000 / CLOCKS_PER_SEC;
     checks->numChecks = numChecks;
