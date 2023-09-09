@@ -7,6 +7,7 @@
 #include <locale.h>
 #include "smallarray.h"
 #include "intArray.h"
+#include "testMethods.h"
 
 #define MAX_ID_LEN 15 //how long the id in each roll can be
                       //guarded by strncpy
@@ -494,6 +495,10 @@ int main( int argc, char* argv[] ) {
     long numGroups = 0;
     start = clock();
     unsigned long numChecks = 0;
+
+    struct check_t *normalPairsCheck = checkNormalPairs( groupArray );
+    
+
 
 //    for ( int i = 0; i < groupArray->length; i++ ) {
 //        unsigned int group = groupArray->content[i];
