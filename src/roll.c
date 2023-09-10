@@ -14,12 +14,12 @@ static int dscRollSort( const void *roll1, const void *roll2 ) {
     return r2->length - r1->length;
 }
 
-void sortRollsAscending( struct OrderStats *orderStats ) {
-    qsort( orderStats->rollList, orderStats->numberOfRolls, sizeof( struct Roll ), ascRollSort );
+void sortRollsAscending( struct Roll *rollList, int numberOfRolls ) {
+    qsort( rollList, numberOfRolls, sizeof( struct Roll ), ascRollSort );
 }
 
-void sortRollsDescending( struct OrderStats *orderStats ) {
-    qsort( orderStats->rollList, orderStats->numberOfRolls, sizeof( struct Roll ), dscRollSort );
+void sortRollsDescending( struct Roll *rollList, int numberOfRolls ) {
+    qsort( rollList, numberOfRolls, sizeof( struct Roll ), dscRollSort );
 }
 
 void printRollsFromInt(  unsigned int integer, int numberOfRolls, struct Roll *rollList ) {

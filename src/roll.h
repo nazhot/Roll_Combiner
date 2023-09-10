@@ -9,13 +9,13 @@ struct Roll {
 };
 
 struct OrderStats {
-    int minRollsPerGroup: 5;
-    int maxRollsPerGroup: 5;
+    int minRollsPerGroup;
+    int maxRollsPerGroup;
 
-    int minRollsPerOrder: 5;
-    int maxRollsPerOrder: 5;
-    int minGroupsPerOrder: 5;
-    int maxGroupsPerOrder: 5;
+    int minRollsPerOrder;
+    int maxRollsPerOrder;
+    int minGroupsPerOrder;
+    int maxGroupsPerOrder;
 
     int minGroupLength;
     int maxGroupLength;
@@ -24,11 +24,11 @@ struct OrderStats {
     float maxOrderLength;
 
     struct Roll *rollList;
-    int numberOfRolls : 5;
+    int numberOfRolls;
 };
 
-void sortRollsAscending( struct OrderStats* );
-void sortRollsDescending( struct OrderStats* ); 
+void sortRollsAscending( struct Roll* rollList, int numberOfRolls );
+void sortRollsDescending( struct Roll* rollList, int numberOfRolls ); 
 void printRollsFromInt(  unsigned int, int, struct Roll* );
 float rollsLength(  unsigned int, int, struct Roll* );
 

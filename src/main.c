@@ -290,6 +290,11 @@ int main( int argc, char* argv[] ) {
 
     struct OrderStats *orderStats = malloc( sizeof( struct OrderStats ) );
     readRollFileIntoOrderStats( fileName, orderStats );
+    sortRollsAscending( orderStats->rollList, orderStats->numberOfRolls );
+
+    for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
+        printf( "%f\n", orderStats->rollList[i].length );
+    }
 
     orderStats->minOrderLength   = 1800;
     orderStats->maxOrderLength   = 2000;
@@ -297,19 +302,11 @@ int main( int argc, char* argv[] ) {
     orderStats->minGroupLength   = 250;
     orderStats->maxGroupLength   = 350;
     orderStats->minGroupsPerOrder = ceil( orderStats->minOrderLength / orderStats->maxGroupLength );
-    orderStats->maxGroupsPerOrder = floor( orderStats->maxOrderLength / orderStats->minOrderLength );
+    orderStats->maxGroupsPerOrder = floor( orderStats->maxOrderLength / orderStats->minGroupLength );
 
-//    float              minOrderLength        = 1800; //meters
-//    float              maxOrderLength        = 2000; //meters
-//    int                maxSplices            = 7;    //how many splices allowed when putting rolls together for a group
-//    float              minGroupLength        = 250;  //meters
-//    float              maxGroupLength        = 350;  //meters
-//    float              tempLengthSum         = 0;    //accumulates the length
     int                minRollsInGroup       = 0;    //minimum number of rolls needed to form a group
     int                minRollsInOrder       = 0;    //minimum number of rolls needed to form an order
     int                maxRollsInOrder       = 0;    //maximum number of rolls needed to form an order
-//    int                minGroupsInOrder      = ceil( minOrderLength / maxGroupLength );
-//    int                maxGroupsInOrder      = floor( maxOrderLength / minGroupLength );
     int                numPotentialOrders    = 0;
     struct int_array  *groupArray            = createIntArray( 1024, 0, 2 ); //malloc( sizeof(unsigned int) * 1024 );
     struct int_array **groupsWithRoll        = malloc( sizeof( struct int_array* ) * orderStats->numberOfRolls );

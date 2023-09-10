@@ -46,4 +46,5 @@ void readRollFileIntoOrderStats( char *rollFilePath, struct OrderStats *orderSta
 
     orderStats->rollList = rollList;
     orderStats->numberOfRolls = numberOfRolls;
+    printf( "Number of rolls: %i\n", orderStats->numberOfRolls );
 }
