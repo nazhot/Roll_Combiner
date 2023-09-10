@@ -290,11 +290,6 @@ int main( int argc, char* argv[] ) {
 
     struct OrderStats *orderStats = malloc( sizeof( struct OrderStats ) );
     readRollFileIntoOrderStats( fileName, orderStats );
-    sortRollsAscending( orderStats->rollList, orderStats->numberOfRolls );
-
-    for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
-        printf( "%f\n", orderStats->rollList[i].length );
-    }
 
     orderStats->minOrderLength   = 1800;
     orderStats->maxOrderLength   = 2000;
@@ -303,6 +298,8 @@ int main( int argc, char* argv[] ) {
     orderStats->maxGroupLength   = 350;
     orderStats->minGroupsPerOrder = ceil( orderStats->minOrderLength / orderStats->maxGroupLength );
     orderStats->maxGroupsPerOrder = floor( orderStats->maxOrderLength / orderStats->minGroupLength );
+
+    setMinMaxRollStats( orderStats );
 
     int                minRollsInGroup       = 0;    //minimum number of rolls needed to form a group
     int                minRollsInOrder       = 0;    //minimum number of rolls needed to form an order
@@ -355,9 +352,9 @@ int main( int argc, char* argv[] ) {
 //    }
     
     printf( "Number of rolls inputted: %i\n", orderStats->numberOfRolls );
-    printf( "Minimum number of rolls needed to make group: %i\n", minRollsInGroup );
-    printf( "Minimum number of rolls needed to make order: %i\n", minRollsInOrder );
-    printf( "Maximum number of rolls needed to make order: %i\n", maxRollsInOrder );
+    printf( "Minimum number of rolls needed to make group: %i\n", orderStats->minRollsPerGroup );
+    printf( "Minimum number of rolls needed to make order: %i\n", orderStats->minRollsPerOrder );
+    printf( "Maximum number of rolls needed to make order: %i\n", orderStats->maxRollsPerOrder );
     printf( "Minimum number of groups to make an order: %i\n", orderStats->minGroupsPerOrder );
     printf( "Maximum number of groups to make an order: %i\n", orderStats->maxGroupsPerOrder );
     printf( "Generating list of groups..." );

@@ -51,3 +51,33 @@ float rollsLength(  unsigned int num, int numberOfRolls, struct Roll *rollList )
     }
     return totalLength;
 }
+
+void setMinMaxRollStats( struct OrderStats *orderStats ) {
+    sortRollsDescending( orderStats->rollList, orderStats->numberOfRolls );
+
+    orderStats->minRollsPerGroup = 1;
+    orderStats->minRollsPerOrder = 1;
+    orderStats->maxRollsPerOrder = 1;
+
+    float minRollsPerGroupLength = 0;
+    float minRollsPerOrderLength = 0;
+    float maxRollsPerOrderLength = 0;
+
+    for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
+       int minIndex = i;
+       int maxIndex = orderStats->numberOfRolls - 1 - i;
+       minRollsPerGroupLength += orderStats->rollList[minIndex].length;
+       minRollsPerOrderLength += orderStats->rollList[minIndex].length;
+       maxRollsPerOrderLength += orderStats->rollList[maxIndex].length;
+       if ( minRollsPerGroupLength <= orderStats->minGroupLength ) {
+           orderStats->minRollsPerGroup++;
+       }
+       if ( minRollsPerOrderLength <= orderStats->minOrderLength ) {
+           orderStats->minRollsPerOrder++;
+       }
+       if ( maxRollsPerOrderLength <= orderStats->maxOrderLength ) {
+           orderStats->maxRollsPerOrder++;
+       }
+    }
+}
+

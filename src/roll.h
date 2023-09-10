@@ -31,5 +31,6 @@ void sortRollsAscending( struct Roll* rollList, int numberOfRolls );
 void sortRollsDescending( struct Roll* rollList, int numberOfRolls ); 
 void printRollsFromInt(  unsigned int, int, struct Roll* );
 float rollsLength(  unsigned int, int, struct Roll* );
+void setMinMaxRollStats( struct OrderStats *orderStats );
 
 #endif
