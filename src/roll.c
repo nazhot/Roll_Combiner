@@ -1,6 +1,26 @@
 #include "roll.h"
 #include <stdio.h>
+#include <stdlib.h>
 
+static int ascRollSort( const void *roll1, const void *roll2 ) {
+    struct Roll *r1 = ( struct Roll* ) roll1;
+    struct Roll *r2 = ( struct Roll* ) roll2;
+    return r1->length - r2->length;
+}
+
+static int dscRollSort( const void *roll1, const void *roll2 ) {
+    struct Roll *r1 = ( struct Roll* ) roll1;
+    struct Roll *r2 = ( struct Roll* ) roll2;
+    return r2->length - r1->length;
+}
+
+void sortRollsAscending( struct OrderStats *orderStats ) {
+    qsort( orderStats->rollList, orderStats->numberOfRolls, sizeof( struct Roll ), ascRollSort );
+}
+
+void sortRollsDescending( struct OrderStats *orderStats ) {
+    qsort( orderStats->rollList, orderStats->numberOfRolls, sizeof( struct Roll ), dscRollSort );
+}
 
 void printRollsFromInt(  unsigned int integer, int numberOfRolls, struct Roll *rollList ) {
     printf( "----------GROUP----------\n" );

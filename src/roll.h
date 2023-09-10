@@ -20,10 +20,15 @@ struct OrderStats {
     int minGroupLength;
     int maxGroupLength;
 
-    int minOrderLength;
-    int maxOrderLength;
+    float minOrderLength;
+    float maxOrderLength;
+
+    struct Roll *rollList;
+    int numberOfRolls : 5;
 };
 
+void sortRollsAscending( struct OrderStats* );
+void sortRollsDescending( struct OrderStats* ); 
 void printRollsFromInt(  unsigned int, int, struct Roll* );
 float rollsLength(  unsigned int, int, struct Roll* );
 
