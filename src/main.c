@@ -45,10 +45,6 @@ void printNumberBits( unsigned int num ) {
 }
 
 
-
-
-
-
 /*
  * go from an array where elements are the rolls that make up a group to the 
  *  equivalent unsigned int
@@ -64,6 +60,7 @@ unsigned int arrayToInt( int array[], int arraySize ) {
     return integer;
 }
 
+
 unsigned nextSetOfNBits( unsigned x ) {
     unsigned smallest, ripple, new_smallest, ones;
 
@@ -75,6 +72,7 @@ unsigned nextSetOfNBits( unsigned x ) {
     return ripple | ones;
 
 }
+
 
 int getSmallestIntArrayIndex( unsigned int currentGroup, struct int_array **groupsWithRoll, int numberOfRolls ) {
     int smallestLength = INT32_MAX;
@@ -90,6 +88,7 @@ int getSmallestIntArrayIndex( unsigned int currentGroup, struct int_array **grou
     }
     return smallestLengthIndex;
 }
+
 
 int getSmallestIntArrayIndexWithBias( unsigned int currentGroup, int rollBias, struct int_array **groupsWithRoll, int numberOfRolls ) {
     if ( currentGroup >> rollBias & 1 ) {
@@ -301,9 +300,14 @@ int main( int argc, char* argv[] ) {
 
     setMinMaxRollStats( orderStats );
 
-    int                minRollsInGroup       = 0;    //minimum number of rolls needed to form a group
-    int                minRollsInOrder       = 0;    //minimum number of rolls needed to form an order
-    int                maxRollsInOrder       = 0;    //maximum number of rolls needed to form an order
+    printf( "Number of rolls inputted: %i\n", orderStats->numberOfRolls );
+    printf( "Minimum number of rolls needed to make group: %i\n", orderStats->minRollsPerGroup );
+    printf( "Minimum number of rolls needed to make order: %i\n", orderStats->minRollsPerOrder );
+    printf( "Maximum number of rolls needed to make order: %i\n", orderStats->maxRollsPerOrder );
+    printf( "Minimum number of groups to make an order: %i\n", orderStats->minGroupsPerOrder );
+    printf( "Maximum number of groups to make an order: %i\n", orderStats->maxGroupsPerOrder );
+    printf( "Generating list of groups..." );
+
     int                numPotentialOrders    = 0;
     struct int_array  *groupArray            = createIntArray( 1024, 0, 2 ); //malloc( sizeof(unsigned int) * 1024 );
     struct int_array **groupsWithRoll        = malloc( sizeof( struct int_array* ) * orderStats->numberOfRolls );
@@ -312,22 +316,13 @@ int main( int argc, char* argv[] ) {
     struct int_array **doubleBiasedGroupsWithRoll[orderStats->numberOfRolls * orderStats->numberOfRolls];
     struct int_array  *groupsWithRollBySize[orderStats->numberOfRolls];
 
-
     //set up maxNumber, and initialize groupContainsRoll array
     for ( int i = 0; i < orderStats->numberOfRolls; i++ ) { 
         allGroupsWithRoll[i] = ( struct sortedSize_t ){ 0, i };
-        //if ( tempLengthSum <= maxOrderLength ) {
-        //    maxRollsInOrder++;
-        //}
         groupsWithRoll[i] = createIntArray( 10000, 0, 1.1 );
         biasedGroupsWithRoll[i] = malloc( sizeof( struct int_array* ) * orderStats->numberOfRolls );
         for ( int j = 0; j < orderStats->numberOfRolls; j++ ) {
             biasedGroupsWithRoll[i][j] = createIntArray( 10000, 0, 1.1 );
-         }
-    }
-
-    for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
-        for ( int j = 0; j < orderStats->numberOfRolls; j++ ) {
             if ( j == i ) {
                 continue;
             }
@@ -336,34 +331,15 @@ int main( int argc, char* argv[] ) {
             for ( int k = 0; k < orderStats->numberOfRolls; k++ ) {
                 doubleBiasedGroupsWithRoll[index][k] = createIntArray( 10000, 0, 1.1 );
             }
-        }
+         }
     }
-
-//    tempLengthSum = 0;
-//    //figure out the minimum required rolls for a group/order
-//    for ( int i = numberOfRolls - 1; i >= 0; i-- ) {
-//        if ( tempLengthSum >= minOrderLength ) {
-//            break;
-//        }
-//        if ( tempLengthSum < minGroupLength ) {
-//            minRollsInGroup++;
-//        }
-//        minRollsInOrder++;
-//    }
     
-    printf( "Number of rolls inputted: %i\n", orderStats->numberOfRolls );
-    printf( "Minimum number of rolls needed to make group: %i\n", orderStats->minRollsPerGroup );
-    printf( "Minimum number of rolls needed to make order: %i\n", orderStats->minRollsPerOrder );
-    printf( "Maximum number of rolls needed to make order: %i\n", orderStats->maxRollsPerOrder );
-    printf( "Minimum number of groups to make an order: %i\n", orderStats->minGroupsPerOrder );
-    printf( "Maximum number of groups to make an order: %i\n", orderStats->maxGroupsPerOrder );
-    printf( "Generating list of groups..." );
     clock_t start = clock(), diff; 
     //changed so that it is only gathering groups now
     //go through all possible combinations of rolls, from the minimum to maximum to create a group
     //when a valid group is found, it will add it to a general array for all groups,
     //as well as an array of arrays, with the array at index is made up of groups that contain (index) rolls
-    for ( int groupSize = minRollsInGroup; groupSize <= orderStats->maxRollsPerGroup; groupSize++ ) {
+    for ( int groupSize = orderStats->minRollsPerGroup; groupSize <= orderStats->maxRollsPerGroup; groupSize++ ) {
         int group         = ( 1 << groupSize ) - 1; //starts at the smallest possible number for a group with groupSize bits set
         int largestNumber = group << ( orderStats->numberOfRolls - groupSize ); //largest number that could represent a group with groupSize bits set
 
@@ -471,7 +447,7 @@ int main( int argc, char* argv[] ) {
     printf( "Done!\nFound %'d groups\nGenerating potential orders...", groupArray->length );
     fflush( stdout );
 
-    for ( int orderSize = minRollsInOrder; orderSize <= maxRollsInOrder; orderSize++ ) {
+    for ( int orderSize = orderStats->minRollsPerOrder; orderSize <= orderStats->maxRollsPerOrder; orderSize++ ) {
         int order         = ( 1 << orderSize ) - 1;
         int largestNumber = order << ( orderStats->numberOfRolls - orderSize );
 

@@ -1,6 +1,7 @@
-#include "roll.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "roll.h"
+#include "intArray.h"
 
 static int ascRollSort( const void *roll1, const void *roll2 ) {
     struct Roll *r1 = ( struct Roll* ) roll1;
@@ -12,6 +13,18 @@ static int dscRollSort( const void *roll1, const void *roll2 ) {
     struct Roll *r1 = ( struct Roll* ) roll1;
     struct Roll *r2 = ( struct Roll* ) roll2;
     return r2->length - r1->length;
+}
+
+static unsigned nextSetOfNBits( unsigned x ) {
+    unsigned smallest, ripple, new_smallest, ones;
+
+    if ( x == 0 ) return 0;
+    smallest     = ( x & -x );
+    ripple       = x + smallest;
+    new_smallest = ( ripple & -ripple );
+    ones         = ( ( new_smallest / smallest ) >> 1 ) - 1;
+    return ripple | ones;
+
 }
 
 void sortRollsAscending( struct Roll *rollList, int numberOfRolls ) {
@@ -81,3 +94,20 @@ void setMinMaxRollStats( struct OrderStats *orderStats ) {
     }
 }
 
+void setGroupArray( struct OrderStats *orderStats, struct int_array *groupArray ) {
+    for ( int groupSize = orderStats->minRollsPerGroup; groupSize <= orderStats->maxRollsPerGroup; groupSize++ ) {
+        int group         = ( 1 << groupSize ) - 1; //starts at the smallest possible number for a group with groupSize bits set
+        int largestNumber = group << ( orderStats->numberOfRolls - groupSize ); //largest number that could represent a group with groupSize bits set
+
+        do {
+            float groupLength = rollsLength(  group, orderStats->numberOfRolls, orderStats->rollList ); 
+
+            if ( groupLength < orderStats->minGroupLength || groupLength > orderStats->maxGroupLength ) {
+                group = nextSetOfNBits( group );
+                continue;
+            }
+            groupArray                   = addToIntArray( groupArray, group );
+            group                        = nextSetOfNBits( group );
+        } while ( group <= largestNumber );
+    }
+}
