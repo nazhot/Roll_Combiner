@@ -298,7 +298,8 @@ int main( int argc, char* argv[] ) {
     orderStats->minGroupsPerOrder = ceil( orderStats->minOrderLength / orderStats->maxGroupLength );
     orderStats->maxGroupsPerOrder = floor( orderStats->maxOrderLength / orderStats->minGroupLength );
 
-    setMinMaxRollStats( orderStats );
+    setMinMaxRollStats( orderStats ); //rolls are now sorted in descending length order
+    sortRollsAscending( orderStats->rollList, orderStats->numberOfRolls);
 
     printf( "Number of rolls inputted: %i\n", orderStats->numberOfRolls );
     printf( "Minimum number of rolls needed to make group: %i\n", orderStats->minRollsPerGroup );
@@ -357,8 +358,8 @@ int main( int argc, char* argv[] ) {
         } while ( group <= largestNumber );
     }
 
-    //qsort( allGroupsWithRoll, g_numberOfRolls, sizeof( struct sortedSize_t ), sortCompare );
-
+    qsort( allGroupsWithRoll, orderStats->numberOfRolls, sizeof( struct sortedSize_t ), descCompare );
+    puts( "All Groups" );
     for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
         groupsWithRollBySize[i] = createIntArray( groupArray->size / orderStats->numberOfRolls, 0, 1.1 );
         printf( "%i: %i\n", allGroupsWithRoll[i].rollNumber, allGroupsWithRoll[i].size );
