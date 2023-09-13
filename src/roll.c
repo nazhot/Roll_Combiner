@@ -15,6 +15,12 @@ static int dscRollSort( const void *roll1, const void *roll2 ) {
     return r2->length - r1->length;
 }
 
+static int dscRollSortByNumGroups( const void *roll1, const void *roll2 ) {
+    struct Roll *r1 = ( struct Roll* ) roll1;
+    struct Roll *r2 = ( struct Roll* ) roll2;
+    return r2->numGroups - r1->numGroups;
+}
+
 static unsigned nextSetOfNBits( unsigned x ) {
     unsigned smallest, ripple, new_smallest, ones;
 
@@ -110,4 +116,31 @@ void setGroupArray( struct OrderStats *orderStats, struct int_array *groupArray 
             group                        = nextSetOfNBits( group );
         } while ( group <= largestNumber );
     }
+}
+
+void setNumGroupsPerRoll( struct OrderStats *orderStats ) {
+    for ( int groupSize = orderStats->minRollsPerGroup; groupSize <= orderStats->maxRollsPerGroup; groupSize++ ) {
+        int group         = ( 1 << groupSize ) - 1; //starts at the smallest possible number for a group with groupSize bits set
+        int largestNumber = group << ( orderStats->numberOfRolls - groupSize ); //largest number that could represent a group with groupSize bits set
+
+        do {
+            float groupLength = rollsLength(  group, orderStats->numberOfRolls, orderStats->rollList ); 
+
+            if ( groupLength < orderStats->minGroupLength || groupLength > orderStats->maxGroupLength ) {
+                group = nextSetOfNBits( group );
+                continue;
+            }
+
+            for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
+                if ( group >> i & 1 ) {
+                    orderStats->rollList[i].numGroups++;
+                }
+            }
+            group                        = nextSetOfNBits( group );
+        } while ( group <= largestNumber );
+    }
+}
+
+void sortRollsByNumGroups( struct OrderStats *orderStats ) {
+    qsort( orderStats->rollList, orderStats->numberOfRolls, sizeof( struct Roll ), dscRollSortByNumGroups );
 }

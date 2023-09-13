@@ -327,34 +327,8 @@ int main( int argc, char* argv[] ) {
     }
     
     clock_t start = clock(), diff; 
-    for ( int groupSize = orderStats->minRollsPerGroup; groupSize <= orderStats->maxRollsPerGroup; groupSize++ ) {
-        int group         = ( 1 << groupSize ) - 1; //starts at the smallest possible number for a group with groupSize bits set
-        int largestNumber = group << ( orderStats->numberOfRolls - groupSize ); //largest number that could represent a group with groupSize bits set
-
-        do {
-            float groupLength = rollsLength(  group, orderStats->numberOfRolls, orderStats->rollList ); 
-
-            if ( groupLength < orderStats->minGroupLength || groupLength > orderStats->maxGroupLength ) {
-                group = nextSetOfNBits( group );
-                continue;
-            }
-
-            for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
-                if ( group >> i & 1 ) {
-                    allGroupsWithRoll[i].size++;
-                }
-            }
-            group                        = nextSetOfNBits( group );
-        } while ( group <= largestNumber );
-    }
-    qsort( allGroupsWithRoll, orderStats->numberOfRolls, sizeof( struct sortedSize_t ), descCompare );
-    struct Roll *temp_rollList = malloc( sizeof( struct Roll ) * orderStats->numberOfRolls );
-    for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
-        temp_rollList[i] = orderStats->rollList[allGroupsWithRoll[i].rollNumber];
-        allGroupsWithRoll[i] = ( struct sortedSize_t ) { 0, i };
-    }
-    free( orderStats->rollList );
-    orderStats->rollList = temp_rollList;
+    setNumGroupsPerRoll( orderStats );
+    sortRollsByNumGroups( orderStats );
     //changed so that it is only gathering groups now
     //go through all possible combinations of rolls, from the minimum to maximum to create a group
     //when a valid group is found, it will add it to a general array for all groups,
