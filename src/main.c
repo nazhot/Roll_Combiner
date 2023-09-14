@@ -6,7 +6,7 @@
 #include <math.h>
 #include <locale.h>
 #include "fileReaders.h"
-#include "smallarray.h"
+#include "smallArray.h"
 #include "intArray.h"
 #include "testMethods.h"
 #include "roll.h"
@@ -75,7 +75,7 @@ FILE *g_outputFile;
 //}
 
 
-//void recursiveSolve( unsigned int currentGroup, unsigned int *groups, int numGroupsInOrder, struct IntArray **groupsWithRoll, int minGroupsInOrder, int minOrderLength, int maxOrderLength, struct smallarray *alreadyFound, int *numFound, int numPotentialOrders ) {
+//void recursiveSolve( unsigned int currentGroup, unsigned int *groups, int numGroupsInOrder, struct IntArray **groupsWithRoll, int minGroupsInOrder, int minOrderLength, int maxOrderLength, struct SmallArray *alreadyFound, int *numFound, int numPotentialOrders ) {
 //    //Id, Length, Number of Groups, Number of Rolls, Order Groups,Remaining Rolls, Average Remaining Roll Length
 //    if ( getSmallArrayValue( alreadyFound, currentGroup ) ) {
 //        return;
