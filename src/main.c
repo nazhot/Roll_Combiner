@@ -266,67 +266,21 @@ int main( int argc, char* argv[] ) {
     printf( "Maximum number of groups to make an order: %i\n", orderStats->maxGroupsPerOrder );
     printf( "Generating list of groups..." );
 
-    int                numPotentialOrders    = 0;
-    struct int_array  *groupArray            = createIntArray( 1024, 0, 2 ); //malloc( sizeof(unsigned int) * 1024 );
-    struct int_array  *groupsWithRollBySize[orderStats->numberOfRolls];
+    int               numPotentialOrders    = 0;
+    struct int_array *groupArray            = createIntArray( 1024, 0, 2 ); //malloc( sizeof(unsigned int) * 1024 );
+    struct int_array *groupsWithRollBySize[orderStats->numberOfRolls];
     
     clock_t start = clock(), diff; 
     setNumGroupsPerRoll( orderStats );
     sortRollsByNumGroups( orderStats );
-    //changed so that it is only gathering groups now
-    //go through all possible combinations of rolls, from the minimum to maximum to create a group
-    //when a valid group is found, it will add it to a general array for all groups,
-    //as well as an array of arrays, with the array at index is made up of groups that contain (index) rolls
-    for ( int groupSize = orderStats->minRollsPerGroup; groupSize <= orderStats->maxRollsPerGroup; groupSize++ ) {
-        int group         = ( 1 << groupSize ) - 1; //starts at the smallest possible number for a group with groupSize bits set
-        int largestNumber = group << ( orderStats->numberOfRolls - groupSize ); //largest number that could represent a group with groupSize bits set
-
-        do {
-            float groupLength = rollsLength(  group, orderStats->numberOfRolls, orderStats->rollList ); 
-
-            if ( groupLength < orderStats->minGroupLength || groupLength > orderStats->maxGroupLength ) {
-                group = nextSetOfNBits( group );
-                continue;
-            }
-            groupArray = addToIntArray( groupArray, group );
-            group      = nextSetOfNBits( group );
-        } while ( group <= largestNumber );
-    }
-
-    for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
-        groupsWithRollBySize[i] = createIntArray( groupArray->size / orderStats->numberOfRolls, 0, 1.1 );
-    }
-
-    for ( int i = 0; i < groupArray->size; i++ ) {
-        unsigned int group = groupArray->content[i];
-        for ( int j = 0; j < orderStats->numberOfRolls; j++ ) {
-            if ( group >> j & 1 ) {
-                groupsWithRollBySize[j] = addToIntArray( groupsWithRollBySize[j], group );
-                break;
-            }   
-        }
-    }
-    for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
-        shrinkIntArray( groupsWithRollBySize[i] );
-    }
-
-    start = clock();
-
-//    struct int_array **biasedWithMostRolls = biasedGroupsWithRoll[largestTotalSizeIndex];
+    setGroupArray( orderStats, groupArray );
+    setGroupsWithRollBySize( groupsWithRollBySize, groupArray, orderStats->numberOfRolls );
 
     struct check_t *normalPairsCheck = checkNormalPairs( groupArray );
     struct check_t *biasedBySizeCheck  = checkUnbiasedIntArray( groupArray, groupsWithRollBySize, orderStats->numberOfRolls );
-//    struct check_t *biasedCheck        = checkBiasedIntArray( groupArray, biasedGroupsWithRoll, g_numberOfRolls );
-//    struct check_t *biasedCheck        = checkUnbiasedIntArray( groupArray, biasedWithMostRolls, g_numberOfRolls );
-
 
     printCheck( "Normal Pairs", normalPairsCheck );
     printCheck( "Biased by Size", biasedBySizeCheck );
-//    printCheck( "Biased Pairs", biasedCheck );
-//    for ( int i = 0; i < g_numberOfRolls; i++ ) {
-//        printf( "Total number of groups with roll %i: %i\n", i, allGroupsWithRoll[i] );
-//    }
-
 
     diff = clock() - start;
     int msec = diff * 1000 / CLOCKS_PER_SEC;
@@ -350,18 +304,7 @@ int main( int argc, char* argv[] ) {
         } while ( order <= largestNumber );
     }
 
-
-//    diff = clock() - start;
-//    int msec = diff * 1000 / CLOCKS_PER_SEC;
-//
-//    printf( "%d second %d milliseconds\n", msec/1000, msec%1000 );
     printf( "Done!\nFound %'d potential orders\n", numPotentialOrders );
-
-    //int smallArraySize            = ( 1 << orderStats->numberOfRolls ) - 1;
-    //int numFound                  = 0;
-    //struct smallarray *smallArray = createSmallArray( smallArraySize );
-    //unsigned int *groups          = malloc( sizeof( unsigned int ) * orderStats->numberOfRolls );
-
 
     //recursiveSolve( 0, groups, 0, groupsWithRoll, minGroupsInOrder, minOrderLength, maxOrderLength, smallArray, &numFound, numPotentialOrders );
 

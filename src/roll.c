@@ -100,7 +100,7 @@ void setMinMaxRollStats( struct OrderStats *orderStats ) {
     }
 }
 
-void setGroupArray( struct OrderStats *orderStats, struct int_array *groupArray ) {
+struct int_array* setGroupArray( struct OrderStats *orderStats, struct int_array *groupArray ) {
     for ( int groupSize = orderStats->minRollsPerGroup; groupSize <= orderStats->maxRollsPerGroup; groupSize++ ) {
         int group         = ( 1 << groupSize ) - 1; //starts at the smallest possible number for a group with groupSize bits set
         int largestNumber = group << ( orderStats->numberOfRolls - groupSize ); //largest number that could represent a group with groupSize bits set
@@ -116,6 +116,7 @@ void setGroupArray( struct OrderStats *orderStats, struct int_array *groupArray 
             group                        = nextSetOfNBits( group );
         } while ( group <= largestNumber );
     }
+    return groupArray;
 }
 
 void setNumGroupsPerRoll( struct OrderStats *orderStats ) {
@@ -143,4 +144,25 @@ void setNumGroupsPerRoll( struct OrderStats *orderStats ) {
 
 void sortRollsByNumGroups( struct OrderStats *orderStats ) {
     qsort( orderStats->rollList, orderStats->numberOfRolls, sizeof( struct Roll ), dscRollSortByNumGroups );
+}
+
+struct int_array** setGroupsWithRollBySize( struct int_array **groupsWithRollBySize, struct int_array *groupArray, int numberOfRolls ) {
+    for ( int i = 0; i < numberOfRolls; i++ ) {
+        groupsWithRollBySize[i] = createIntArray( groupArray->size / numberOfRolls, 0, 1.1 );
+    }
+
+    for ( int i = 0; i < groupArray->size; i++ ) {
+        unsigned int group = groupArray->content[i];
+        for ( int j = 0; j < numberOfRolls; j++ ) {
+            if ( group >> j & 1 ) {
+                groupsWithRollBySize[j] = addToIntArray( groupsWithRollBySize[j], group );
+                break;
+            }   
+        }
+    }
+
+    for ( int i = 0; i < numberOfRolls; i++ ) {
+        shrinkIntArray( groupsWithRollBySize[i] );
+    }
+    return groupsWithRollBySize;
 }

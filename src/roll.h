@@ -33,8 +33,9 @@ void sortRollsDescending( struct Roll* rollList, int numberOfRolls );
 void printRollsFromInt(  unsigned int, int, struct Roll* );
 float rollsLength(  unsigned int, int, struct Roll* );
 void setMinMaxRollStats( struct OrderStats *orderStats );
-void setGroupArray( struct OrderStats *orderStats, struct int_array *groupArray );
+struct int_array* setGroupArray( struct OrderStats *orderStats, struct int_array *groupArray );
 void setNumGroupsPerRoll( struct OrderStats *orderStats );
 void sortRollsByNumGroups( struct OrderStats *orderStats );
+struct int_array** setGroupsWithRollBySize( struct int_array **groupsWithRollBySize, struct int_array *groupArray, int numberOfRolls );
 
 #endif
