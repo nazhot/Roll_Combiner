@@ -15,56 +15,6 @@
 
 FILE *g_outputFile;
 
-void printArray( unsigned int array[], int arrayLength ) {
-    printf( "[" );
-    for ( int i = 0; i < arrayLength; i++ ) {
-       printf( "%u", array[i] ); 
-       if ( i < arrayLength - 1 ) {
-        printf( ", " );
-       }
-    }
-    printf( "]\n" );
-}
-
-
-void printNumberBits( unsigned int num ) {
-    printf( "%u: ", num );
-    int numBits = sizeof( unsigned int ) * 8;
-    for ( int i = 0; i < numBits; i++ ) {
-        printf( "%i", num >> i & 1 );
-    }
-    printf( "\n" );
-}
-
-
-/*
- * go from an array where elements are the rolls that make up a group to the 
- *  equivalent unsigned int
- *      array:     elements are the rolls that make up a group
- *      arraySize: how many elements are in the array
-*/
-unsigned int arrayToInt( int array[], int arraySize ) {
-    unsigned int integer = 0;
-    for ( int i = 0; i < arraySize; i++ ) {
-        int rollNumber = array[i];
-        integer += 1 << rollNumber;
-    }
-    return integer;
-}
-
-
-unsigned nextSetOfNBits( unsigned x ) {
-    unsigned smallest, ripple, new_smallest, ones;
-
-    if ( x == 0 ) return 0;
-    smallest     = ( x & -x );
-    ripple       = x + smallest;
-    new_smallest = ( ripple & -ripple );
-    ones         = ( ( new_smallest / smallest ) >> 1 ) - 1;
-    return ripple | ones;
-
-}
-
 //void setGroupsString( unsigned int *groups, int numGroups ) {
 //    fputc( '\"', g_outputFile );
 //    for ( int i = 0; i < numGroups; i++ ){
@@ -266,7 +216,7 @@ int main( int argc, char* argv[] ) {
     printf( "Maximum number of groups to make an order: %i\n", orderStats->maxGroupsPerOrder );
     printf( "Generating list of groups..." );
 
-    struct IntArray *groupArray            = createIntArray( 1024, 0, 2 ); //malloc( sizeof(unsigned int) * 1024 );
+    struct IntArray *groupArray            = createIntArray( 1024, 0, 2 ); 
     struct IntArray **groupsWithRollBySize = malloc( sizeof( struct IntArray* ) * orderStats->numberOfRolls );
     
     clock_t start = clock(), diff; 
