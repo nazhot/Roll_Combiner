@@ -232,13 +232,29 @@ int main( int argc, char* argv[] ) {
     printf( "Done!\nFound %'d groups\nGenerating potential orders...", groupArray->length );
     fflush( stdout );
 
-    int numPotentialOrders = getNumPotentialOrders( orderStats );
+    int numPotentialOrders = getNumPotentialOrders( orderStats, groupsWithoutRollBySize );
     printf( "Done!\nFound %'d potential orders\n", numPotentialOrders );
 
     int smallArraySize = 1 << orderStats->numberOfRolls;
     struct SmallArray *alreadyFound = createSmallArray(smallArraySize );
     int numFound = 0;
-    recursiveSolve( 0, -1, 0, groupsWithRollBySize, orderStats, alreadyFound, &numFound, numPotentialOrders);
+    int cumPreviousGroups = 0;
+    for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
+        printf(" Starting solving for index %i\n", i );
+        for ( int j = 0; j < groupsWithRollBySize[i]->length; j++ ) {
+            unsigned int group = groupsWithRollBySize[i]->content[j];
+            unsigned long numChecked = 0;
+            //start = clock();
+            //printf( "   -group #: %i\n", cumPreviousGroups + j );
+            recursiveSolve( group, i, 1, groupsWithRollBySize, orderStats, alreadyFound, &numFound, numPotentialOrders, &numChecked );
+            //diff = clock() - start;
+           // int msec = diff * 1000 / CLOCKS_PER_SEC;
+            //printf( "   -num checked: %'lu\n", numChecked );
+            //printf( "Completed, took %i seconds, %i millis\n", msec/1000, msec%1000 );
+        }
+        cumPreviousGroups += groupsWithRollBySize[i]->length;
+    }
+    //recursiveSolve( 0, -1, 0, groupsWithRollBySize, orderStats, alreadyFound, &numFound, numPotentialOrders);
 
     diff = clock() - start;
     int msec = diff * 1000 / CLOCKS_PER_SEC;

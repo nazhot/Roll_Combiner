@@ -190,7 +190,7 @@ struct IntArray** setGroupsWithoutRollBySize( struct IntArray **groupsWithoutRol
 }
 
 
-int getNumPotentialOrders( struct OrderStats *orderStats ) {
+int getNumPotentialOrders( struct OrderStats *orderStats, struct IntArray **groupsWithoutRollBySize ) {
     int numPotentialOrders = 0;
     for ( int orderSize = orderStats->minRollsPerOrder; orderSize <= orderStats->maxRollsPerOrder; orderSize++ ) {
         int order         = ( 1 << orderSize ) - 1;

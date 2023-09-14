@@ -24,7 +24,7 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 # The -MMD and -MP flags together generate Makefiles for us!
 # These files will have .d instead of .o as the output.
-CFLAGS := $(INC_FLAGS) -MMD -MP -Wall
+CFLAGS := $(INC_FLAGS) -MMD -MP -Wall -O2
 LDFLAGS := -lm
 
 # The final build step.

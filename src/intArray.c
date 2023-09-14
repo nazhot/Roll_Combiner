@@ -62,6 +62,9 @@ struct IntArray* shrinkIntArray( struct IntArray *intArray ) {
 }
 
 void freeIntArray( struct IntArray *intArray ) {
+    if ( intArray == NULL ) {
+        return;
+    }
     free( intArray->content );
     free( intArray );
 }
