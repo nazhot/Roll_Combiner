@@ -37,6 +37,7 @@ struct IntArray* setGroupArray( struct OrderStats *orderStats, struct IntArray *
 void setNumGroupsPerRoll( struct OrderStats *orderStats );
 void sortRollsByNumGroups( struct OrderStats *orderStats );
 struct IntArray** setGroupsWithRollBySize( struct IntArray **groupsWithRollBySize, struct IntArray *groupArray, int numberOfRolls );
+struct IntArray** setGroupsWithoutRollBySize( struct IntArray **groupsWithoutRollBySize, struct IntArray *groupArray, int numberOfRolls );
 int getNumPotentialOrders( struct OrderStats *orderStats );
 
 #endif

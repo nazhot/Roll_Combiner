@@ -219,19 +219,16 @@ int main( int argc, char* argv[] ) {
 
     struct IntArray *groupArray            = createIntArray( 1024, 0, 2 ); 
     struct IntArray **groupsWithRollBySize = malloc( sizeof( struct IntArray* ) * orderStats->numberOfRolls );
+    struct IntArray **groupsWithoutRollBySize = malloc( sizeof( struct IntArray* ) * orderStats->numberOfRolls );
+
     
     clock_t start = clock(), diff; 
     setNumGroupsPerRoll( orderStats );
     sortRollsByNumGroups( orderStats );
     groupArray           = setGroupArray( orderStats, groupArray );
     groupsWithRollBySize = setGroupsWithRollBySize( groupsWithRollBySize, groupArray, orderStats->numberOfRolls );
+    groupsWithoutRollBySize = setGroupsWithoutRollBySize( groupsWithoutRollBySize, groupArray, orderStats->numberOfRolls);
 
-//    struct check_t *normalPairsCheck = checkNormalPairs( groupArray );
-//    struct check_t *biasedBySizeCheck  = checkUnbiasedIntArray( groupArray, groupsWithRollBySize, orderStats->numberOfRolls );
-
-//    printCheck( "Normal Pairs", normalPairsCheck );
-//    printCheck( "Biased by Size", biasedBySizeCheck );
-    //printf( "Took %i seconds, %i millis\n", msec/1000, msec%1000 );
     printf( "Done!\nFound %'d groups\nGenerating potential orders...", groupArray->length );
     fflush( stdout );
 
@@ -253,6 +250,11 @@ int main( int argc, char* argv[] ) {
     for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
         freeIntArray( groupsWithRollBySize[i] );
     }
+
+    free( orderStats->rollList );
+    free( orderStats );
+
+    free( groupsWithRollBySize );
 
     return 0;
 }
