@@ -15,14 +15,6 @@
 
 FILE *g_outputFile;
 
-
-
-struct sortedSize_t {
-    int size;
-    int rollNumber;
-};
-
-
 void printArray( unsigned int array[], int arrayLength ) {
     printf( "[" );
     for ( int i = 0; i < arrayLength; i++ ) {
@@ -71,30 +63,6 @@ unsigned nextSetOfNBits( unsigned x ) {
     ones         = ( ( new_smallest / smallest ) >> 1 ) - 1;
     return ripple | ones;
 
-}
-
-
-int getSmallestIntArrayIndex( unsigned int currentGroup, struct int_array **groupsWithRoll, int numberOfRolls ) {
-    int smallestLength = INT32_MAX;
-    int smallestLengthIndex = -1;
-    for ( int i = 0; i < numberOfRolls; i++ ) {
-        if ( !( currentGroup >> i & 1 ) ) {
-            continue;
-        }
-        if ( groupsWithRoll[i]->length < smallestLength ) {
-            smallestLength = groupsWithRoll[i]->length;
-            smallestLengthIndex = i;
-        }
-    }
-    return smallestLengthIndex;
-}
-
-
-int getSmallestIntArrayIndexWithBias( unsigned int currentGroup, int rollBias, struct int_array **groupsWithRoll, int numberOfRolls ) {
-    if ( currentGroup >> rollBias & 1 ) {
-        return rollBias;
-    }
-    return getSmallestIntArrayIndex( currentGroup, groupsWithRoll, numberOfRolls );
 }
 
 //void setGroupsString( unsigned int *groups, int numGroups ) {
@@ -263,17 +231,6 @@ void printCheck( char title[], struct check_t *check ) {
    printf( "Num groups: %'lu\n", check->numGroups );
 }
 
-int descCompare( const void *a, const void *b ) {
-    struct sortedSize_t tempA = *( struct sortedSize_t* ) a;
-    struct sortedSize_t tempB = *( struct sortedSize_t* ) b;
-    return tempB.size - tempA.size;
-}
-
-int ascCompare( const void *a, const void *b ) {
-    struct sortedSize_t tempA = *( struct sortedSize_t* ) a;
-    struct sortedSize_t tempB = *( struct sortedSize_t* ) b;
-    return tempA.size - tempB.size;
-}
 
 int main( int argc, char* argv[] ) {
 
@@ -311,20 +268,7 @@ int main( int argc, char* argv[] ) {
 
     int                numPotentialOrders    = 0;
     struct int_array  *groupArray            = createIntArray( 1024, 0, 2 ); //malloc( sizeof(unsigned int) * 1024 );
-    struct int_array **groupsWithRoll        = malloc( sizeof( struct int_array* ) * orderStats->numberOfRolls );
-    struct sortedSize_t allGroupsWithRoll[orderStats->numberOfRolls];
-    struct int_array **biasedGroupsWithRoll[orderStats->numberOfRolls];
     struct int_array  *groupsWithRollBySize[orderStats->numberOfRolls];
-
-    //set up maxNumber, and initialize groupContainsRoll array
-    for ( int i = 0; i < orderStats->numberOfRolls; i++ ) { 
-        allGroupsWithRoll[i] = ( struct sortedSize_t ){ 0, i };
-        groupsWithRoll[i] = createIntArray( 10000, 0, 1.1 );
-        biasedGroupsWithRoll[i] = malloc( sizeof( struct int_array* ) * orderStats->numberOfRolls );
-        for ( int j = 0; j < orderStats->numberOfRolls; j++ ) {
-            biasedGroupsWithRoll[i][j] = createIntArray( 10000, 0, 1.1 );
-         }
-    }
     
     clock_t start = clock(), diff; 
     setNumGroupsPerRoll( orderStats );
@@ -344,51 +288,26 @@ int main( int argc, char* argv[] ) {
                 group = nextSetOfNBits( group );
                 continue;
             }
-
-            for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
-                int biasedMinSizeIndex = getSmallestIntArrayIndexWithBias( group, i, biasedGroupsWithRoll[i], orderStats->numberOfRolls );
-                biasedGroupsWithRoll[i][biasedMinSizeIndex] = addToIntArray( biasedGroupsWithRoll[i][biasedMinSizeIndex], group );
-                if ( group >> i & 1 ) {
-                    allGroupsWithRoll[i].size++;
-                }
-            }
-            int minSizeIndex = getSmallestIntArrayIndex( group, groupsWithRoll, orderStats->numberOfRolls );
-
-            groupsWithRoll[minSizeIndex] = addToIntArray( groupsWithRoll[minSizeIndex], group );
-            groupArray                   = addToIntArray( groupArray, group );
-            group                        = nextSetOfNBits( group );
+            groupArray = addToIntArray( groupArray, group );
+            group      = nextSetOfNBits( group );
         } while ( group <= largestNumber );
     }
 
-    //qsort( allGroupsWithRoll, orderStats->numberOfRolls, sizeof( struct sortedSize_t ), descCompare );
-    puts( "All Groups" );
     for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
         groupsWithRollBySize[i] = createIntArray( groupArray->size / orderStats->numberOfRolls, 0, 1.1 );
-        printf( "%i: %i\n", allGroupsWithRoll[i].rollNumber, allGroupsWithRoll[i].size );
     }
 
     for ( int i = 0; i < groupArray->size; i++ ) {
         unsigned int group = groupArray->content[i];
         for ( int j = 0; j < orderStats->numberOfRolls; j++ ) {
-            int index = allGroupsWithRoll[j].rollNumber;
-            if ( group >> index & 1 ) {
-                groupsWithRollBySize[index] = addToIntArray( groupsWithRollBySize[index], group );
+            if ( group >> j & 1 ) {
+                groupsWithRollBySize[j] = addToIntArray( groupsWithRollBySize[j], group );
                 break;
             }   
         }
     }
-
     for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
         shrinkIntArray( groupsWithRollBySize[i] );
-        printf( "%i: %i\n", i, groupsWithRollBySize[i]->length );
-    }
-
-    for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
-        //printf( "Biased towards group %i\n", i );
-        groupsWithRoll[i] = shrinkIntArray( groupsWithRoll[i] );
-        for ( int j = 0; j < orderStats->numberOfRolls; j++ ) {
-            biasedGroupsWithRoll[i][j] = shrinkIntArray( biasedGroupsWithRoll[i][j] );
-        }
     }
 
     start = clock();
@@ -396,14 +315,12 @@ int main( int argc, char* argv[] ) {
 //    struct int_array **biasedWithMostRolls = biasedGroupsWithRoll[largestTotalSizeIndex];
 
     struct check_t *normalPairsCheck = checkNormalPairs( groupArray );
-    struct check_t *unbiasedPairsCheck = checkUnbiasedIntArray( groupArray, groupsWithRoll, orderStats->numberOfRolls );
     struct check_t *biasedBySizeCheck  = checkUnbiasedIntArray( groupArray, groupsWithRollBySize, orderStats->numberOfRolls );
 //    struct check_t *biasedCheck        = checkBiasedIntArray( groupArray, biasedGroupsWithRoll, g_numberOfRolls );
 //    struct check_t *biasedCheck        = checkUnbiasedIntArray( groupArray, biasedWithMostRolls, g_numberOfRolls );
 
 
     printCheck( "Normal Pairs", normalPairsCheck );
-    printCheck( "Unbiased Pairs", unbiasedPairsCheck );
     printCheck( "Biased by Size", biasedBySizeCheck );
 //    printCheck( "Biased Pairs", biasedCheck );
 //    for ( int i = 0; i < g_numberOfRolls; i++ ) {
@@ -451,13 +368,8 @@ int main( int argc, char* argv[] ) {
     fclose( g_outputFile );
     freeIntArray( groupArray );
     for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
-        freeIntArray( groupsWithRoll[i] );
-        for ( int j = 0; j < orderStats->numberOfRolls; j++ ) {
-            freeIntArray( biasedGroupsWithRoll[i][j] );
-        }
-        free( biasedGroupsWithRoll[i] );
+        freeIntArray( groupsWithRollBySize[i] );
     }
-    free( groupsWithRoll );
 
     return 0;
 }
