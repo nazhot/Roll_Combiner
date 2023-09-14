@@ -10,6 +10,7 @@
 #include "intArray.h"
 #include "testMethods.h"
 #include "roll.h"
+#include "solver.h"
                       //guarded by strncpy
 #define MAX_NUM_ROLLS 32;
 
@@ -225,22 +226,26 @@ int main( int argc, char* argv[] ) {
     groupArray           = setGroupArray( orderStats, groupArray );
     groupsWithRollBySize = setGroupsWithRollBySize( groupsWithRollBySize, groupArray, orderStats->numberOfRolls );
 
-    struct check_t *normalPairsCheck = checkNormalPairs( groupArray );
-    struct check_t *biasedBySizeCheck  = checkUnbiasedIntArray( groupArray, groupsWithRollBySize, orderStats->numberOfRolls );
+//    struct check_t *normalPairsCheck = checkNormalPairs( groupArray );
+//    struct check_t *biasedBySizeCheck  = checkUnbiasedIntArray( groupArray, groupsWithRollBySize, orderStats->numberOfRolls );
 
-    printCheck( "Normal Pairs", normalPairsCheck );
-    printCheck( "Biased by Size", biasedBySizeCheck );
-
-    diff = clock() - start;
-    int msec = diff * 1000 / CLOCKS_PER_SEC;
-    printf( "Took %i seconds, %i millis\n", msec/1000, msec%1000 );
+//    printCheck( "Normal Pairs", normalPairsCheck );
+//    printCheck( "Biased by Size", biasedBySizeCheck );
+    //printf( "Took %i seconds, %i millis\n", msec/1000, msec%1000 );
     printf( "Done!\nFound %'d groups\nGenerating potential orders...", groupArray->length );
     fflush( stdout );
 
     int numPotentialOrders = getNumPotentialOrders( orderStats );
-
     printf( "Done!\nFound %'d potential orders\n", numPotentialOrders );
 
+    int smallArraySize = 1 << orderStats->numberOfRolls;
+    struct SmallArray *alreadyFound = createSmallArray(smallArraySize );
+    int numFound = 0;
+    recursiveSolve( 0, -1, 0, groupsWithRollBySize, orderStats, alreadyFound, &numFound, numPotentialOrders);
+
+    diff = clock() - start;
+    int msec = diff * 1000 / CLOCKS_PER_SEC;
+    printf( "Completed, took %i seconds, %i millis\n", msec/1000, msec%1000 );
     //recursiveSolve( 0, groups, 0, groupsWithRoll, minGroupsInOrder, minOrderLength, maxOrderLength, smallArray, &numFound, numPotentialOrders );
 
     fclose( g_outputFile );
