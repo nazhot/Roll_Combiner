@@ -268,13 +268,13 @@ int main( int argc, char* argv[] ) {
 
     int               numPotentialOrders    = 0;
     struct int_array *groupArray            = createIntArray( 1024, 0, 2 ); //malloc( sizeof(unsigned int) * 1024 );
-    struct int_array *groupsWithRollBySize[orderStats->numberOfRolls];
+    struct int_array **groupsWithRollBySize = malloc( sizeof( struct int_array* ) * orderStats->numberOfRolls );
     
     clock_t start = clock(), diff; 
     setNumGroupsPerRoll( orderStats );
     sortRollsByNumGroups( orderStats );
-    setGroupArray( orderStats, groupArray );
-    setGroupsWithRollBySize( groupsWithRollBySize, groupArray, orderStats->numberOfRolls );
+    groupArray           = setGroupArray( orderStats, groupArray );
+    groupsWithRollBySize = setGroupsWithRollBySize( groupsWithRollBySize, groupArray, orderStats->numberOfRolls );
 
     struct check_t *normalPairsCheck = checkNormalPairs( groupArray );
     struct check_t *biasedBySizeCheck  = checkUnbiasedIntArray( groupArray, groupsWithRollBySize, orderStats->numberOfRolls );
