@@ -125,7 +125,7 @@ unsigned nextSetOfNBits( unsigned x ) {
 //}
 
 
-//void recursiveSolve( unsigned int currentGroup, unsigned int *groups, int numGroupsInOrder, struct int_array **groupsWithRoll, int minGroupsInOrder, int minOrderLength, int maxOrderLength, struct smallarray *alreadyFound, int *numFound, int numPotentialOrders ) {
+//void recursiveSolve( unsigned int currentGroup, unsigned int *groups, int numGroupsInOrder, struct IntArray **groupsWithRoll, int minGroupsInOrder, int minOrderLength, int maxOrderLength, struct smallarray *alreadyFound, int *numFound, int numPotentialOrders ) {
 //    //Id, Length, Number of Groups, Number of Rolls, Order Groups,Remaining Rolls, Average Remaining Roll Length
 //    if ( getSmallArrayValue( alreadyFound, currentGroup ) ) {
 //        return;
@@ -188,9 +188,9 @@ unsigned nextSetOfNBits( unsigned x ) {
 //    }
 //
 //    int averageGroupsPerRoll             = numValidGroups / numValidRolls + 1;
-//    struct int_array **newGroupsWithRoll = malloc( sizeof( struct int_array* ) * numberOfRolls ); //holds the groups that can go with currentGroup
+//    struct IntArray **newGroupsWithRoll = malloc( sizeof( struct IntArray* ) * numberOfRolls ); //holds the groups that can go with currentGroup
 //
-//    for ( int i = 0; i < numberOfRolls; i++ ) { //initialize the int_arrays
+//    for ( int i = 0; i < numberOfRolls; i++ ) { //initialize the IntArrays
 //        newGroupsWithRoll[i] = createIntArray( averageGroupsPerRoll, 0, 1.1 );
 //    }
 //
@@ -266,9 +266,8 @@ int main( int argc, char* argv[] ) {
     printf( "Maximum number of groups to make an order: %i\n", orderStats->maxGroupsPerOrder );
     printf( "Generating list of groups..." );
 
-    int               numPotentialOrders    = 0;
-    struct int_array *groupArray            = createIntArray( 1024, 0, 2 ); //malloc( sizeof(unsigned int) * 1024 );
-    struct int_array **groupsWithRollBySize = malloc( sizeof( struct int_array* ) * orderStats->numberOfRolls );
+    struct IntArray *groupArray            = createIntArray( 1024, 0, 2 ); //malloc( sizeof(unsigned int) * 1024 );
+    struct IntArray **groupsWithRollBySize = malloc( sizeof( struct IntArray* ) * orderStats->numberOfRolls );
     
     clock_t start = clock(), diff; 
     setNumGroupsPerRoll( orderStats );
@@ -288,21 +287,7 @@ int main( int argc, char* argv[] ) {
     printf( "Done!\nFound %'d groups\nGenerating potential orders...", groupArray->length );
     fflush( stdout );
 
-    for ( int orderSize = orderStats->minRollsPerOrder; orderSize <= orderStats->maxRollsPerOrder; orderSize++ ) {
-        int order         = ( 1 << orderSize ) - 1;
-        int largestNumber = order << ( orderStats->numberOfRolls - orderSize );
-
-        do {
-            float orderLength = rollsLength( order, orderStats->numberOfRolls, orderStats->rollList );
-
-            if ( orderLength < orderStats->minOrderLength || orderLength > orderStats->maxOrderLength ) {
-                order = nextSetOfNBits( order );
-                continue;
-            }
-            numPotentialOrders++; 
-            order = nextSetOfNBits( order );
-        } while ( order <= largestNumber );
-    }
+    int numPotentialOrders = getNumPotentialOrders( orderStats );
 
     printf( "Done!\nFound %'d potential orders\n", numPotentialOrders );
 

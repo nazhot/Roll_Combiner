@@ -2,7 +2,7 @@
 #define INT_ARRAY_H_
 
 
-struct int_array {
+struct IntArray {
     unsigned int *content;
     int size;
     int length;
@@ -11,10 +11,10 @@ struct int_array {
 };
 
 
-struct int_array* createIntArray( int, int, float );
-struct int_array* addToIntArray( struct int_array*, unsigned int );
-void freeIntArray( struct int_array* );
-struct int_array* shrinkIntArray( struct int_array* );
+struct IntArray* createIntArray( int, int, float );
+struct IntArray* addToIntArray( struct IntArray*, unsigned int );
+void freeIntArray( struct IntArray* );
+struct IntArray* shrinkIntArray( struct IntArray* );
 
 
 #endif

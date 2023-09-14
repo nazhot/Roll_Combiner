@@ -100,7 +100,7 @@ void setMinMaxRollStats( struct OrderStats *orderStats ) {
     }
 }
 
-struct int_array* setGroupArray( struct OrderStats *orderStats, struct int_array *groupArray ) {
+struct IntArray* setGroupArray( struct OrderStats *orderStats, struct IntArray *groupArray ) {
     for ( int groupSize = orderStats->minRollsPerGroup; groupSize <= orderStats->maxRollsPerGroup; groupSize++ ) {
         int group         = ( 1 << groupSize ) - 1; //starts at the smallest possible number for a group with groupSize bits set
         int largestNumber = group << ( orderStats->numberOfRolls - groupSize ); //largest number that could represent a group with groupSize bits set
@@ -146,7 +146,7 @@ void sortRollsByNumGroups( struct OrderStats *orderStats ) {
     qsort( orderStats->rollList, orderStats->numberOfRolls, sizeof( struct Roll ), dscRollSortByNumGroups );
 }
 
-struct int_array** setGroupsWithRollBySize( struct int_array **groupsWithRollBySize, struct int_array *groupArray, int numberOfRolls ) {
+struct IntArray** setGroupsWithRollBySize( struct IntArray **groupsWithRollBySize, struct IntArray *groupArray, int numberOfRolls ) {
     for ( int i = 0; i < numberOfRolls; i++ ) {
         groupsWithRollBySize[i] = createIntArray( groupArray->size / numberOfRolls, 0, 1.1 );
     }
@@ -165,4 +165,24 @@ struct int_array** setGroupsWithRollBySize( struct int_array **groupsWithRollByS
         shrinkIntArray( groupsWithRollBySize[i] );
     }
     return groupsWithRollBySize;
+}
+
+int getNumPotentialOrders( struct OrderStats *orderStats ) {
+    int numPotentialOrders = 0;
+    for ( int orderSize = orderStats->minRollsPerOrder; orderSize <= orderStats->maxRollsPerOrder; orderSize++ ) {
+        int order         = ( 1 << orderSize ) - 1;
+        int largestNumber = order << ( orderStats->numberOfRolls - orderSize );
+
+        do {
+            float orderLength = rollsLength( order, orderStats->numberOfRolls, orderStats->rollList );
+
+            if ( orderLength < orderStats->minOrderLength || orderLength > orderStats->maxOrderLength ) {
+                order = nextSetOfNBits( order );
+                continue;
+            }
+            numPotentialOrders++; 
+            order = nextSetOfNBits( order );
+        } while ( order <= largestNumber );
+    }
+    return numPotentialOrders;
 }

@@ -4,7 +4,7 @@
 #include "intArray.h"
 #include <time.h>
 
-struct check_t* checkNormalPairs(struct int_array *groupArray ) {
+struct check_t* checkNormalPairs(struct IntArray *groupArray ) {
     struct check_t *checks = malloc( sizeof( struct check_t ) );
     clock_t start = clock(), diff;
     long numChecks = 0;
@@ -28,7 +28,7 @@ struct check_t* checkNormalPairs(struct int_array *groupArray ) {
 }
 
 
-struct check_t* checkUnbiasedIntArray( struct int_array *groupArray, struct int_array **groupsWithRoll, int numberOfRolls ) {
+struct check_t* checkUnbiasedIntArray( struct IntArray *groupArray, struct IntArray **groupsWithRoll, int numberOfRolls ) {
     struct check_t *checks = malloc( sizeof( struct check_t ) );
     clock_t start = clock(), diff;
     long numChecks = 0;
@@ -78,7 +78,7 @@ struct check_t* checkUnbiasedIntArray( struct int_array *groupArray, struct int_
     return checks;
 }
 
-struct check_t* checkBiasedIntArray( struct int_array *groupArray, struct int_array ***biasedGroupsWithRoll, int numberOfRolls ) {
+struct check_t* checkBiasedIntArray( struct IntArray *groupArray, struct IntArray ***biasedGroupsWithRoll, int numberOfRolls ) {
     struct check_t *checks = malloc( sizeof( struct check_t ) );
     clock_t start = clock(), diff;
     long numChecks = 0;
@@ -96,7 +96,7 @@ struct check_t* checkBiasedIntArray( struct int_array *groupArray, struct int_ar
                 largestSizeIndex = j;
             }
         }
-        struct int_array **temp_groupsWithRoll = biasedGroupsWithRoll[largestSizeIndex];
+        struct IntArray **temp_groupsWithRoll = biasedGroupsWithRoll[largestSizeIndex];
         for ( int j = i + 1; j < numberOfRolls; j++ ) {
             if ( group >> j & 1 ) {
                 continue;
@@ -123,7 +123,7 @@ struct check_t* checkBiasedIntArray( struct int_array *groupArray, struct int_ar
 //                largestSizeIndex = j;
 //            }
 //        }
-//        struct int_array **temp_groupsWithRoll = biasedGroupsWithRoll[largestSizeIndex];
+//        struct IntArray **temp_groupsWithRoll = biasedGroupsWithRoll[largestSizeIndex];
 //        for ( int j = 0; j < numberOfRolls; j++ ) {
 //            if ( group >> j & 1 ) {
 //                continue;
@@ -146,7 +146,7 @@ struct check_t* checkBiasedIntArray( struct int_array *groupArray, struct int_ar
 //
 }
 
-struct check_t* checkDoubleBiasedIntArray( struct int_array *groupArray, struct int_array ***biasedGroupsWithRoll, int numberOfRolls ) {
+struct check_t* checkDoubleBiasedIntArray( struct IntArray *groupArray, struct IntArray ***biasedGroupsWithRoll, int numberOfRolls ) {
     struct check_t *checks = malloc( sizeof( struct check_t ) );
     clock_t start = clock(), diff;
     long numChecks = 0;
@@ -171,7 +171,7 @@ struct check_t* checkDoubleBiasedIntArray( struct int_array *groupArray, struct 
                 }
             }
         }
-        struct int_array **temp_groupsWithRoll = biasedGroupsWithRoll[largestSizeIndex];
+        struct IntArray **temp_groupsWithRoll = biasedGroupsWithRoll[largestSizeIndex];
         for ( int j = 0; j < numberOfRolls; j++ ) {
             if ( group >> j & 1 ) {
                 continue;
