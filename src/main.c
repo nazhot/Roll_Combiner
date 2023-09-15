@@ -220,7 +220,11 @@ int main( int argc, char* argv[] ) {
     struct IntArray *groupArray            = createIntArray( 1024, 0, 2 ); 
     struct IntArray **groupsWithRollBySize = malloc( sizeof( struct IntArray* ) * orderStats->numberOfRolls );
     struct IntArray **groupsWithoutRollBySize = malloc( sizeof( struct IntArray* ) * orderStats->numberOfRolls );
+    int              *ordersWithRoll = malloc( sizeof( int ) * orderStats->numberOfRolls );
 
+    for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
+        ordersWithRoll[i] = 0;
+    }
     
     clock_t start = clock(), diff; 
     setNumGroupsPerRoll( orderStats );
@@ -232,8 +236,12 @@ int main( int argc, char* argv[] ) {
     printf( "Done!\nFound %'d groups\nGenerating potential orders...", groupArray->length );
     fflush( stdout );
 
-    int numPotentialOrders = getNumPotentialOrders( orderStats, groupsWithoutRollBySize );
+    int numPotentialOrders = getNumPotentialOrders( orderStats, ordersWithRoll );
     printf( "Done!\nFound %'d potential orders\n", numPotentialOrders );
+    puts( "Orders with Roll" );
+    for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
+        printf( "%i: %i\n", i, ordersWithRoll[i] );
+    }
 
     int smallArraySize = 1 << orderStats->numberOfRolls;
     struct SmallArray *alreadyFound = createSmallArray(smallArraySize );
