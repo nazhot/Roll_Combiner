@@ -247,6 +247,7 @@ int main( int argc, char* argv[] ) {
     struct SmallArray *alreadyFound = createSmallArray(smallArraySize );
     int numFound = 0;
     int cumPreviousGroups = 0;
+    int ordersWithRollBitMask = 0;
     for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
         printf(" Starting solving for index %i\n", i );
         for ( int j = 0; j < groupsWithRollBySize[i]->length; j++ ) {
@@ -254,7 +255,7 @@ int main( int argc, char* argv[] ) {
             unsigned long numChecked = 0;
             //start = clock();
             //printf( "   -group #: %i\n", cumPreviousGroups + j );
-            recursiveSolve( group, i, 1, groupsWithRollBySize, orderStats, alreadyFound, &numFound, numPotentialOrders, &numChecked );
+            recursiveSolve( group, i, 1, groupsWithRollBySize, orderStats, alreadyFound, &numFound, numPotentialOrders, ordersWithRoll, &ordersWithRollBitMask );
             //diff = clock() - start;
            // int msec = diff * 1000 / CLOCKS_PER_SEC;
             //printf( "   -num checked: %'lu\n", numChecked );
