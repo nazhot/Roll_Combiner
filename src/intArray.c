@@ -46,6 +46,11 @@ struct IntArray* addToIntArray( struct IntArray *intArray, unsigned int toAdd ) 
     return intArray;
 }
 
+void addToIntArrayNoResize( struct IntArray *intArray, unsigned int toAdd ) {
+    intArray->content[intArray->length] = toAdd;
+    intArray->length++;
+}
+
 struct IntArray* shrinkIntArray( struct IntArray *intArray ) {
     if ( intArray->length == 0 ) {
         return intArray;

@@ -13,6 +13,7 @@ struct IntArray {
 
 struct IntArray* createIntArray( int, int, float );
 struct IntArray* addToIntArray( struct IntArray*, unsigned int );
+void addToIntArrayNoResize( struct IntArray*, unsigned int );
 void freeIntArray( struct IntArray* );
 struct IntArray* shrinkIntArray( struct IntArray* );
 

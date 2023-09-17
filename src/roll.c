@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "roll.h"
 #include "intArray.h"
+#include "smallArray.h"
 
 static int ascRollSort( const void *roll1, const void *roll2 ) {
     struct Roll *r1 = ( struct Roll* ) roll1;
@@ -61,12 +62,13 @@ void printRollsFromInt(  unsigned int integer, int numberOfRolls, struct Roll *r
  *      num:      number representation of the set of rolls
  *      numRolls: maximum number of bits to check
 */
-float rollsLength(  unsigned int num, int numberOfRolls, struct Roll *rollList ) {
+float rollsLength( const unsigned int num, const int numberOfRolls, struct Roll *rollList ) {
     float totalLength = 0;
     for ( int i = 0; i <= numberOfRolls; i++ ) {
-        if ( num >> i & 1 ) {
-            totalLength += rollList[i].length;
-        }
+        //if ( num >> i & 1 ) {
+        //    totalLength += rollList[i].length;
+        //}
+        totalLength += ( num >> i & 1 ) * rollList[i].length;
     }
     return totalLength;
 }
@@ -190,7 +192,7 @@ struct IntArray** setGroupsWithoutRollBySize( struct IntArray **groupsWithoutRol
 }
 
 
-int getNumPotentialOrders( struct OrderStats *orderStats, int *ordersWithRoll ) {
+int getPotentialOrders( struct OrderStats *orderStats, int *ordersWithRoll ) {
     int numPotentialOrders = 0;
     for ( int orderSize = orderStats->minRollsPerOrder; orderSize <= orderStats->maxRollsPerOrder; orderSize++ ) {
         int order         = ( 1 << orderSize ) - 1;

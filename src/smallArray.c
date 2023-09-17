@@ -1,4 +1,5 @@
 #include "smallArray.h"
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -23,9 +24,9 @@ struct SmallArray* createSmallArray( int size ) {
     return temp;
 }
 
-int8_t getSmallArrayValue( struct SmallArray* SmallArray, int number ){
-    int8_t modulo = number % 32;
+int8_t getSmallArrayValue( struct SmallArray* SmallArray, const int number ){
     int    index  = number / 32; 
+    int8_t modulo = number % 32;
 
     if ( index > SmallArray->size - 1 ) {
         return 0;
@@ -36,7 +37,7 @@ int8_t getSmallArrayValue( struct SmallArray* SmallArray, int number ){
 
 }
 
-void setSmallArrayValue( struct SmallArray* SmallArray, int number ) {
+void setSmallArrayValue( struct SmallArray* SmallArray, const int number ) {
     int8_t modulo = number % 32;
     int    index  = number / 32;
 

@@ -5,7 +5,7 @@
 #include "roll.h"
 
 
-void recursiveSolve( unsigned int currentGroup, int currentArrayIndex, int numGroupsInOrder, struct IntArray **groupsWithRoll, struct OrderStats *orderStats, struct SmallArray *alreadyFound, int *numFound, int numPotentialOrders, int *ordersWithRoll, int *ordersWithRollBitMask ) {
+void recursiveSolve( const unsigned int currentGroup, const int currentArrayIndex, const int numGroupsInOrder, struct IntArray **groupsWithRoll, const struct OrderStats *orderStats, struct SmallArray *alreadyFound, int *numFound, const int numPotentialOrders, int *ordersWithRoll, int *ordersWithRollBitMask ) {
     //Id, Length, Number of Groups, Number of Rolls, Order Groups,Remaining Rolls, Average Remaining Roll Length
     if ( currentGroup & *ordersWithRollBitMask || getSmallArrayValue( alreadyFound, currentGroup ) ) {
         return;
@@ -14,20 +14,17 @@ void recursiveSolve( unsigned int currentGroup, int currentArrayIndex, int numGr
     setSmallArrayValue( alreadyFound, currentGroup );
 
     if ( numGroupsInOrder >= orderStats->minGroupsPerOrder ) {
-        float currentLength = rollsLength( currentGroup, orderStats->numberOfRolls, orderStats->rollList );
+        const float currentLength = rollsLength( currentGroup, orderStats->numberOfRolls, orderStats->rollList );
         if ( currentLength >= orderStats->minOrderLength && currentLength <= orderStats->maxOrderLength ) {
             *numFound += 1;
-            for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
+            for ( int i = 0; i < orderStats->numberOfRolls; ++i ) {
                 ordersWithRoll[i] -= ( currentGroup >> i & 1 );
-                if ( ordersWithRoll[i] <= 0 ) {
+                if ( ordersWithRoll[i] == 0 ) {
                     *ordersWithRollBitMask |= 1 << i; //|= to guard against this happening multiple times, which it will everytime a new order is found when ordersWithRoll[i] is already 0
                 }
             }
             printf( "\rOrders found: %'i/%'i (%.2f%%)", *numFound, numPotentialOrders, *numFound * 1.0 / numPotentialOrders * 100 );
             fflush( stdout );
-        }
-        if ( currentLength >= orderStats->maxOrderLength ) {
-            return;
         }
         if ( currentLength + orderStats->minGroupLength > orderStats->maxOrderLength ) {
             return;
@@ -35,27 +32,28 @@ void recursiveSolve( unsigned int currentGroup, int currentArrayIndex, int numGr
     }
 
     struct IntArray **newGroupsWithRoll = malloc( sizeof( struct IntArray* ) * orderStats->numberOfRolls );
-    for ( int i = currentArrayIndex + 1; i < orderStats->numberOfRolls; i++ ) {
-        if ( currentGroup >> i & 1 || ordersWithRoll[i] <= 0) {
+    for ( int i = currentArrayIndex + 1; i < orderStats->numberOfRolls; ++i ) {
+        if ( currentGroup >> i & 1 || ordersWithRoll[i] == 0) {
             continue;
         }
-        newGroupsWithRoll[i] = createIntArray( groupsWithRoll[i]->size, 0, 1.1 ); //will only be smaller than groupsWithRoll[i]->size
-        for ( int j = 0; j < groupsWithRoll[i]->length; j++ ) {
+        newGroupsWithRoll[i] = createIntArray( groupsWithRoll[i]->length, 0, 1.1 ); //will only be smaller than groupsWithRoll[i]->size
+        for ( int j = 0; j < groupsWithRoll[i]->length; ++j ) {
             if ( currentGroup & groupsWithRoll[i]->content[j] || currentGroup & *ordersWithRollBitMask ) {
                 continue;
             }
             //bit i will always be set, definition of group being in groupsWithRoll[i]
             //always trying to fill in the lowest roll number first, and since a group being in groupsWithRoll[i] means no bit < i is set, i is the lowest
-            newGroupsWithRoll[i] = addToIntArray( newGroupsWithRoll[i], groupsWithRoll[i]->content[j] );
+            //newGroupsWithRoll[i] = addToIntArray( newGroupsWithRoll[i], groupsWithRoll[i]->content[j] );
+            addToIntArrayNoResize( newGroupsWithRoll[i], groupsWithRoll[i]->content[j] );
         }
-        shrinkIntArray( newGroupsWithRoll[i] );
+        //shrinkIntArray( newGroupsWithRoll[i] );
     }
 
-    for ( int i = currentArrayIndex + 1; i < orderStats->numberOfRolls; i++ ) {
-        if ( currentGroup >> i & 1 || ordersWithRoll[i] <= 0 ) {
+    for ( int i = currentArrayIndex + 1; i < orderStats->numberOfRolls; ++i ) {
+        if ( currentGroup >> i & 1 || ordersWithRoll[i] == 0 ) {
             continue;
         }
-        for ( int j = 0; j < newGroupsWithRoll[i]->length; j++ ) {
+        for ( int j = 0; j < newGroupsWithRoll[i]->length; ++j ) {
             if ( currentGroup & newGroupsWithRoll[i]->content[j] || currentGroup & *ordersWithRollBitMask ) {
                 continue;
             }
@@ -63,8 +61,8 @@ void recursiveSolve( unsigned int currentGroup, int currentArrayIndex, int numGr
         }
     }
 
-    for ( int i = currentArrayIndex + 1; i < orderStats->numberOfRolls; i++ ) {
-        if ( currentGroup >> i & 1 || ordersWithRoll[i] <= 0 ) {
+    for ( int i = currentArrayIndex + 1; i < orderStats->numberOfRolls; ++i ) {
+        if ( currentGroup >> i & 1 || ordersWithRoll[i] == 0 ) {
             continue;
         }
         freeIntArray( newGroupsWithRoll[i] );
