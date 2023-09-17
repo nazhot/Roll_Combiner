@@ -38,7 +38,7 @@ void recursiveSolve( const unsigned int currentGroup, const int currentArrayInde
         }
         newGroupsWithRoll[i] = createIntArray( groupsWithRoll[i]->length, 0, 1.1 ); //will only be smaller than groupsWithRoll[i]->size
         for ( int j = 0; j < groupsWithRoll[i]->length; ++j ) {
-            if ( currentGroup & groupsWithRoll[i]->content[j] || currentGroup & *ordersWithRollBitMask ) {
+            if ( currentGroup & groupsWithRoll[i]->content[j] || groupsWithRoll[i]->content[j] & *ordersWithRollBitMask ) {
                 continue;
             }
             //bit i will always be set, definition of group being in groupsWithRoll[i]
@@ -54,8 +54,8 @@ void recursiveSolve( const unsigned int currentGroup, const int currentArrayInde
             continue;
         }
         for ( int j = 0; j < newGroupsWithRoll[i]->length; ++j ) {
-            if ( currentGroup & newGroupsWithRoll[i]->content[j] || currentGroup & *ordersWithRollBitMask ) {
-                continue;
+            if ( currentGroup & newGroupsWithRoll[i]->content[j] ) { //could include || groupsWithRoll[i]->content[j] & *ordersWithRollBitMask, but this would only happen if that bitmask
+                continue;                                            //changes during the run, since it is already checked before
             }
             recursiveSolve( currentGroup | newGroupsWithRoll[i]->content[j], i, numGroupsInOrder + 1, newGroupsWithRoll, orderStats, alreadyFound, numFound, numPotentialOrders, ordersWithRoll, ordersWithRollBitMask );
         }
