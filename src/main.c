@@ -219,10 +219,8 @@ int main( int argc, char* argv[] ) {
 
     struct IntArray *groupArray            = createIntArray( 1024, 0, 2 ); 
     struct IntArray **groupsWithRollBySize = malloc( sizeof( struct IntArray* ) * orderStats->numberOfRolls );
-    struct IntArray **groupsWithoutRollBySize = malloc( sizeof( struct IntArray* ) * orderStats->numberOfRolls );
+    //struct IntArray **groupsWithoutRollBySize = malloc( sizeof( struct IntArray* ) * orderStats->numberOfRolls );
     int              *ordersWithRoll = malloc( sizeof( int ) * orderStats->numberOfRolls );
-    int smallArraySize = 1 << orderStats->numberOfRolls;
-    struct SmallArray *alreadyFound = createSmallArray( smallArraySize );
 
     for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
         ordersWithRoll[i] = 0;
@@ -233,39 +231,36 @@ int main( int argc, char* argv[] ) {
     sortRollsByNumGroups( orderStats );
     groupArray           = setGroupArray( orderStats, groupArray );
     groupsWithRollBySize = setGroupsWithRollBySize( groupsWithRollBySize, groupArray, orderStats->numberOfRolls );
-    groupsWithoutRollBySize = setGroupsWithoutRollBySize( groupsWithoutRollBySize, groupArray, orderStats->numberOfRolls);
+    //groupsWithoutRollBySize = setGroupsWithoutRollBySize( groupsWithoutRollBySize, groupArray, orderStats->numberOfRolls);
 
     printf( "Done!\nFound %'d groups\nGenerating potential orders...", groupArray->length );
     fflush( stdout );
 
-    int numPotentialOrders = getPotentialOrders( orderStats, ordersWithRoll );
-    printf( "Done!\nFound %'d potential orders\n", numPotentialOrders );
+    orderStats->numberOfPotentialOrders = getPotentialOrders( orderStats, ordersWithRoll );
+    printf( "Done!\nFound %'d potential orders\n", orderStats->numberOfPotentialOrders );
     puts( "Orders with Roll" );
     for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
         printf( "%i: %i\n", i, ordersWithRoll[i] );
     }
 
-    int numFound = 0;
-    int cumPreviousGroups = 0;
-    int ordersWithRollBitMask = 0;
     int recursiveStart = clock();
-    for ( int i = 0; i < orderStats->numberOfRolls; ++i ) {
-        printf(" Starting solving for index %i\n", i );
-        for ( int j = 0; j < groupsWithRollBySize[i]->length; ++j ) {
-            unsigned int group = groupsWithRollBySize[i]->content[j];
-            recursiveSolve( group, i, 1, groupsWithRollBySize, orderStats, alreadyFound, &numFound, numPotentialOrders, ordersWithRoll, &ordersWithRollBitMask );
-        }
-        cumPreviousGroups += groupsWithRollBySize[i]->length;
-    }
+    rollSolve( orderStats, groupsWithRollBySize, ordersWithRoll );
+//    for ( int i = 0; i < orderStats->numberOfRolls; ++i ) {
+//        printf(" Starting solving for index %i\n", i );
+//        for ( int j = 0; j < groupsWithRollBySize[i]->length; ++j ) {
+//            unsigned int group = groupsWithRollBySize[i]->content[j];
+//
+//            //recursiveSolve( group, i, 1, groupsWithRollBySize, orderStats, alreadyFound, &numFound, numPotentialOrders, ordersWithRoll, &ordersWithRollBitMask );
+//        }
+//        cumPreviousGroups += groupsWithRollBySize[i]->length;
+//    }
     int recursiveDiff = clock() - recursiveStart;
     int recursiveMsec = recursiveDiff * 1000 / CLOCKS_PER_SEC;
     printf( "Completed recursive loop, took %i seconds, %i millis\n", recursiveMsec/1000, recursiveMsec%1000 );
-    //recursiveSolve( 0, -1, 0, groupsWithRollBySize, orderStats, alreadyFound, &numFound, numPotentialOrders);
 
     diff = clock() - start;
     int msec = diff * 1000 / CLOCKS_PER_SEC;
     printf( "Completed total program, took %i seconds, %i millis\n", msec/1000, msec%1000 );
-    //recursiveSolve( 0, groups, 0, groupsWithRoll, minGroupsInOrder, minOrderLength, maxOrderLength, smallArray, &numFound, numPotentialOrders );
 
     fclose( g_outputFile );
     freeIntArray( groupArray );
@@ -275,8 +270,8 @@ int main( int argc, char* argv[] ) {
 
     free( orderStats->rollList );
     free( orderStats );
-
     free( groupsWithRollBySize );
+    free( ordersWithRoll );
 
     return 0;
 }

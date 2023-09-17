@@ -71,6 +71,7 @@ static void recursiveSolve( const unsigned int currentGroup, const int currentAr
     free( newGroupsWithRoll );
 }
 
-void rollSolve( struct IntArray **groupsWithRoll, struct OrderStats **orderStats ) {
-
+void rollSolve( struct OrderStats *orderStats, struct IntArray **groupsWithRoll, int *ordersWithRoll ) {
+    int smallArraySize = 1 << orderStats->numberOfRolls;
+    struct SmallArray *alreadyFound = createSmallArray( smallArraySize );
 }

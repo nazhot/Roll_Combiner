@@ -27,6 +27,7 @@ struct OrderStats {
 
     struct Roll *rollList;
     int numberOfRolls;
+    int numberOfPotentialOrders;
 };
 
 void sortRollsAscending( struct Roll* rollList, int numberOfRolls );
