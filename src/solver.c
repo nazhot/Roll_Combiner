@@ -3,9 +3,10 @@
 #include "intArray.h"
 #include "smallArray.h"
 #include "roll.h"
+#include "solver.h"
 
 
-void recursiveSolve( const unsigned int currentGroup, const int currentArrayIndex, const int numGroupsInOrder, struct IntArray **groupsWithRoll, const struct OrderStats *orderStats, struct SmallArray *alreadyFound, int *numFound, const int numPotentialOrders, int *ordersWithRoll, int *ordersWithRollBitMask ) {
+static void recursiveSolve( const unsigned int currentGroup, const int currentArrayIndex, const int numGroupsInOrder, struct IntArray **groupsWithRoll, const struct OrderStats *orderStats, struct SmallArray *alreadyFound, int *numFound, const int numPotentialOrders, int *ordersWithRoll, int *ordersWithRollBitMask ) {
     //Id, Length, Number of Groups, Number of Rolls, Order Groups,Remaining Rolls, Average Remaining Roll Length
     if ( currentGroup & *ordersWithRollBitMask || getSmallArrayValue( alreadyFound, currentGroup ) ) {
         return;
@@ -68,4 +69,8 @@ void recursiveSolve( const unsigned int currentGroup, const int currentArrayInde
         freeIntArray( newGroupsWithRoll[i] );
     }
     free( newGroupsWithRoll );
+}
+
+void rollSolve( struct IntArray **groupsWithRoll, struct OrderStats **orderStats ) {
+
 }
