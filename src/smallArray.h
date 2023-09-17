@@ -12,7 +12,7 @@ struct SmallArray{
 
 
 struct SmallArray* createSmallArray( int size );
-int8_t getSmallArrayValue( struct SmallArray*, int );
-void   setSmallArrayValue( struct SmallArray*, int );
+int8_t getSmallArrayValue( struct SmallArray* smallArray, int toAdd );
+void   setSmallArrayValue( struct SmallArray* smallArray, int toAdd );
 
 #endif

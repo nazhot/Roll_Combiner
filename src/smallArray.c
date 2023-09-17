@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 
-struct SmallArray* createSmallArray( int size ) {
+struct SmallArray* createSmallArray( const int size ) {
     struct SmallArray* temp = ( struct SmallArray* ) malloc( sizeof( struct SmallArray ) );
    
     int convertedSize = size / 32 + 1;
