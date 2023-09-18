@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "roll.h"
@@ -123,6 +124,8 @@ struct IntArray* setGroupArray( struct OrderStats *orderStats, struct IntArray *
 }
 
 void setNumGroupsPerRoll( struct OrderStats *orderStats ) {
+    float actualMinGroupLength = INT32_MAX * 1.0;
+    float actualMaxGroupLength = 0;
     for ( int groupSize = orderStats->minRollsPerGroup; groupSize <= orderStats->maxRollsPerGroup; groupSize++ ) {
         int group         = ( 1 << groupSize ) - 1; //starts at the smallest possible number for a group with groupSize bits set
         int largestNumber = group << ( orderStats->numberOfRolls - groupSize ); //largest number that could represent a group with groupSize bits set
@@ -135,6 +138,13 @@ void setNumGroupsPerRoll( struct OrderStats *orderStats ) {
                 continue;
             }
 
+            if ( groupLength < actualMinGroupLength ) {
+                actualMinGroupLength = groupLength;
+            }
+            if ( groupLength > actualMaxGroupLength ) {
+                actualMaxGroupLength = groupLength;
+            }
+
             for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
                 if ( group >> i & 1 ) {
                     orderStats->rollList[i].numGroups++;
@@ -143,6 +153,8 @@ void setNumGroupsPerRoll( struct OrderStats *orderStats ) {
             group                        = nextSetOfNBits( group );
         } while ( group <= largestNumber );
     }
+    printf( "Actual min group length: %f\n", actualMinGroupLength );
+    printf( "Actual max group length: %f\n", actualMaxGroupLength );
 }
 
 void sortRollsByNumGroups( struct OrderStats *orderStats ) {
