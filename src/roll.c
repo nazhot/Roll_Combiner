@@ -206,6 +206,8 @@ struct IntArray** setGroupsWithoutRollBySize( struct IntArray **groupsWithoutRol
 
 int getPotentialOrders( struct OrderStats *orderStats, int *ordersWithRoll ) {
     int numPotentialOrders = 0;
+    float actualMinOrderLength = INT32_MAX * 1.0;
+    float actualMaxOrderLength = 0;
     for ( int orderSize = orderStats->minRollsPerOrder; orderSize <= orderStats->maxRollsPerOrder; orderSize++ ) {
         int order         = ( 1 << orderSize ) - 1;
         int largestNumber = order << ( orderStats->numberOfRolls - orderSize );
@@ -217,6 +219,14 @@ int getPotentialOrders( struct OrderStats *orderStats, int *ordersWithRoll ) {
                 order = nextSetOfNBits( order );
                 continue;
             }
+
+            if ( orderLength < actualMinOrderLength ) {
+                actualMinOrderLength = orderLength;
+            }
+
+            if ( orderLength > actualMaxOrderLength ) {
+                actualMaxOrderLength = orderLength;
+            }
             for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
                 if ( order >> i & 1  ) {
                     ordersWithRoll[i] += 1;
@@ -226,5 +236,8 @@ int getPotentialOrders( struct OrderStats *orderStats, int *ordersWithRoll ) {
             order = nextSetOfNBits( order );
         } while ( order <= largestNumber );
     }
+    printf( "Actual min group length: %f\n", actualMinOrderLength );
+    printf( "Actual max group length: %f\n", actualMaxOrderLength );
+
     return numPotentialOrders;
 }
