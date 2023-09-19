@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 
-struct IntArray* createIntArray( int size, int sizeAddConstant, float sizeAddMultiplier ) {
+struct IntArray* createIntArray( const int size, const int sizeAddConstant, const float sizeAddMultiplier ) {
     struct IntArray *intArray = malloc( sizeof( struct IntArray ) );
     if ( intArray == NULL ) {
         printf( "Couldn't allocate the memory for an IntArray\n" );
@@ -23,7 +23,7 @@ struct IntArray* createIntArray( int size, int sizeAddConstant, float sizeAddMul
 }
 
 
-struct IntArray* addToIntArray( struct IntArray *intArray, unsigned int toAdd ) { 
+struct IntArray* addToIntArray( struct IntArray *intArray, const unsigned int toAdd ) { 
     if ( intArray->length >= intArray->size ) {
         int newSize = intArray->size * intArray->sizeAddMultiplier + intArray->sizeAddConstant;
         if ( newSize == intArray->size ) {
@@ -46,7 +46,7 @@ struct IntArray* addToIntArray( struct IntArray *intArray, unsigned int toAdd ) 
     return intArray;
 }
 
-void addToIntArrayNoResize( struct IntArray *intArray, unsigned int toAdd ) {
+void addToIntArrayNoResize( struct IntArray *intArray, const unsigned int toAdd ) {
     intArray->content[intArray->length] = toAdd;
     intArray->length++;
 }
@@ -67,9 +67,6 @@ struct IntArray* shrinkIntArray( struct IntArray *intArray ) {
 }
 
 void freeIntArray( struct IntArray *intArray ) {
-    if ( intArray == NULL ) {
-        return;
-    }
     free( intArray->content );
     free( intArray );
 }
