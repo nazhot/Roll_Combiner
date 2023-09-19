@@ -24,7 +24,7 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 # The -MMD and -MP flags together generate Makefiles for us!
 # These files will have .d instead of .o as the output.
-CFLAGS := $(INC_FLAGS) -MMD -MP -Wall -O2
+CFLAGS := $(INC_FLAGS) -MMD -MP -Wall -O2 
 LDFLAGS := -lm
 
 # The final build step.
@@ -40,6 +40,10 @@ $(BUILD_DIR)/%.c.o: %.c
 .PHONY: clean
 clean:
 	rm -r $(BUILD_DIR)
+	mkdir $(BUILD_DIR)
+	touch $(BUILD_DIR)/.gitignore
+	printf "*\n!.gitignore" >> $(BUILD_DIR)/.gitignore 
+
 
 # Include the .d makefiles. The - at the front suppresses the errors of missing
 # Makefiles. Initially, all the .d files will be missing, and we don't want those
