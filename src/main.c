@@ -217,7 +217,7 @@ int main( int argc, char* argv[] ) {
     printf( "Maximum number of groups to make an order: %i\n", orderStats->maxGroupsPerOrder );
     printf( "Generating list of groups..." );
 
-    struct IntArray *groupArray            = createIntArray( 1024, 0, 2 ); 
+    struct IntArray *groupArray            = createIntArray( 500000, 0, 2 ); 
     struct IntArray **groupsWithRollBySize = malloc( sizeof( struct IntArray* ) * orderStats->numberOfRolls );
     //struct IntArray **groupsWithoutRollBySize = malloc( sizeof( struct IntArray* ) * orderStats->numberOfRolls );
     int              *ordersWithRoll = malloc( sizeof( int ) * orderStats->numberOfRolls );
