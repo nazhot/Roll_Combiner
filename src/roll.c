@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "group.h"
 #include "roll.h"
 #include "intArray.h"
 #include "smallArray.h"
@@ -103,10 +102,7 @@ void setMinMaxRollStats( struct OrderStats *orderStats ) {
     }
 }
 
-struct GroupArray* setGroupArray( struct OrderStats *orderStats ) {
-
-    struct GroupArray *groupArray = createGroupArray( 500000, 0, 1.1 );
-
+struct IntArray* setGroupArray( struct OrderStats *orderStats, struct IntArray *groupArray ) {
     for ( int groupSize = orderStats->minRollsPerGroup; groupSize <= orderStats->maxRollsPerGroup; groupSize++ ) {
         int group         = ( 1 << groupSize ) - 1; //starts at the smallest possible number for a group with groupSize bits set
         int largestNumber = group << ( orderStats->numberOfRolls - groupSize ); //largest number that could represent a group with groupSize bits set
@@ -118,14 +114,11 @@ struct GroupArray* setGroupArray( struct OrderStats *orderStats ) {
                 group = nextSetOfNBits( group );
                 continue;
             }
-            struct Group *groupObject = malloc( sizeof( struct Group )  );
-            groupObject->rolls = group;
-            groupObject->length = groupLength;
-            groupArray                   = addToGroupArray( groupArray, *groupObject );
+            groupArray                   = addToIntArray( groupArray, group );
             group                        = nextSetOfNBits( group );
         } while ( group <= largestNumber );
     }
-    shrinkGroupArray( groupArray );
+    shrinkIntArray( groupArray );
     return groupArray;
 }
 
@@ -156,50 +149,44 @@ void sortRollsByNumGroups( struct OrderStats *orderStats ) {
     qsort( orderStats->rollList, orderStats->numberOfRolls, sizeof( struct Roll ), dscRollSortByNumGroups );
 }
 
-struct GroupArray** setGroupsWithRollBySize( struct GroupArray *groupArray, int numberOfRolls ) {
-
-    struct GroupArray **groupsWithRollBySize = malloc( sizeof( struct GroupArray* ) * numberOfRolls );
-
+struct IntArray** setGroupsWithRollBySize( struct IntArray **groupsWithRollBySize, struct IntArray *groupArray, float *minLengths, int numberOfRolls ) {
     for ( int i = 0; i < numberOfRolls; i++ ) {
-        groupsWithRollBySize[i] = createGroupArray( groupArray->size / numberOfRolls, 0, 1.1 );
+        groupsWithRollBySize[i] = createIntArray( groupArray->size / numberOfRolls, 0, 1.1 );
     }
 
     for ( int i = 0; i < groupArray->size; i++ ) {
-        struct Group *group = &groupArray->content[i];
+        unsigned int group = groupArray->content[i];
         for ( int j = 0; j < numberOfRolls; j++ ) {
-            if ( group->rolls >> j & 1 ) {
-                groupsWithRollBySize[j] = addToGroupArray( groupsWithRollBySize[j], *group );
+            if ( group >> j & 1 ) {
+                groupsWithRollBySize[j] = addToIntArray( groupsWithRollBySize[j], group );
                 break;
             }   
         }
     }
     for ( int i = 0; i < numberOfRolls; i++ ) {
-        shrinkGroupArray( groupsWithRollBySize[i] );
+        shrinkIntArray( groupsWithRollBySize[i] );
     }
     return groupsWithRollBySize;
 }
 
-struct GroupArray** setGroupsWithoutRollBySize( struct GroupArray *groupArray, int numberOfRolls ) {
-
-    struct GroupArray **groupsWithoutRollBySize = malloc( sizeof( struct GroupArray* ) * numberOfRolls );
-
+struct IntArray** setGroupsWithoutRollBySize( struct IntArray **groupsWithoutRollBySize, struct IntArray *groupArray, int numberOfRolls ) {
     for ( int i = 0; i < numberOfRolls; i++ ) {
-        groupsWithoutRollBySize[i] = createGroupArray( groupArray->size / numberOfRolls, 0, 1.1 );
+        groupsWithoutRollBySize[i] = createIntArray( groupArray->size / numberOfRolls, 0, 1.1 );
     }
 
     unsigned int bitMask = ( 1 << ( numberOfRolls + 1 ) ) - 1;
     for ( int i = 0; i < groupArray->size; i++ ) {
-        struct Group *group = &groupArray->content[i];
-        group->rolls ^= bitMask;
+        unsigned int group = groupArray->content[i];
+        group ^= bitMask;
         for ( int j = 0; j < numberOfRolls; j++ ) {
-            if ( group->rolls >> j & 1 ) {
-                groupsWithoutRollBySize[j] = addToGroupArray( groupsWithoutRollBySize[j], *group );
+            if ( group >> j & 1 ) {
+                groupsWithoutRollBySize[j] = addToIntArray( groupsWithoutRollBySize[j], group );
                 break;
             }   
         }
     }
     for ( int i = 0; i < numberOfRolls; i++ ) {
-        shrinkGroupArray( groupsWithoutRollBySize[i] );
+        shrinkIntArray( groupsWithoutRollBySize[i] );
     }
     return groupsWithoutRollBySize;
 }
