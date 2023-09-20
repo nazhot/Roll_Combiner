@@ -6,6 +6,7 @@
 #include <math.h>
 #include <locale.h>
 #include "fileReaders.h"
+#include "group.h"
 #include "smallArray.h"
 #include "intArray.h"
 #include "testMethods.h"
@@ -217,9 +218,6 @@ int main( int argc, char* argv[] ) {
     printf( "Maximum number of groups to make an order: %i\n", orderStats->maxGroupsPerOrder );
     printf( "Generating list of groups..." );
 
-    struct IntArray *groupArray            = createIntArray( 500000, 0, 2 ); 
-    struct IntArray **groupsWithRollBySize = malloc( sizeof( struct IntArray* ) * orderStats->numberOfRolls );
-    //struct IntArray **groupsWithoutRollBySize = malloc( sizeof( struct IntArray* ) * orderStats->numberOfRolls );
     int              *ordersWithRoll = malloc( sizeof( int ) * orderStats->numberOfRolls );
 
     for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
@@ -230,8 +228,8 @@ int main( int argc, char* argv[] ) {
     clock_t start = clock(), diff; 
     setNumGroupsPerRoll( orderStats );
     sortRollsByNumGroups( orderStats );
-    groupArray           = setGroupArray( orderStats, groupArray );
-    groupsWithRollBySize = setGroupsWithRollBySize( groupsWithRollBySize, groupArray, minLengthOfEachRoll, orderStats->numberOfRolls );
+    struct GroupArray *groupArray = setGroupArray( orderStats );
+    struct GroupArray **groupsWithRollBySize = setGroupsWithRollBySize( groupArray, orderStats->numberOfRolls );
     //groupsWithoutRollBySize = setGroupsWithoutRollBySize( groupsWithoutRollBySize, groupArray, orderStats->numberOfRolls);
 
     printf( "Done!\nFound %'d groups\nGenerating potential orders...", groupArray->length );
@@ -253,7 +251,7 @@ int main( int argc, char* argv[] ) {
     for ( int i = 0; i < orderStats->numberOfRolls; ++i ) {
         printf(" Starting solving for index %i\n", i );
         for ( int j = 0; j < groupsWithRollBySize[i]->length; ++j ) {
-            unsigned int group = groupsWithRollBySize[i]->content[j];
+            unsigned int group = groupsWithRollBySize[i]->content[j].rolls;
 
             recursiveSolve( group, i, 1, groupsWithRollBySize, orderStats, alreadyFound, &numFound, orderStats->numberOfPotentialOrders, ordersWithRoll, &ordersWithRollBitMask );
         }
@@ -267,9 +265,9 @@ int main( int argc, char* argv[] ) {
     printf( "Completed total program, took %i seconds, %i millis\n", msec/1000, msec%1000 );
 
     fclose( g_outputFile );
-    freeIntArray( groupArray );
+    freeGroupArray( groupArray );
     for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
-        freeIntArray( groupsWithRollBySize[i] );
+        freeGroupArray( groupsWithRollBySize[i] );
     }
 
     free( orderStats->rollList );

@@ -4,6 +4,8 @@
 struct Group {
     unsigned int rolls;
     float length;
+    int lastNonRollIndex: 4;
+    int firstNonRollIndex: 4;
 };
 
 struct GroupArray {
@@ -12,12 +14,12 @@ struct GroupArray {
     int length;
     int sizeAddConstant;
     float sizeAddMultiplier;
-    int lastNonRollIndex: 4;
-    int firstNonRollIndex: 4;
 };
 
 struct GroupArray* createGroupArray( int arraySize, int sizeAddConstant, float sizeAddMultiplier );
-struct GroupArray* addToGroupArray( struct GroupArray* groupArray, struct Group toAdd ); 
-struct GroupArray* shrinkGroupArray( struct GroupArray* groupArray );
+struct GroupArray* addToGroupArray( struct GroupArray *groupArray, struct Group toAdd ); 
+void addToGroupArrayNoResize( struct GroupArray *groupArray, struct Group toAdd );
+struct GroupArray* shrinkGroupArray( struct GroupArray *groupArray );
+void freeGroupArray( struct GroupArray *groupArray );
 
 #endif

@@ -46,7 +46,7 @@ struct GroupArray* addToGroupArray( struct GroupArray *groupArray, struct Group 
     return groupArray;
 }
 
-void addToGroupArrayNoResize( struct GroupArray *groupArray, const struct Group toAdd ) {
+void addToGroupArrayNoResize( struct GroupArray *groupArray, struct Group toAdd ) {
     groupArray->content[groupArray->length] = toAdd;
     groupArray->length++;
 }
