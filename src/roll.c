@@ -151,14 +151,14 @@ void sortRollsByNumGroups( struct OrderStats *orderStats ) {
 
 struct IntArray** setGroupsWithRollBySize( struct IntArray **groupsWithRollBySize, struct IntArray *groupArray, float *minLengths, int numberOfRolls ) {
     for ( int i = 0; i < numberOfRolls; i++ ) {
-        groupsWithRollBySize[i] = createIntArray( groupArray->size / numberOfRolls, 0, 1.1 );
+        groupsWithRollBySize[i] = createIntArray( groupArray->size, 0, 1.1 );
     }
 
     for ( int i = 0; i < groupArray->size; i++ ) {
         unsigned int group = groupArray->content[i];
         for ( int j = 0; j < numberOfRolls; j++ ) {
             if ( group >> j & 1 ) {
-                groupsWithRollBySize[j] = addToIntArray( groupsWithRollBySize[j], group );
+                addToIntArrayNoResize( groupsWithRollBySize[j], group );
                 break;
             }   
         }

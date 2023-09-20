@@ -14,7 +14,7 @@ void recursiveSolve( const unsigned int currentGroup, const int currentArrayInde
 
     setSmallArrayValue( alreadyFound, currentGroup );
 
-    if ( numGroupsInOrder >= orderStats->minGroupsPerOrder ) {
+    if ( numGroupsInOrder >= orderStats->minGroupsPerOrder && __builtin_popcount( currentGroup ) >= orderStats->minRollsPerOrder ) {
         const float currentLength = rollsLength( currentGroup, orderStats->numberOfRolls, orderStats->rollList );
         if ( currentLength >= orderStats->minOrderLength && currentLength <= orderStats->maxOrderLength ) {
             *numFound += 1;
