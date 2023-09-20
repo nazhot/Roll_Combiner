@@ -14,7 +14,7 @@ struct SmallArray* createSmallArray( const int size ) {
     int32_t *array = ( int32_t* ) malloc( 4 * convertedSize );
     if ( array == NULL ) {
         printf( "Could not allocate SmallArray of that size!\n" );
-        return NULL;
+        exit( 1 );
     }
     for ( int i = 0; i < convertedSize; i++ ){
         array[i] = 0;

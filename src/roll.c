@@ -22,7 +22,7 @@ static int dscRollSortByNumGroups( const void *roll1, const void *roll2 ) {
     return r2->numGroups - r1->numGroups;
 }
 
-static unsigned nextSetOfNBits( unsigned x ) {
+static unsigned nextSetOfNBits( const unsigned x ) {
     unsigned smallest, ripple, new_smallest, ones;
 
     if ( x == 0 ) return 0;
