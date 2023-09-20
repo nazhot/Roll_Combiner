@@ -4,13 +4,14 @@
 #include "roll.h"
 #include "fileReaders.h"
 
-void readRollFileIntoOrderStats( char *rollFilePath, struct OrderStats *orderStats ) {
+struct OrderStats* readRollFile( char *rollFilePath ) {
            FILE *p_rollFile;
            int   maxNumberOfRolls  = sizeof(int) * 8 ;
            int   maxFileLineLength = 100;
            char  fileLine[maxFileLineLength];
     struct Roll *rollList = malloc( sizeof( struct Roll ) * maxNumberOfRolls );
            int   numberOfRolls = 0;
+    struct OrderStats *orderStats = malloc( sizeof( struct OrderStats ) );
 
     p_rollFile = fopen( rollFilePath, "r" );
 
@@ -46,4 +47,5 @@ void readRollFileIntoOrderStats( char *rollFilePath, struct OrderStats *orderSta
 
     orderStats->rollList = rollList;
     orderStats->numberOfRolls = numberOfRolls;
+    return orderStats;
 }

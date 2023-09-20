@@ -2,7 +2,6 @@
 #define FILE_READERS_H_
 #include "roll.h"
 
-void readRollFileIntoOrderStats( char *rollFilePath, struct OrderStats *orderStats );
-
+struct OrderStats* readRollFile( char *rollFilePath );
 
 #endif

@@ -149,7 +149,7 @@ void sortRollsByNumGroups( struct OrderStats *orderStats ) {
     qsort( orderStats->rollList, orderStats->numberOfRolls, sizeof( struct Roll ), dscRollSortByNumGroups );
 }
 
-struct IntArray** setGroupsWithRollBySize( struct IntArray **groupsWithRollBySize, struct IntArray *groupArray, int numberOfRolls ) {
+struct IntArray** setGroupsWithRollBySize( struct IntArray **groupsWithRollBySize, struct IntArray *groupArray, float *minLengths, int numberOfRolls ) {
     for ( int i = 0; i < numberOfRolls; i++ ) {
         groupsWithRollBySize[i] = createIntArray( groupArray->size / numberOfRolls, 0, 1.1 );
     }

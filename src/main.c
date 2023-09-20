@@ -195,8 +195,8 @@ int main( int argc, char* argv[] ) {
     fputs( "Id,Length,Number of Groups,Number of Rolls,Order Groups,Remaining Rolls,Average Remaining Roll Length\n", g_outputFile );
     char *fileName = argv[1];
 
-    struct OrderStats *orderStats = malloc( sizeof( struct OrderStats ) );
-    readRollFileIntoOrderStats( fileName, orderStats );
+    struct OrderStats *orderStats = readRollFile( fileName );
+    float *minLengthOfEachRoll = malloc( sizeof( float ) * orderStats->numberOfRolls );
 
     orderStats->minOrderLength   = 1800;
     orderStats->maxOrderLength   = 2000;
@@ -224,13 +224,14 @@ int main( int argc, char* argv[] ) {
 
     for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
         ordersWithRoll[i] = 0;
+        minLengthOfEachRoll[i] = INT32_MAX * 1.0;
     }
     
     clock_t start = clock(), diff; 
     setNumGroupsPerRoll( orderStats );
     sortRollsByNumGroups( orderStats );
     groupArray           = setGroupArray( orderStats, groupArray );
-    groupsWithRollBySize = setGroupsWithRollBySize( groupsWithRollBySize, groupArray, orderStats->numberOfRolls );
+    groupsWithRollBySize = setGroupsWithRollBySize( groupsWithRollBySize, groupArray, minLengthOfEachRoll, orderStats->numberOfRolls );
     //groupsWithoutRollBySize = setGroupsWithoutRollBySize( groupsWithoutRollBySize, groupArray, orderStats->numberOfRolls);
 
     printf( "Done!\nFound %'d groups\nGenerating potential orders...", groupArray->length );
