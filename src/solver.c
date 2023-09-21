@@ -79,9 +79,8 @@ void orderSolve( struct IntArray **groupsWithRoll, struct OrderStats *orderStats
     struct SmallArray *alreadyFound = createSmallArray( alreadyFoundSize );
 
     for ( int i = 0; i < orderStats->numberOfRolls; ++i ) {
-        printf(" Starting solving for index %i\n", i );
         for ( int j = 0; j < groupsWithRoll[i]->length; ++j ) {
-            unsigned int group = groupsWithRoll[i]->content[j];
+            const unsigned int group = groupsWithRoll[i]->content[j];
             recursiveSolve( group, i, 1, groupsWithRoll, orderStats, alreadyFound, &numFound, ordersWithRoll, &ordersWithRollBitMask );
         }
     }
