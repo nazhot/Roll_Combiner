@@ -217,8 +217,6 @@ int main( int argc, char* argv[] ) {
     printf( "Maximum number of groups to make an order: %i\n", orderStats->maxGroupsPerOrder );
     printf( "Generating list of groups..." );
 
-    struct IntArray *groupArray            = createIntArray( 500000, 0, 2 ); 
-    struct IntArray **groupsWithRollBySize = malloc( sizeof( struct IntArray* ) * orderStats->numberOfRolls );
     //struct IntArray **groupsWithoutRollBySize = malloc( sizeof( struct IntArray* ) * orderStats->numberOfRolls );
     int              *ordersWithRoll = malloc( sizeof( int ) * orderStats->numberOfRolls );
 
@@ -230,11 +228,10 @@ int main( int argc, char* argv[] ) {
     clock_t start = clock(), diff; 
     setNumGroupsPerRoll( orderStats );
     sortRollsByNumGroups( orderStats );
-    groupArray           = setGroupArray( orderStats, groupArray );
-    groupsWithRollBySize = setGroupsWithRollBySize( groupsWithRollBySize, groupArray, minLengthOfEachRoll, orderStats->numberOfRolls );
+    struct IntArray **groupsWithRollBySize = getGroupsWithRollBySize( orderStats );
     //groupsWithoutRollBySize = setGroupsWithoutRollBySize( groupsWithoutRollBySize, groupArray, orderStats->numberOfRolls);
 
-    printf( "Done!\nFound %'d groups\nGenerating potential orders...", groupArray->length );
+    printf( "Done!\nFound %'d groups\nGenerating potential orders...", orderStats->numberOfGroups );
     fflush( stdout );
 
     orderStats->numberOfPotentialOrders = getPotentialOrders( orderStats, ordersWithRoll );
@@ -263,7 +260,6 @@ int main( int argc, char* argv[] ) {
     printf( "Completed total program, took %i seconds, %i millis\n", msec/1000, msec%1000 );
 
     fclose( g_outputFile );
-    freeIntArray( groupArray );
     for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
         freeIntArray( groupsWithRollBySize[i] );
     }

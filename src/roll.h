@@ -28,6 +28,7 @@ struct OrderStats {
 
     struct Roll *rollList;
     int numberOfRolls;
+    int numberOfGroups;
     int numberOfPotentialOrders;
 };
 
@@ -39,7 +40,7 @@ void setMinMaxRollStats( struct OrderStats *orderStats );
 struct IntArray* setGroupArray( struct OrderStats *orderStats, struct IntArray *groupArray );
 void setNumGroupsPerRoll( struct OrderStats *orderStats );
 void sortRollsByNumGroups( struct OrderStats *orderStats );
-struct IntArray** setGroupsWithRollBySize( struct IntArray **groupsWithRollBySize, struct IntArray *groupArray, float *minLengths, int numberOfRolls );
+struct IntArray** getGroupsWithRollBySize( struct OrderStats *orderStats );
 struct IntArray** setGroupsWithoutRollBySize( struct IntArray **groupsWithoutRollBySize, struct IntArray *groupArray, int numberOfRolls );
 int getPotentialOrders( struct OrderStats *orderStats, int *ordersWithRoll );
 
