@@ -6,7 +6,7 @@
 #include "solver.h"
 
 
-static void recursiveSolve( const unsigned int currentGroup, const int currentArrayIndex, const int numGroupsInOrder, struct IntArray **groupsWithRoll, struct OrderStats *orderStats, struct SmallArray *alreadyFound, int *numFound, const int numPotentialOrders, int *ordersWithRoll, int *ordersWithRollBitMask ) {
+static void recursiveSolve( const unsigned int currentGroup, const int currentArrayIndex, const int numGroupsInOrder, struct IntArray **groupsWithRoll, struct OrderStats *orderStats, struct SmallArray *alreadyFound, int *numFound, int *ordersWithRoll, int *ordersWithRollBitMask ) {
     //Id, Length, Number of Groups, Number of Rolls, Order Groups,Remaining Rolls, Average Remaining Roll Length
     if ( currentGroup & *ordersWithRollBitMask || getSmallArrayValue( alreadyFound, currentGroup ) ) {
         return;
@@ -24,7 +24,7 @@ static void recursiveSolve( const unsigned int currentGroup, const int currentAr
                     *ordersWithRollBitMask |= 1 << i; //|= to guard against this happening multiple times, which it will everytime a new order is found when ordersWithRoll[i] is already 0
                 }
             }
-            printf( "\rOrders found: %'i/%'i (%.2f%%)", *numFound, numPotentialOrders, *numFound * 1.0 / numPotentialOrders * 100 );
+            printf( "\rOrders found: %'i/%'i (%.2f%%)", *numFound, orderStats->numberOfPotentialOrders, *numFound * 1.0 / orderStats->numberOfPotentialOrders * 100 );
             fflush( stdout );
         }
         if ( currentLength + orderStats->minGroupLength > orderStats->maxOrderLength ) {
@@ -58,7 +58,7 @@ static void recursiveSolve( const unsigned int currentGroup, const int currentAr
             if ( currentGroup & newGroupsWithRoll[i]->content[j] ) { //could include || groupsWithRoll[i]->content[j] & *ordersWithRollBitMask, but this would only happen if that bitmask
                 continue;                                            //changes during the run, since it is already checked before
             }
-            recursiveSolve( currentGroup | newGroupsWithRoll[i]->content[j], i, numGroupsInOrder + 1, newGroupsWithRoll, orderStats, alreadyFound, numFound, numPotentialOrders, ordersWithRoll, ordersWithRollBitMask );
+            recursiveSolve( currentGroup | newGroupsWithRoll[i]->content[j], i, numGroupsInOrder + 1, newGroupsWithRoll, orderStats, alreadyFound, numFound, ordersWithRoll, ordersWithRollBitMask );
         }
     }
 
@@ -82,7 +82,7 @@ void orderSolve( struct IntArray **groupsWithRoll, struct OrderStats *orderStats
         printf(" Starting solving for index %i\n", i );
         for ( int j = 0; j < groupsWithRoll[i]->length; ++j ) {
             unsigned int group = groupsWithRoll[i]->content[j];
-            recursiveSolve( group, i, 1, groupsWithRoll, orderStats, alreadyFound, &numFound, orderStats->numberOfPotentialOrders, ordersWithRoll, &ordersWithRollBitMask );
+            recursiveSolve( group, i, 1, groupsWithRoll, orderStats, alreadyFound, &numFound, ordersWithRoll, &ordersWithRollBitMask );
         }
     }
 
