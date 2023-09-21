@@ -6,7 +6,7 @@
 #include "solver.h"
 
 
-void recursiveSolve( const unsigned int currentGroup, const int currentArrayIndex, const int numGroupsInOrder, struct IntArray **groupsWithRoll, struct OrderStats *orderStats, struct SmallArray *alreadyFound, int *numFound, const int numPotentialOrders, int *ordersWithRoll, int *ordersWithRollBitMask ) {
+static void recursiveSolve( const unsigned int currentGroup, const int currentArrayIndex, const int numGroupsInOrder, struct IntArray **groupsWithRoll, struct OrderStats *orderStats, struct SmallArray *alreadyFound, int *numFound, const int numPotentialOrders, int *ordersWithRoll, int *ordersWithRollBitMask ) {
     //Id, Length, Number of Groups, Number of Rolls, Order Groups,Remaining Rolls, Average Remaining Roll Length
     if ( currentGroup & *ordersWithRollBitMask || getSmallArrayValue( alreadyFound, currentGroup ) ) {
         return;
@@ -69,4 +69,21 @@ void recursiveSolve( const unsigned int currentGroup, const int currentArrayInde
         freeIntArray( newGroupsWithRoll[i] );
     }
     free( newGroupsWithRoll );
+}
+
+
+void orderSolve( struct IntArray **groupsWithRoll, struct OrderStats *orderStats, int *ordersWithRoll ) {
+    int numFound = 0;
+    int ordersWithRollBitMask = 0;
+    int alreadyFoundSize = 1 << orderStats->numberOfRolls;
+    struct SmallArray *alreadyFound = createSmallArray( alreadyFoundSize );
+
+    for ( int i = 0; i < orderStats->numberOfRolls; ++i ) {
+        printf(" Starting solving for index %i\n", i );
+        for ( int j = 0; j < groupsWithRoll[i]->length; ++j ) {
+            unsigned int group = groupsWithRoll[i]->content[j];
+            recursiveSolve( group, i, 1, groupsWithRoll, orderStats, alreadyFound, &numFound, orderStats->numberOfPotentialOrders, ordersWithRoll, &ordersWithRollBitMask );
+        }
+    }
+
 }

@@ -244,20 +244,16 @@ int main( int argc, char* argv[] ) {
         printf( "%i: %i\n", i, ordersWithRoll[i] );
     }
 
-    int numFound = 0;
-    int ordersWithRollBitMask = 0;
-    int alreadyFoundSize = 1 << orderStats->numberOfRolls;
-    struct SmallArray *alreadyFound = createSmallArray( alreadyFoundSize );
 
     int recursiveStart = clock();
-    for ( int i = 0; i < orderStats->numberOfRolls; ++i ) {
-        printf(" Starting solving for index %i\n", i );
-        for ( int j = 0; j < groupsWithRollBySize[i]->length; ++j ) {
-            unsigned int group = groupsWithRollBySize[i]->content[j];
-
-            recursiveSolve( group, i, 1, groupsWithRollBySize, orderStats, alreadyFound, &numFound, orderStats->numberOfPotentialOrders, ordersWithRoll, &ordersWithRollBitMask );
-        }
-    }
+    orderSolve( groupsWithRollBySize, orderStats, ordersWithRoll );
+//    for ( int i = 0; i < orderStats->numberOfRolls; ++i ) {
+//        printf(" Starting solving for index %i\n", i );
+//        for ( int j = 0; j < groupsWithRollBySize[i]->length; ++j ) {
+//            unsigned int group = groupsWithRollBySize[i]->content[j];
+//            recursiveSolve( group, i, 1, groupsWithRollBySize, orderStats, alreadyFound, &numFound, orderStats->numberOfPotentialOrders, ordersWithRoll, &ordersWithRollBitMask );
+//        }
+//    }
     int recursiveDiff = clock() - recursiveStart;
     int recursiveMsec = recursiveDiff * 1000 / CLOCKS_PER_SEC;
     printf( "Completed recursive loop, took %i seconds, %i millis\n", recursiveMsec/1000, recursiveMsec%1000 );
