@@ -191,12 +191,11 @@ int main( int argc, char* argv[] ) {
     }
     setlocale(LC_NUMERIC, "");
 
-    g_outputFile = fopen( "outputs/output.csv", "w" );
-    fputs( "Id,Length,Number of Groups,Number of Rolls,Order Groups,Remaining Rolls,Average Remaining Roll Length\n", g_outputFile );
+    //g_outputFile = fopen( "outputs/output.csv", "w" );
+    //fputs( "Id,Length,Number of Groups,Number of Rolls,Order Groups,Remaining Rolls,Average Remaining Roll Length\n", g_outputFile );
     char *fileName = argv[1];
 
     struct OrderStats *orderStats = readRollFile( fileName );
-    float *minLengthOfEachRoll = malloc( sizeof( float ) * orderStats->numberOfRolls );
 
     orderStats->minOrderLength   = 1800;
     orderStats->maxOrderLength   = 2000;
@@ -216,31 +215,17 @@ int main( int argc, char* argv[] ) {
     printf( "Minimum number of groups to make an order: %i\n", orderStats->minGroupsPerOrder );
     printf( "Maximum number of groups to make an order: %i\n", orderStats->maxGroupsPerOrder );
     printf( "Generating list of groups..." );
-
-    //struct IntArray **groupsWithoutRollBySize = malloc( sizeof( struct IntArray* ) * orderStats->numberOfRolls );
-    int              *ordersWithRoll = malloc( sizeof( int ) * orderStats->numberOfRolls );
-
-    for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
-        ordersWithRoll[i] = 0;
-        minLengthOfEachRoll[i] = INT32_MAX * 1.0;
-    }
     
     clock_t start = clock(), diff; 
     setNumGroupsPerRoll( orderStats );
     sortRollsByNumGroups( orderStats );
     struct IntArray **groupsWithRollBySize = getGroupsWithRollBySize( orderStats );
-    //groupsWithoutRollBySize = setGroupsWithoutRollBySize( groupsWithoutRollBySize, groupArray, orderStats->numberOfRolls);
 
     printf( "Done!\nFound %'d groups\nGenerating potential orders...", orderStats->numberOfGroups );
     fflush( stdout );
 
-    orderStats->numberOfPotentialOrders = getPotentialOrders( orderStats, ordersWithRoll );
+    int *ordersWithRoll = getOrdersWithRoll( orderStats );
     printf( "Done!\nFound %'d potential orders\n", orderStats->numberOfPotentialOrders );
-    puts( "Orders with Roll" );
-    for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
-        printf( "%i: %i\n", i, ordersWithRoll[i] );
-    }
-
 
     int recursiveStart = clock();
     orderSolve( groupsWithRollBySize, orderStats, ordersWithRoll );
@@ -259,7 +244,7 @@ int main( int argc, char* argv[] ) {
     int msec = diff * 1000 / CLOCKS_PER_SEC;
     printf( "Completed total program, took %i seconds, %i millis\n", msec/1000, msec%1000 );
 
-    fclose( g_outputFile );
+    //fclose( g_outputFile );
     for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
         freeIntArray( groupsWithRollBySize[i] );
     }

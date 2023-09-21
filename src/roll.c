@@ -65,9 +65,6 @@ void printRollsFromInt(  unsigned int integer, int numberOfRolls, struct Roll *r
 float rollsLength( const unsigned int num, const int numberOfRolls, struct Roll *rollList ) {
     float totalLength = 0;
     for ( int i = 0; i <= numberOfRolls; i++ ) {
-        //if ( num >> i & 1 ) {
-        //    totalLength += rollList[i].length;
-        //}
         totalLength += ( num >> i & 1 ) * rollList[i].length;
     }
     return totalLength;
@@ -113,10 +110,10 @@ struct IntArray** getGroupsWithRollBySize( struct OrderStats *orderStats ) {
 
     for ( int groupSize = orderStats->minRollsPerGroup; groupSize <= orderStats->maxRollsPerGroup; groupSize++ ) {
         int group         = ( 1 << groupSize ) - 1; //starts at the smallest possible number for a group with groupSize bits set
-        int largestNumber = group << ( orderStats->numberOfRolls - groupSize ); //largest number that could represent a group with groupSize bits set
+        const int largestNumber = group << ( orderStats->numberOfRolls - groupSize ); //largest number that could represent a group with groupSize bits set
 
         do {
-            float groupLength = rollsLength(  group, orderStats->numberOfRolls, orderStats->rollList ); 
+            const float groupLength = rollsLength(  group, orderStats->numberOfRolls, orderStats->rollList ); 
 
             if ( groupLength < orderStats->minGroupLength || groupLength > orderStats->maxGroupLength ) {
                 group = nextSetOfNBits( group );
@@ -143,10 +140,10 @@ struct IntArray** getGroupsWithRollBySize( struct OrderStats *orderStats ) {
 void setNumGroupsPerRoll( struct OrderStats *orderStats ) {
     for ( int groupSize = orderStats->minRollsPerGroup; groupSize <= orderStats->maxRollsPerGroup; groupSize++ ) {
         int group         = ( 1 << groupSize ) - 1; //starts at the smallest possible number for a group with groupSize bits set
-        int largestNumber = group << ( orderStats->numberOfRolls - groupSize ); //largest number that could represent a group with groupSize bits set
+        const int largestNumber = group << ( orderStats->numberOfRolls - groupSize ); //largest number that could represent a group with groupSize bits set
 
         do {
-            float groupLength = rollsLength(  group, orderStats->numberOfRolls, orderStats->rollList ); 
+            const float groupLength = rollsLength(  group, orderStats->numberOfRolls, orderStats->rollList ); 
 
             if ( groupLength < orderStats->minGroupLength || groupLength > orderStats->maxGroupLength ) {
                 group = nextSetOfNBits( group );
@@ -158,7 +155,7 @@ void setNumGroupsPerRoll( struct OrderStats *orderStats ) {
                     orderStats->rollList[i].numGroups++;
                 }
             }
-            group                        = nextSetOfNBits( group );
+            group = nextSetOfNBits( group );
         } while ( group <= largestNumber );
     }
 }
@@ -190,20 +187,26 @@ struct IntArray** setGroupsWithoutRollBySize( struct IntArray **groupsWithoutRol
 }
 
 
-int getPotentialOrders( struct OrderStats *orderStats, int *ordersWithRoll ) {
+int* getOrdersWithRoll( struct OrderStats *orderStats ) {
+    int *ordersWithRoll = malloc( sizeof( int ) * orderStats->numberOfRolls );
     int numPotentialOrders = 0;
-    for ( int orderSize = orderStats->minRollsPerOrder; orderSize <= orderStats->maxRollsPerOrder; orderSize++ ) {
+
+    for ( int i = 0; i < orderStats->numberOfRolls; ++i ) {
+        ordersWithRoll[i] = 0;
+    }
+
+    for ( int orderSize = orderStats->minRollsPerOrder; orderSize <= orderStats->maxRollsPerOrder; ++orderSize ) {
         int order         = ( 1 << orderSize ) - 1;
-        int largestNumber = order << ( orderStats->numberOfRolls - orderSize );
+        const int largestNumber = order << ( orderStats->numberOfRolls - orderSize );
 
         do {
-            float orderLength = rollsLength( order, orderStats->numberOfRolls, orderStats->rollList );
+            const float orderLength = rollsLength( order, orderStats->numberOfRolls, orderStats->rollList );
 
             if ( orderLength < orderStats->minOrderLength || orderLength > orderStats->maxOrderLength ) {
                 order = nextSetOfNBits( order );
                 continue;
             }
-            for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
+            for ( int i = 0; i < orderStats->numberOfRolls; ++i ) {
                 if ( order >> i & 1  ) {
                     ordersWithRoll[i] += 1;
                 }
@@ -212,5 +215,6 @@ int getPotentialOrders( struct OrderStats *orderStats, int *ordersWithRoll ) {
             order = nextSetOfNBits( order );
         } while ( order <= largestNumber );
     }
-    return numPotentialOrders;
+    orderStats->numberOfPotentialOrders = numPotentialOrders;
+    return ordersWithRoll;
 }
