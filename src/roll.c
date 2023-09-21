@@ -164,29 +164,6 @@ void sortRollsByNumGroups( struct OrderStats *orderStats ) {
     qsort( orderStats->rollList, orderStats->numberOfRolls, sizeof( struct Roll ), dscRollSortByNumGroups );
 }
 
-struct IntArray** setGroupsWithoutRollBySize( struct IntArray **groupsWithoutRollBySize, struct IntArray *groupArray, int numberOfRolls ) {
-    for ( int i = 0; i < numberOfRolls; i++ ) {
-        groupsWithoutRollBySize[i] = createIntArray( groupArray->size / numberOfRolls, 0, 1.1 );
-    }
-
-    unsigned int bitMask = ( 1 << ( numberOfRolls + 1 ) ) - 1;
-    for ( int i = 0; i < groupArray->size; i++ ) {
-        unsigned int group = groupArray->content[i];
-        group ^= bitMask;
-        for ( int j = 0; j < numberOfRolls; j++ ) {
-            if ( group >> j & 1 ) {
-                groupsWithoutRollBySize[j] = addToIntArray( groupsWithoutRollBySize[j], group );
-                break;
-            }   
-        }
-    }
-    for ( int i = 0; i < numberOfRolls; i++ ) {
-        shrinkIntArray( groupsWithoutRollBySize[i] );
-    }
-    return groupsWithoutRollBySize;
-}
-
-
 int* getOrdersWithRoll( struct OrderStats *orderStats ) {
     int *ordersWithRoll = malloc( sizeof( int ) * orderStats->numberOfRolls );
     int numPotentialOrders = 0;

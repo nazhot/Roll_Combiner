@@ -175,14 +175,6 @@ FILE *g_outputFile;
 //    free( newGroupsWithRoll );
 //}
 
-void printCheck( char title[], struct check_t *check ) {
-   printf( "--------%s-------\n", title ); 
-   printf( "Time: %i sec, %i msecs\n", check->msecs / 1000, check->msecs % 1000 );
-   printf( "Num checks: %'lu\n", check->numChecks );
-   printf( "Num groups: %'lu\n", check->numGroups );
-}
-
-
 int main( int argc, char* argv[] ) {
 
     if ( argc != 2 ) {
@@ -190,6 +182,7 @@ int main( int argc, char* argv[] ) {
         return 1;
     }
     setlocale(LC_NUMERIC, "");
+    clock_t start = clock(), diff; 
 
     //g_outputFile = fopen( "outputs/output.csv", "w" );
     //fputs( "Id,Length,Number of Groups,Number of Rolls,Order Groups,Remaining Rolls,Average Remaining Roll Length\n", g_outputFile );
@@ -216,7 +209,6 @@ int main( int argc, char* argv[] ) {
     printf( "Maximum number of groups to make an order: %i\n", orderStats->maxGroupsPerOrder );
     printf( "Generating list of groups..." );
     
-    clock_t start = clock(), diff; 
     setNumGroupsPerRoll( orderStats );
     sortRollsByNumGroups( orderStats );
     struct IntArray **groupsWithRollBySize = getGroupsWithRollBySize( orderStats );
@@ -229,13 +221,6 @@ int main( int argc, char* argv[] ) {
 
     int recursiveStart = clock();
     orderSolve( groupsWithRollBySize, orderStats, ordersWithRoll );
-//    for ( int i = 0; i < orderStats->numberOfRolls; ++i ) {
-//        printf(" Starting solving for index %i\n", i );
-//        for ( int j = 0; j < groupsWithRollBySize[i]->length; ++j ) {
-//            unsigned int group = groupsWithRollBySize[i]->content[j];
-//            recursiveSolve( group, i, 1, groupsWithRollBySize, orderStats, alreadyFound, &numFound, orderStats->numberOfPotentialOrders, ordersWithRoll, &ordersWithRollBitMask );
-//        }
-//    }
     int recursiveDiff = clock() - recursiveStart;
     int recursiveMsec = recursiveDiff * 1000 / CLOCKS_PER_SEC;
     printf( "Completed recursive loop, took %i seconds, %i millis\n", recursiveMsec/1000, recursiveMsec%1000 );
