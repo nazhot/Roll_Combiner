@@ -244,33 +244,6 @@ int main( int argc, char* argv[] ) {
         printf( "%i: %i\n", i, ordersWithRoll[i] );
     }
 
-    struct IntArray **validOtherGroups = malloc( sizeof( struct IntArray * ) * groupArray->length );
-
-    int cumGroups = 0;
-    for ( int i = 0; i < orderStats->numberOfRolls; ++i ) {
-        for ( int j = 0; j < groupsWithRollBySize[i]->length; ++j ) {
-            validOtherGroups[cumGroups + j] = createIntArray( groupArray->length - ( cumGroups + j ), 0, 1.1 );
-            const unsigned int group1 = groupsWithRollBySize[i]->content[j];
-            for ( int k = i + 1; k < orderStats->numberOfRolls; ++k ) {
-                if ( group1 >> k & 1 ) {
-                    continue;
-                }
-                for ( int l = 0; l < groupsWithRollBySize[k]->length; ++l ) {
-                    const unsigned int group2 = groupsWithRollBySize[k]->content[l];
-                    if ( group1 & group2 ) {
-                        continue;
-                    }
-                    addToIntArrayNoResize( validOtherGroups[cumGroups + j], group1 | group2 );
-                }
-            }
-            shrinkIntArray( validOtherGroups[cumGroups + j]);
-            if ( cumGroups + j < 400 ) {
-                printf( "Size %i: %i\n", cumGroups + j, validOtherGroups[cumGroups + j]->length );
-            }
-        }
-        cumGroups += groupsWithRollBySize[i]->length;
-    }
-
 
     int recursiveStart = clock();
     orderSolve( groupsWithRollBySize, orderStats, ordersWithRoll );
