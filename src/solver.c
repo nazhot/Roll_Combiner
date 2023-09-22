@@ -31,44 +31,17 @@ static void recursiveSolve( const unsigned int currentGroup, const int currentAr
             return;
         }
     }
-
-    struct IntArray **newGroupsWithRoll = malloc( sizeof( struct IntArray* ) * orderStats->numberOfRolls );
-    for ( int i = currentArrayIndex + 1; i < orderStats->numberOfRolls; ++i ) {
-        if ( currentGroup >> i & 1 || ordersWithRoll[i] == 0) {
-            continue;
-        }
-        newGroupsWithRoll[i] = createIntArray( groupsWithRoll[i]->length, 0, 1.1 ); //will only be smaller than groupsWithRoll[i]->size
-        for ( int j = 0; j < groupsWithRoll[i]->length; ++j ) {
-            if ( currentGroup & groupsWithRoll[i]->content[j] || groupsWithRoll[i]->content[j] & *ordersWithRollBitMask ) {
-                continue;
-            }
-            //bit i will always be set, definition of group being in groupsWithRoll[i]
-            //always trying to fill in the lowest roll number first, and since a group being in groupsWithRoll[i] means no bit < i is set, i is the lowest
-            //newGroupsWithRoll[i] = addToIntArray( newGroupsWithRoll[i], groupsWithRoll[i]->content[j] );
-            addToIntArrayNoResize( newGroupsWithRoll[i], groupsWithRoll[i]->content[j] );
-        }
-        //shrinkIntArray( newGroupsWithRoll[i] );
-    }
-
     for ( int i = currentArrayIndex + 1; i < orderStats->numberOfRolls; ++i ) {
         if ( currentGroup >> i & 1 || ordersWithRoll[i] == 0 ) {
             continue;
         }
-        for ( int j = 0; j < newGroupsWithRoll[i]->length; ++j ) {
-            if ( currentGroup & newGroupsWithRoll[i]->content[j] ) { //could include || groupsWithRoll[i]->content[j] & *ordersWithRollBitMask, but this would only happen if that bitmask
+        for ( int j = 0; j < groupsWithRoll[i]->length; ++j ) {
+            if ( currentGroup & groupsWithRoll[i]->content[j] ) { //could include || groupsWithRoll[i]->content[j] & *ordersWithRollBitMask, but this would only happen if that bitmask
                 continue;                                            //changes during the run, since it is already checked before
             }
-            recursiveSolve( currentGroup | newGroupsWithRoll[i]->content[j], i, numGroupsInOrder + 1, newGroupsWithRoll, orderStats, alreadyFound, numFound, ordersWithRoll, ordersWithRollBitMask );
+            recursiveSolve( currentGroup | groupsWithRoll[i]->content[j], i, numGroupsInOrder + 1, groupsWithRoll, orderStats, alreadyFound, numFound, ordersWithRoll, ordersWithRollBitMask );
         }
     }
-
-    for ( int i = currentArrayIndex + 1; i < orderStats->numberOfRolls; ++i ) {
-        if ( currentGroup >> i & 1 || ordersWithRoll[i] == 0 ) {
-            continue;
-        }
-        freeIntArray( newGroupsWithRoll[i] );
-    }
-    free( newGroupsWithRoll );
 }
 
 static void testRecursiveSolve( const unsigned int currentGroup, const int currentArrayIndex, const int numGroupsInOrder, struct IntArray ***groupsWithRoll, struct OrderStats *orderStats, struct SmallArray *alreadyFound, int *numFound, int *ordersWithRoll, int *ordersWithRollBitMask ) {
