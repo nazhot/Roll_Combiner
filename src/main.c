@@ -213,35 +213,16 @@ int main( int argc, char* argv[] ) {
     sortRollsByNumGroups( orderStats );
     struct IntArray **groupsWithRollBySize = getGroupsWithRollBySize( orderStats );
 
+
     printf( "Done!\nFound %'d groups\nGenerating potential orders...", orderStats->numberOfGroups );
     fflush( stdout );
 
     int *ordersWithRoll = getOrdersWithRoll( orderStats );
     printf( "Done!\nFound %'d potential orders\n", orderStats->numberOfPotentialOrders );
-
-    struct IntArray ***testGroupsWithRoll = malloc( sizeof( struct IntArray* ) * orderStats->numberOfRolls );
-    for ( int i = 0; i < orderStats->numberOfRolls; ++i ) {
-        testGroupsWithRoll[i] = malloc( sizeof( struct IntArray* ) * ( orderStats->numberOfRolls ) );
-        for ( int j = i + 1; j < orderStats->numberOfRolls; ++j ) {
-            testGroupsWithRoll[i][j] = createIntArray( groupsWithRollBySize[i]->length, 0, 1.1 );
-        }
-        for ( int j = 0; j < groupsWithRollBySize[i]->length; ++j ) {
-            unsigned int group = groupsWithRollBySize[i]->content[j];
-            for ( int k = i + 1; k < orderStats->numberOfRolls; ++k ) {
-                if ( group >> k & 1 ) {
-                    addToIntArrayNoResize( testGroupsWithRoll[i][k], group );
-                    break;
-                }
-            }
-        }
-        for ( int j = i + 1; j < orderStats->numberOfRolls; j++ ) {
-            shrinkIntArray( testGroupsWithRoll[i][j] );
-        }
-    }
+    nonRecursiveSolve( groupsWithRollBySize, orderStats, ordersWithRoll );
 
     int recursiveStart = clock();
     orderSolve( groupsWithRollBySize, orderStats, ordersWithRoll );
-    //testOrderSolve( testGroupsWithRoll, orderStats, ordersWithRoll );
     int recursiveDiff = clock() - recursiveStart;
     int recursiveMsec = recursiveDiff * 1000 / CLOCKS_PER_SEC;
     printf( "Completed recursive loop, took %i seconds, %i millis\n", recursiveMsec/1000, recursiveMsec%1000 );

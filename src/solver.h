@@ -3,4 +3,5 @@
 
 void orderSolve( struct IntArray **groupsWithRoll, struct OrderStats *orderStats, int *ordersWithRoll );
 void testOrderSolve( struct IntArray ***groupsWithRoll, struct OrderStats *orderStats, int *ordersWithRoll );
+void nonRecursiveSolve( struct IntArray **groupsWithRoll, struct OrderStats *orderStats, int *ordersWithRoll );
 #endif
