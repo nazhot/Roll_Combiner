@@ -2,4 +2,5 @@
 #define SOLVER_H_
 
 void orderSolve( struct IntArray **groupsWithRoll, struct OrderStats *orderStats, int *ordersWithRoll );
+void testOrderSolve( struct IntArray ***groupsWithRoll, struct OrderStats *orderStats, int *ordersWithRoll );
 #endif
