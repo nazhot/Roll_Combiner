@@ -219,10 +219,10 @@ int main( int argc, char* argv[] ) {
 
     int *ordersWithRoll = getOrdersWithRoll( orderStats );
     printf( "Done!\nFound %'d potential orders\n", orderStats->numberOfPotentialOrders );
-    //nonRecursiveSolve( groupsWithRollBySize, orderStats, ordersWithRoll );
 
     int recursiveStart = clock();
-    orderSolve( groupsWithRollBySize, orderStats, ordersWithRoll );
+    //orderSolve( groupsWithRollBySize, orderStats, ordersWithRoll );
+    nonRecursiveSolve( groupsWithRollBySize, orderStats, ordersWithRoll );
     int recursiveDiff = clock() - recursiveStart;
     int recursiveMsec = recursiveDiff * 1000 / CLOCKS_PER_SEC;
     printf( "Completed recursive loop, took %i seconds, %i millis\n", recursiveMsec/1000, recursiveMsec%1000 );
