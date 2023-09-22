@@ -59,73 +59,48 @@ void orderSolve( struct IntArray **groupsWithRoll, struct OrderStats *orderStats
     }
 }
 
-/*
- * increment an array through all possible numbers up to maxValue
- * array starts at [0, 1, 2, 3, ..., n]
- * array ends at   [maxValue - 3, maxValue - 2, maxValue - 1, maxValue]
- *      array:       array to increment
- *      arrayLength: how long the array is
- *      maxValue:    highest value the final element in the array will go to (inclusive)
-*/
-static int incrementArrayByMaxValues( int array[], int maxValues[], int arrayLength ) {
-    for ( int i = arrayLength - 1; i >= 0; --i ) {
-        if ( array[i] < maxValues[i] ) {
-            array[i] += 1;
-            return 1;
-        }
-        if ( i == 0 ) {
-            return 0;
-        }
-        for ( int j = i - 1; j >= 0; --j ) {
-            if ( array[j] < maxValues[j] ) {
-                array[j] += 1;
-                for ( int k = j + 1; k < arrayLength; ++k ) {
-                    array[k] = 0;
-                }
-                return 1;
-            }
-        }
-    }
-    return 0;
+//currentGroup, currentArrayIndex, numGroupsInOrder
+
+struct StackParameter{
+    unsigned int currentGroup;
+    int currentArrayIndex;
+    int numGroupsInOrder;
+};
+
+struct SolveStack {
+    int capacity;
+    int top;
+    struct StackParameter *content;
+};
+
+static struct SolveStack* createStack( int capacity ) {
+    struct SolveStack *solveStack = malloc( sizeof( struct SolveStack ) );
+    solveStack->capacity = capacity;
+    solveStack->top = -1;
+    solveStack->content = malloc( sizeof( struct StackParameter ) * capacity );
+    return solveStack;
 }
 
-static int incrementArray( int array[], int arrayLength, int maxValue ) {
-    for ( int i = arrayLength - 1; i >= 0; i-- ) {
-        int difference = (arrayLength - 1) - i;
-        if ( array[i] < maxValue - difference ) {
-            array[i] += 1;
-            for ( int j = 1; i + j < arrayLength; j++ ) {
-                array[i + j] = array[i] + j;
-            }
-            return 1;
-        }
+
+static struct StackParameter popStack( struct SolveStack *solveStack ) {
+    if ( solveStack->top == -1 ) {
+        struct StackParameter temp = ( struct StackParameter ) {-1, -1 -1};
+        return temp;
     }
-    return 0;
+    return solveStack->content[solveStack->top--];
+}
+
+static void pushStack( struct SolveStack *solveStack, struct StackParameter stackParameter ) {
+    if ( solveStack->top == solveStack->capacity - 1 ) {
+        return;
+    }
+    solveStack->content[++solveStack->top] = stackParameter;
+}
+
+static int stackIsEmpty( struct SolveStack *solveStack ) {
+    return solveStack->top == -1;
 }
 
 void nonRecursiveSolve( struct IntArray **groupsWithRoll, struct OrderStats *orderStats, int *ordersWithRoll ) {
-
-    for ( int numGroups = orderStats->minGroupsPerOrder; numGroups < orderStats->maxGroupsPerOrder; ++numGroups ) {
-        printf( "Num groups: %i\n", numGroups );
-        int firstRoll[numGroups];
-        int groupStartingWithRoll[numGroups];
-        for ( int i = 0; i < numGroups; ++i ) {
-            firstRoll[i] = i;
-            groupStartingWithRoll[i] = 0;
-        }
-
-        do {
-            int maxValues[numGroups];
-            for ( int i = 0; i < numGroups; ++i ) {
-                maxValues[i] = groupsWithRoll[i]->length - 1;
-            }
-            do {
-
-            } while ( incrementArrayByMaxValues( groupStartingWithRoll, maxValues, numGroups ) );
-        } while( incrementArray( firstRoll, numGroups, orderStats->numberOfRolls - 1 ) );
-
-
-
-    }
 
 }

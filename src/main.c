@@ -219,7 +219,7 @@ int main( int argc, char* argv[] ) {
 
     int *ordersWithRoll = getOrdersWithRoll( orderStats );
     printf( "Done!\nFound %'d potential orders\n", orderStats->numberOfPotentialOrders );
-    nonRecursiveSolve( groupsWithRollBySize, orderStats, ordersWithRoll );
+    //nonRecursiveSolve( groupsWithRollBySize, orderStats, ordersWithRoll );
 
     int recursiveStart = clock();
     orderSolve( groupsWithRollBySize, orderStats, ordersWithRoll );
