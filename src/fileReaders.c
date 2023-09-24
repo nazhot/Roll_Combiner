@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "roll.h"
 #include "fileReaders.h"
 
@@ -47,5 +48,6 @@ struct OrderStats* readRollFile( char *rollFilePath ) {
 
     orderStats->rollList = rollList;
     orderStats->numberOfRolls = numberOfRolls;
+    orderStats->numberOfBytesForRolls = ceil( numberOfRolls / 8.0 );
     return orderStats;
 }

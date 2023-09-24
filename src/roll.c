@@ -69,6 +69,13 @@ float rollsLength( const unsigned int num, const int numberOfRolls, struct Roll 
     return totalLength;
 }
 
+float test_rollsLength( const unsigned int num, float rollLengths[4][256]) {
+    return rollLengths[0][( num >> 0 ) & 255 ] + 
+           rollLengths[1][( num >> 8 ) & 255 ] +
+           rollLengths[2][( num >> 16 ) & 255 ] +
+           rollLengths[3][( num >> 24 ) & 256 ];
+}
+
 void setMinMaxRollStats( struct OrderStats *orderStats ) {
     sortRollsDescending( orderStats->rollList, orderStats->numberOfRolls );
 
@@ -161,6 +168,15 @@ void setNumGroupsPerRoll( struct OrderStats *orderStats ) {
 
 void sortRollsByNumGroups( struct OrderStats *orderStats ) {
     qsort( orderStats->rollList, orderStats->numberOfRolls, sizeof( struct Roll ), dscRollSortByNumGroups );
+}
+
+void setRollLengthsArray( struct OrderStats *orderStats, struct IntArray **groupsWithRoll ) {
+    for ( int i = 0; i < 4; ++i ) {
+        for ( int j = 0; j < 256; j++ ) {
+            unsigned int group = j << ( 8 * i );
+            orderStats->rollLengths[i][j] = rollsLength( group, orderStats->numberOfRolls, orderStats->rollList );
+        }
+    }
 }
 
 int* getOrdersWithRoll( struct OrderStats *orderStats ) {

@@ -27,6 +27,8 @@ struct OrderStats {
     float maxOrderLength;
 
     struct Roll *rollList;
+    float rollLengths[4][256];
+    int numberOfBytesForRolls;
     int numberOfRolls;
     int numberOfGroups;
     int numberOfPotentialOrders;
@@ -36,10 +38,11 @@ void sortRollsAscending( struct Roll* rollList, int numberOfRolls );
 void sortRollsDescending( struct Roll* rollList, int numberOfRolls ); 
 void printRollsFromInt(  unsigned int, int, struct Roll* );
 float rollsLength(  unsigned int, int, struct Roll* );
+float test_rollsLength( const unsigned int num, float rollLengths[4][256]) ;
 void setMinMaxRollStats( struct OrderStats *orderStats );
-struct IntArray* setGroupArray( struct OrderStats *orderStats, struct IntArray *groupArray );
 void setNumGroupsPerRoll( struct OrderStats *orderStats );
 void sortRollsByNumGroups( struct OrderStats *orderStats );
+void setRollLengthsArray( struct OrderStats *orderStats, struct IntArray **groupsWithRoll );
 struct IntArray** getGroupsWithRollBySize( struct OrderStats *orderStats );
 int* getOrdersWithRoll( struct OrderStats *orderStats );
 
