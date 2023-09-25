@@ -48,6 +48,5 @@ struct OrderStats* readRollFile( char *rollFilePath ) {
 
     orderStats->rollList = rollList;
     orderStats->numberOfRolls = numberOfRolls;
-    orderStats->numberOfBytesForRolls = ceil( numberOfRolls / 8.0 );
     return orderStats;
 }
