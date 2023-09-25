@@ -5,6 +5,7 @@
 #include "smallArray.h"
 #include "roll.h"
 #include "solver.h"
+#include <pthread.h>
 
 
 static void recursiveSolve( const unsigned int currentGroup, const int currentArrayIndex, const int numGroupsInOrder, struct IntArray **groupsWithRoll, struct OrderStats *orderStats, struct SmallArray *alreadyFound, int *numFound, int *ordersWithRoll, int *ordersWithRollBitMask ) {
@@ -112,6 +113,10 @@ void nonRecursiveSolve( struct IntArray **groupsWithRoll, struct OrderStats *ord
     struct SmallArray *alreadyFound = createSmallArray( alreadyFoundSize );
     struct SolveStack *solveStack = createStack( 5000000 );
     pushStack( solveStack, ( struct StackParameters ) { 0, -1, 0 } );
+
+    int threadId;
+    pthread_t pThread;
+
 
     while( !stackIsEmpty( solveStack ) ) {
         struct StackParameters parameters = popStack( solveStack );
