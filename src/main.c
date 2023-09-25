@@ -212,7 +212,6 @@ int main( int argc, char* argv[] ) {
     setNumGroupsPerRoll( orderStats );
     sortRollsByNumGroups( orderStats );
     struct IntArray **groupsWithRollBySize = getGroupsWithRollBySize( orderStats );
-    setRollLengthsArray( orderStats, groupsWithRollBySize );
 
     printf( "Done!\nFound %'d groups\nGenerating potential orders...", orderStats->numberOfGroups );
     fflush( stdout );
@@ -236,7 +235,6 @@ int main( int argc, char* argv[] ) {
         freeIntArray( groupsWithRollBySize[i] );
     }
 
-    free( orderStats->rollList );
     free( orderStats );
     free( groupsWithRollBySize );
     free( ordersWithRoll );

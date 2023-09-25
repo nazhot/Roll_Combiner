@@ -64,8 +64,8 @@ void orderSolve( struct IntArray **groupsWithRoll, struct OrderStats *orderStats
 
 struct StackParameters{
     unsigned int currentGroup;
-    int currentArrayIndex;
-    int numGroupsInOrder;
+    int8_t currentArrayIndex;
+    int8_t numGroupsInOrder;
 };
 
 struct SolveStack {
@@ -102,6 +102,8 @@ static void pushStack( struct SolveStack *solveStack, struct StackParameters sta
 static int stackIsEmpty( struct SolveStack *solveStack ) {
     return solveStack->top == -1;
 }
+#pragma GCC push_options
+#pragma GCC optimize("unroll-loops")
 
 void nonRecursiveSolve( struct IntArray **groupsWithRoll, struct OrderStats *orderStats, int *ordersWithRoll ) {
 
@@ -110,14 +112,14 @@ void nonRecursiveSolve( struct IntArray **groupsWithRoll, struct OrderStats *ord
     int alreadyFoundSize = 1 << orderStats->numberOfRolls;
     const int8_t numberOfRolls = orderStats->numberOfRolls;
     struct SmallArray *alreadyFound = createSmallArray( alreadyFoundSize );
-    struct SolveStack *solveStack = createStack( 5000000 );
+    struct SolveStack *solveStack = createStack( 10000000 );
     pushStack( solveStack, ( struct StackParameters ) { 0, -1, 0 } );
 
     while( !stackIsEmpty( solveStack ) ) {
         struct StackParameters parameters = popStack( solveStack );
         const unsigned int currentGroup = parameters.currentGroup;
-        const int currentArrayIndex = parameters.currentArrayIndex;
-        const int numGroupsInOrder = parameters.numGroupsInOrder;
+        const int8_t currentArrayIndex = parameters.currentArrayIndex;
+        const int8_t numGroupsInOrder = parameters.numGroupsInOrder;
 
         if ( currentGroup & ordersWithRollBitMask  ) {
             continue;
@@ -126,10 +128,10 @@ void nonRecursiveSolve( struct IntArray **groupsWithRoll, struct OrderStats *ord
         setSmallArrayValue( alreadyFound, currentGroup );
 
         if ( numGroupsInOrder >= orderStats->minGroupsPerOrder && __builtin_popcount( currentGroup ) >= orderStats->minRollsPerOrder ) {
-            const float currentLength = test_rollsLength( currentGroup, orderStats->rollLengths );
+            const float currentLength = rollsLength( currentGroup, orderStats->numberOfRolls, orderStats->rollList );
             if ( currentLength >= orderStats->minOrderLength && currentLength <= orderStats->maxOrderLength ) {
                 numFound += 1;
-                for ( int i = 0; i < numberOfRolls; ++i ) {
+                for ( int8_t i = 0; i < 32; ++i ) {
                     ordersWithRoll[i] -= ( currentGroup >> i & 1 );
                     if ( ordersWithRoll[i] == 0 ) {
                         ordersWithRollBitMask |= 1 << i; //|= to guard against this happening multiple times, which it will everytime a new order is found when ordersWithRoll[i] is already 0
@@ -142,7 +144,7 @@ void nonRecursiveSolve( struct IntArray **groupsWithRoll, struct OrderStats *ord
                 continue;
             }
         }
-        for ( int i = currentArrayIndex + 1; i < numberOfRolls; ++i ) {
+        for ( int8_t i = currentArrayIndex + 1; i < numberOfRolls; ++i ) {
             if ( currentGroup >> i & 1 || ordersWithRoll[i] == 0 ) {
                 continue;
             }
@@ -153,8 +155,6 @@ void nonRecursiveSolve( struct IntArray **groupsWithRoll, struct OrderStats *ord
                 pushStack( solveStack, ( struct StackParameters ) { currentGroup | groupsWithRoll[i]->content[j], i, numGroupsInOrder + 1} );
             }
         }
-
     }
-
-
 }
+#pragma GCC pop_options
