@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "roll.h"
 #include "fileReaders.h"
 
@@ -9,6 +10,7 @@ struct OrderStats* readRollFile( char *rollFilePath ) {
            int   maxNumberOfRolls  = sizeof(int) * 8 ;
            int   maxFileLineLength = 100;
            char  fileLine[maxFileLineLength];
+    struct Roll *rollList = malloc( sizeof( struct Roll ) * maxNumberOfRolls );
            int   numberOfRolls = 0;
     struct OrderStats *orderStats = malloc( sizeof( struct OrderStats ) );
 
@@ -41,13 +43,11 @@ struct OrderStats* readRollFile( char *rollFilePath ) {
             printf( "You attempted to add more than the maximum allowable rolls (%d)!\nRunning as if you only input %d.\n", maxNumberOfRolls, maxNumberOfRolls );
             break;
         }
-        orderStats->rollList[numberOfRolls++] = roll;
+        rollList[numberOfRolls++] = roll;
     }
 
-    for ( int8_t i = numberOfRolls; i < 32; i++ ) {
-        orderStats->rollList[i] = ( struct Roll ) { "NA", 0, 0};
-    }
-
+    orderStats->rollList = rollList;
     orderStats->numberOfRolls = numberOfRolls;
+    orderStats->numberOfBytesForRolls = ceil( numberOfRolls / 8.0 );
     return orderStats;
 }
