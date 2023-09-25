@@ -61,20 +61,16 @@ void printRollsFromInt(  unsigned int integer, int numberOfRolls, struct Roll *r
  *      num:      number representation of the set of rolls
  *      numRolls: maximum number of bits to check
 */
-float rollsLength( const unsigned int num, const int numberOfRolls, struct Roll *rollList ) {
+#pragma GCC push_options
+#pragma GCC optimize("unroll-loops")
+float rollsLength( const unsigned int num, const int8_t numberOfRolls, struct Roll *rollList ) {
     float totalLength = 0;
-    for ( int i = 0; i <= numberOfRolls; i++ ) {
+    for ( int i = 0; i <= 32; ++i ) {
         totalLength += ( num >> i & 1 ) * rollList[i].length;
     }
     return totalLength;
 }
-
-float test_rollsLength( const unsigned int num, float rollLengths[4][256]) {
-    return rollLengths[0][( num >> 0 ) & 255 ] + 
-           rollLengths[1][( num >> 8 ) & 255 ] +
-           rollLengths[2][( num >> 16 ) & 255 ] +
-           rollLengths[3][( num >> 24 ) & 256 ];
-}
+#pragma GCC pop_options
 
 void setMinMaxRollStats( struct OrderStats *orderStats ) {
     sortRollsDescending( orderStats->rollList, orderStats->numberOfRolls );
@@ -87,7 +83,7 @@ void setMinMaxRollStats( struct OrderStats *orderStats ) {
     float minRollsPerOrderLength = 0;
     float maxRollsPerOrderLength = 0;
 
-    for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
+    for ( int8_t i = 0; i < orderStats->numberOfRolls; i++ ) {
        int minIndex = i;
        int maxIndex = orderStats->numberOfRolls - 1 - i;
        minRollsPerGroupLength += orderStats->rollList[minIndex].length;
@@ -170,20 +166,11 @@ void sortRollsByNumGroups( struct OrderStats *orderStats ) {
     qsort( orderStats->rollList, orderStats->numberOfRolls, sizeof( struct Roll ), dscRollSortByNumGroups );
 }
 
-void setRollLengthsArray( struct OrderStats *orderStats, struct IntArray **groupsWithRoll ) {
-    for ( int i = 0; i < 4; ++i ) {
-        for ( int j = 0; j < 256; j++ ) {
-            unsigned int group = j << ( 8 * i );
-            orderStats->rollLengths[i][j] = rollsLength( group, orderStats->numberOfRolls, orderStats->rollList );
-        }
-    }
-}
-
 int* getOrdersWithRoll( struct OrderStats *orderStats ) {
-    int *ordersWithRoll = malloc( sizeof( int ) * orderStats->numberOfRolls );
+    int *ordersWithRoll = malloc( sizeof( int ) * 32 );
     int numPotentialOrders = 0;
 
-    for ( int i = 0; i < orderStats->numberOfRolls; ++i ) {
+    for ( int i = 0; i < 32; ++i ) {
         ordersWithRoll[i] = 0;
     }
 
