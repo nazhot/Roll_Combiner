@@ -11,6 +11,7 @@
 #include "testMethods.h"
 #include "roll.h"
 #include "solver.h"
+#include <pthread.h>
                       //guarded by strncpy
 #define MAX_NUM_ROLLS 32;
 
@@ -123,7 +124,7 @@ int main( int argc, char* argv[] ) {
     nonRecursiveSolve( groupsWithRollBySize, orderStats, ordersWithRoll );
     int recursiveDiff = clock() - recursiveStart;
     int recursiveMsec = recursiveDiff * 1000 / CLOCKS_PER_SEC;
-    printf( "Completed recursive loop, took %i seconds, %i millis\n", recursiveMsec/1000, recursiveMsec%1000 );
+    printf( "\nCompleted recursive loop, took %i seconds, %i millis\n", recursiveMsec/1000, recursiveMsec%1000 );
 
     diff = clock() - start;
     int msec = diff * 1000 / CLOCKS_PER_SEC;
@@ -138,6 +139,7 @@ int main( int argc, char* argv[] ) {
     free( orderStats );
     free( groupsWithRollBySize );
     free( ordersWithRoll );
+    pthread_exit( NULL );
 
     return 0;
 }
