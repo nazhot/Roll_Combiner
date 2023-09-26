@@ -120,7 +120,6 @@ int main( int argc, char* argv[] ) {
     printf( "Done!\nFound %'d potential orders\n", orderStats->numberOfPotentialOrders );
 
     int recursiveStart = clock();
-    //orderSolve( groupsWithRollBySize, orderStats, ordersWithRoll );
     nonRecursiveSolve( groupsWithRollBySize, orderStats, ordersWithRoll );
     int recursiveDiff = clock() - recursiveStart;
     int recursiveMsec = recursiveDiff * 1000 / CLOCKS_PER_SEC;
