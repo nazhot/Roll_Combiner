@@ -60,10 +60,10 @@ struct ThreadArgs{
     struct IntArray **groupsWithRoll;
     struct OrderStats *orderStats;
     int *ordersWithRoll;
-    int *threadsCompleted;
 };
 
 pthread_mutex_t setSAMutex;
+pthread_mutex_t updateCountMutex;
 
 static void* threadSolve( void *args )  { 
     struct ThreadArgs *threadArgs = ( struct ThreadArgs * ) args;
@@ -76,7 +76,6 @@ static void* threadSolve( void *args )  {
     int *ordersWithRoll = threadArgs->ordersWithRoll;
     int startingGroupIndex = threadArgs->startingGroupIndex;
     int endingGroupIndex = threadArgs->endingGroupIndex;
-
     const int8_t numberOfRolls = orderStats->numberOfRolls;
     struct SolveStack *solveStack = createStack( 500000 );
 
@@ -100,17 +99,17 @@ static void* threadSolve( void *args )  {
             pthread_mutex_unlock( &setSAMutex );
 
             if ( numGroupsInOrder >= orderStats->minGroupsPerOrder && __builtin_popcount( currentGroup ) >= orderStats->minRollsPerOrder ) {
-                const float currentLength = rollsLength( currentGroup, orderStats->numberOfRolls, orderStats->rollList );
+                const float currentLength = rollsLength( currentGroup, numberOfRolls, orderStats->rollList );
                 if ( currentLength >= orderStats->minOrderLength && currentLength <= orderStats->maxOrderLength ) {
-                    pthread_mutex_lock( &setSAMutex );
+                    pthread_mutex_lock( &updateCountMutex );
                     *numFound += 1;
                     for ( int i = 0; i < numberOfRolls; ++i ) {
                         ordersWithRoll[i] -= ( currentGroup >> i & 1 );
                         if ( ordersWithRoll[i] == 0 ) {
-                        *ordersWithRollBitMask |= 1 << i; //|= to guard against this happening multiple times, which it will everytime a new order is found when ordersWithRoll[i] is already 0
+                            *ordersWithRollBitMask |= 1 << i; //|= to guard against this happening multiple times, which it will everytime a new order is found when ordersWithRoll[i] is already 0
                         }
                     }
-                    pthread_mutex_unlock( &setSAMutex );
+                    pthread_mutex_unlock( &updateCountMutex );
                     printf( "\rOrders found: %'i/%'i (%.2f%%)", *numFound, orderStats->numberOfPotentialOrders, *numFound * 1.0 / orderStats->numberOfPotentialOrders * 100 );
                     fflush( stdout );
                 }
@@ -137,7 +136,6 @@ static void* threadSolve( void *args )  {
 
 void nonRecursiveSolve( struct IntArray **groupsWithRoll, struct OrderStats *orderStats, int *ordersWithRoll ) {
     int numFound = 0;
-    int threadsCompleted = 0;
     int ordersWithRollBitMask = 0;
     int alreadyFoundSize = 1 << orderStats->numberOfRolls;
     const int8_t numberOfRolls = orderStats->numberOfRolls;
@@ -145,42 +143,51 @@ void nonRecursiveSolve( struct IntArray **groupsWithRoll, struct OrderStats *ord
     //struct SolveStack *solveStack = createStack( 5000000 );
     //pushStack( solveStack, ( struct StackParameters ) { 0, -1, 0 } );
 
-    pthread_t threadIds[numberOfRolls];
 
     if ( pthread_mutex_init( &setSAMutex, NULL ) != 0 ) { 
-        puts( "Failed to initialize mutex" );
+        puts( "Failed to initialize 'Set SmallArray' mutex" );
+        exit(1);
+    }
+    if ( pthread_mutex_init( &updateCountMutex, NULL ) != 0 ) { 
+        puts( "Failed to initialize 'Update Count' mutex" );
         exit(1);
     }
 
     int threadErrorCode;
     int numGroupsAtOneTime = 10000;
+    pthread_t threadIds[( int ) ceil( orderStats->numberOfGroups * 1.0 / numGroupsAtOneTime ) + numberOfRolls]; //minimum number of threads is numberOfRolls
+                                                                                                                //the actual number should be much closer to the first expression
+                                                                                                                //numberOfRolls is to guard against weight edge cases/configurations
+    int numberOfThreads = 0;
+    int threadIdSize = ( int ) ceil( orderStats->numberOfGroups * 1.0 / numGroupsAtOneTime ) + numberOfRolls;
 
     for ( int8_t i = 0; i < numberOfRolls; i++ ) {
-        for ( int j = 0; j < ceil( groupsWithRoll[i]->length * 1.0 / numGroupsAtOneTime ); ++j ) {
+        //for ( int j = 0; j < ceil( groupsWithRoll[i]->length * 1.0 / numGroupsAtOneTime ); ++j ) {
 
 
             //rc = pthread_create( &threadIds[i], 
             struct ThreadArgs *threadArgs = malloc( sizeof( struct ThreadArgs ) );
             threadArgs->firstRoll = i;
-            threadArgs->numFound = &numFound;
+            threadArgs->numFound = &numFound;;
             threadArgs->ordersWithRollBitMask = &ordersWithRollBitMask;
             threadArgs->alreadyFound = alreadyFound;
             threadArgs->groupsWithRoll = groupsWithRoll;
             threadArgs->orderStats = orderStats;
             threadArgs->ordersWithRoll = ordersWithRoll;
-            threadArgs->threadsCompleted = &threadsCompleted;
-            threadArgs->startingGroupIndex = j * numGroupsAtOneTime;
-            threadArgs->endingGroupIndex = fmin( ( j + 1 ) * numGroupsAtOneTime, groupsWithRoll[i]->length );
+            threadArgs->startingGroupIndex = 0; //j * numGroupsAtOneTime;
+            threadArgs->endingGroupIndex = groupsWithRoll[i]->length; //fmin( ( j + 1 ) * numGroupsAtOneTime, groupsWithRoll[i]->length );
 
-            threadErrorCode = pthread_create( &threadIds[i], NULL, threadSolve, ( void * ) threadArgs );
+            threadErrorCode = pthread_create( &threadIds[numberOfThreads++], NULL, threadSolve, ( void * ) threadArgs );
             if ( threadErrorCode ) {
                 printf("\n ERROR: return code from pthread_create is %d \n", threadErrorCode );
                 exit(1);
             }
-        }
+        //}
     }
 
-    for ( int i = 0; i < numberOfRolls; ++i ) {
+    printf( "Number of threads: %i, array size: %i\n", numberOfThreads, threadIdSize );
+
+    for ( int i = 0; i < numberOfThreads; ++i ) {
         pthread_join( threadIds[i], NULL );
     }
 
