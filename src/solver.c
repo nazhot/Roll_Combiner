@@ -7,6 +7,7 @@
 #include "solver.h"
 #include <pthread.h>
 #include <time.h>
+#include <math.h>
 
 struct StackParameters{
     unsigned int currentGroup;
@@ -50,7 +51,9 @@ static int stackIsEmpty( struct SolveStack *solveStack ) {
 }
 
 struct ThreadArgs{
-    int8_t startingIndex;
+    int8_t firstRoll;
+    int startingGroupIndex;
+    int endingGroupIndex;
     int *numFound;
     int *ordersWithRollBitMask;
     struct SmallArray *alreadyFound;
@@ -64,20 +67,20 @@ pthread_mutex_t setSAMutex;
 
 static void* threadSolve( void *args )  { 
     struct ThreadArgs *threadArgs = ( struct ThreadArgs * ) args;
-    int8_t startingIndex = threadArgs->startingIndex;
+    int8_t startingIndex = threadArgs->firstRoll;
     int *numFound = threadArgs->numFound;
     int *ordersWithRollBitMask = threadArgs->ordersWithRollBitMask;
     struct SmallArray *alreadyFound = threadArgs->alreadyFound;
     struct IntArray **groupsWithRoll = threadArgs->groupsWithRoll;
     struct OrderStats *orderStats = threadArgs->orderStats;
     int *ordersWithRoll = threadArgs->ordersWithRoll;
-
-    printf( "Starting thread %i\n", startingIndex );
+    int startingGroupIndex = threadArgs->startingGroupIndex;
+    int endingGroupIndex = threadArgs->endingGroupIndex;
 
     const int8_t numberOfRolls = orderStats->numberOfRolls;
     struct SolveStack *solveStack = createStack( 500000 );
 
-    for ( int groupNumber = 0; groupNumber < groupsWithRoll[startingIndex]->length; ++groupNumber ) {
+    for ( int groupNumber = startingGroupIndex; groupNumber < endingGroupIndex; ++groupNumber ) {
 
         unsigned int startingGroup = groupsWithRoll[startingIndex]->content[groupNumber];
 
@@ -128,6 +131,7 @@ static void* threadSolve( void *args )  {
             }
         }
     }
+    printf( "Completed thread %i\n", startingIndex );
     pthread_exit( NULL );
 }
 
@@ -149,29 +153,37 @@ void nonRecursiveSolve( struct IntArray **groupsWithRoll, struct OrderStats *ord
     }
 
     int threadErrorCode;
+    int numGroupsAtOneTime = 10000;
 
     for ( int8_t i = 0; i < numberOfRolls; i++ ) {
-        //rc = pthread_create( &threadIds[i], 
-        struct ThreadArgs *threadArgs = malloc( sizeof( struct ThreadArgs ) );
-        threadArgs->startingIndex = i;
-        threadArgs->numFound = &numFound;
-        threadArgs->ordersWithRollBitMask = &ordersWithRollBitMask;
-        threadArgs->alreadyFound = alreadyFound;
-        threadArgs->groupsWithRoll = groupsWithRoll;
-        threadArgs->orderStats = orderStats;
-        threadArgs->ordersWithRoll = ordersWithRoll;
-        threadArgs->threadsCompleted = &threadsCompleted;
+        for ( int j = 0; j < ceil( groupsWithRoll[i]->length * 1.0 / numGroupsAtOneTime ); ++j ) {
 
-        threadErrorCode = pthread_create( &threadIds[i], NULL, threadSolve, ( void * ) threadArgs );
-        if ( threadErrorCode ) {
-            printf("\n ERROR: return code from pthread_create is %d \n", threadErrorCode );
-            exit(1);
+
+            //rc = pthread_create( &threadIds[i], 
+            struct ThreadArgs *threadArgs = malloc( sizeof( struct ThreadArgs ) );
+            threadArgs->firstRoll = i;
+            threadArgs->numFound = &numFound;
+            threadArgs->ordersWithRollBitMask = &ordersWithRollBitMask;
+            threadArgs->alreadyFound = alreadyFound;
+            threadArgs->groupsWithRoll = groupsWithRoll;
+            threadArgs->orderStats = orderStats;
+            threadArgs->ordersWithRoll = ordersWithRoll;
+            threadArgs->threadsCompleted = &threadsCompleted;
+            threadArgs->startingGroupIndex = j * numGroupsAtOneTime;
+            threadArgs->endingGroupIndex = fmin( ( j + 1 ) * numGroupsAtOneTime, groupsWithRoll[i]->length );
+
+            threadErrorCode = pthread_create( &threadIds[i], NULL, threadSolve, ( void * ) threadArgs );
+            if ( threadErrorCode ) {
+                printf("\n ERROR: return code from pthread_create is %d \n", threadErrorCode );
+                exit(1);
+            }
         }
     }
 
     for ( int i = 0; i < numberOfRolls; ++i ) {
         pthread_join( threadIds[i], NULL );
     }
+
 
 //    while( !stackIsEmpty( solveStack ) ) {
 //        struct StackParameters parameters = popStack( solveStack );
