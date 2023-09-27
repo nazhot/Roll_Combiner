@@ -4,9 +4,14 @@
 #include "group.h"
 
 FILE* createOutputFile( char *fileName ) {
-    FILE *outputFile = fopen( "outputs/output.csv", "w" );
-    fputs( "Id,Length,Number of Groups,Number of Rolls,Order Groups,Remaining Rolls,Average Remaining Roll Length\n", outputFile );
+    FILE *outputFile = fopen( fileName, "w" );
+    
+    if ( !outputFile ) {
+        printf( "Could not create/open %s as the output file, exiting\n", fileName ); 
+        exit( 1 );
+    }
 
+    fputs( "Id,Length,Number of Groups,Number of Rolls,Order Groups,Remaining Rolls,Average Remaining Roll Length\n", outputFile );
     return outputFile;
 
 }
