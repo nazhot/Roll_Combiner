@@ -11,7 +11,6 @@
 #include "testMethods.h"
 #include "roll.h"
 #include "solver.h"
-#include <pthread.h>
                       //guarded by strncpy
 #define MAX_NUM_ROLLS 32;
 
