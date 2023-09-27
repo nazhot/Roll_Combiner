@@ -72,10 +72,10 @@ static void* threadSolve( void *args )  {
     struct OrderStats *orderStats = threadArgs->orderStats;
     int *ordersWithRoll = threadArgs->ordersWithRoll;
 
-    printf( "Starting thread with index %i\n", startingIndex );
+    printf( "Starting thread %i\n", startingIndex );
 
     const int8_t numberOfRolls = orderStats->numberOfRolls;
-    struct SolveStack *solveStack = createStack( 50000 );
+    struct SolveStack *solveStack = createStack( 500000 );
 
     for ( int groupNumber = 0; groupNumber < groupsWithRoll[startingIndex]->length; ++groupNumber ) {
 
@@ -132,17 +132,14 @@ static void* threadSolve( void *args )  {
 }
 
 void nonRecursiveSolve( struct IntArray **groupsWithRoll, struct OrderStats *orderStats, int *ordersWithRoll ) {
-
-    int start = clock();
-
     int numFound = 0;
     int threadsCompleted = 0;
     int ordersWithRollBitMask = 0;
     int alreadyFoundSize = 1 << orderStats->numberOfRolls;
     const int8_t numberOfRolls = orderStats->numberOfRolls;
     struct SmallArray *alreadyFound = createSmallArray( alreadyFoundSize );
-    struct SolveStack *solveStack = createStack( 5000000 );
-    pushStack( solveStack, ( struct StackParameters ) { 0, -1, 0 } );
+    //struct SolveStack *solveStack = createStack( 5000000 );
+    //pushStack( solveStack, ( struct StackParameters ) { 0, -1, 0 } );
 
     pthread_t threadIds[numberOfRolls];
 
@@ -170,6 +167,9 @@ void nonRecursiveSolve( struct IntArray **groupsWithRoll, struct OrderStats *ord
             printf("\n ERROR: return code from pthread_create is %d \n", threadErrorCode );
             exit(1);
         }
+    }
+
+    for ( int i = 0; i < numberOfRolls; ++i ) {
         pthread_join( threadIds[i], NULL );
     }
 
