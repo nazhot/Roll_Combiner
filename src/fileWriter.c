@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "group.h"
+#include "roll.h"
 
 FILE* createOutputFile( char *fileName ) {
     FILE *outputFile = fopen( fileName, "w" );
@@ -15,8 +16,18 @@ FILE* createOutputFile( char *fileName ) {
     return outputFile;
 
 }
-void writeOrderToFile( FILE outputFile, unsigned int order, unsigned int *groups, int numGroups, struct OrderStats *orderStats ) {
 
+
+
+
+void writeOrderToFile( FILE *outputFile, unsigned int order, unsigned int *groups, int numGroups, struct OrderStats *orderStats ) {
+    fprintf( outputFile, "%ui,", order );
+    fprintf( outputFile, "%.1f,", rollsLength( order, orderStats->numberOfRolls, orderStats->rollList ) );
+    fprintf( outputFile, "%i,", numGroups );
+    fprintf( outputFile, "%i,", __builtin_popcount( order ) );
+    //groups
+    //remaining rolls
+    //average remaining roll length
 }
 
 
