@@ -70,7 +70,7 @@ int main( int argc, char* argv[] ) {
     int msec = diff * 1000 / CLOCKS_PER_SEC;
     printf( "Completed total program, took %i seconds, %i millis\n", msec/1000, msec%1000 );
 
-    //fclose( g_outputFile );
+    fclose( outputFile );
     for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
         freeIntArray( groupsWithRollBySize[i] );
     }
