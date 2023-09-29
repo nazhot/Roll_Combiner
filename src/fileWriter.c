@@ -25,6 +25,23 @@ void writeOrderToFile( FILE *outputFile, unsigned int order, unsigned int *group
     fprintf( outputFile, "%.1f,", rollsLength( order, orderStats->numberOfRolls, orderStats->rollList ) );
     fprintf( outputFile, "%i,", numGroups );
     fprintf( outputFile, "%i,", __builtin_popcount( order ) );
+    
+    fputc( '\"', outputFile );
+    for ( int i = 0; i < numGroups; ++i ) {
+        unsigned int group = groups[i];
+        float groupLength  = rollsLength( group, orderStats->numberOfRolls, orderStats->rollList );
+        fprintf( outputFile, "%.1f\n", groupLength );
+        for ( int j = 0; j < orderStats->numberOfRolls; ++j ) {
+            if ( !( group >> j & 1 ) ) {
+                continue;
+            }
+            fprintf( outputFile, "%s: %.1f\n", orderStats->rollList[j].id, orderStats->rollList[j].length );
+        }
+        fputc( '\n', outputFile );
+    }
+    fputc( '\"', outputFile );
+
+
     //groups
     //remaining rolls
     //average remaining roll length
