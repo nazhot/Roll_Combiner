@@ -86,10 +86,10 @@ static void* threadSolve( void *args )  {
     for ( int groupNumber = startingGroupIndex; groupNumber < endingGroupIndex; ++groupNumber ) {
 
         unsigned int startingGroup = groupsWithRoll[startingIndex]->content[groupNumber];
-        unsigned int *tempGroups = malloc( sizeof( unsigned int ) * orderStats->maxGroupsPerOrder );
-        tempGroups[0] = startingGroup;
+        unsigned int *firstGroups = malloc( sizeof( unsigned int ) * orderStats->maxGroupsPerOrder );
+        firstGroups[0] = startingGroup;
 
-        pushStack( solveStack, ( struct StackParameters ) { startingGroup, startingIndex, 1, tempGroups } );
+        pushStack( solveStack, ( struct StackParameters ) { startingGroup, startingIndex, 1, firstGroups } );
 
         while( !stackIsEmpty( solveStack ) ) {
             struct StackParameters parameters = popStack( solveStack );
@@ -133,8 +133,12 @@ static void* threadSolve( void *args )  {
                     if ( currentGroup & groupsWithRoll[i]->content[j] || groupsWithRoll[i]->content[j] & *ordersWithRollBitMask || getSmallArrayValue( alreadyFound, currentGroup | groupsWithRoll[i]->content[j] ) ) { //could include || groupsWithRoll[i]->content[j] & *ordersWithRollBitMask, but this would only happen if that bitmask
                         continue;                                            //changes during the run, since it is already checked before
                     }
-                    groups[numGroupsInOrder] = groupsWithRoll[i]->content[j];
-                    pushStack( solveStack, ( struct StackParameters ) { currentGroup | groupsWithRoll[i]->content[j], i, numGroupsInOrder + 1, groups} );
+                    unsigned int *tempGroups = malloc( sizeof( unsigned int ) * orderStats->maxGroupsPerOrder );
+                    for ( int k = 0; k < numGroupsInOrder; k++ ) {
+                        tempGroups[k] = groups[k];
+                    }
+                    tempGroups[numGroupsInOrder] = groupsWithRoll[i]->content[j];
+                    pushStack( solveStack, ( struct StackParameters ) { currentGroup | groupsWithRoll[i]->content[j], i, numGroupsInOrder + 1, tempGroups} );
                 }
             }
         }
