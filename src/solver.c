@@ -81,14 +81,14 @@ static void* threadSolve( void *args )  {
     const int endingGroupIndex = threadArgs->endingGroupIndex;
     const int8_t numberOfRolls = orderStats->numberOfRolls;
     FILE *outputFile = threadArgs->outputFile;
-    struct SolveStack *solveStack = createStack( 500000 );
+    const int stackSize = 500000; 
+    struct SolveStack *solveStack = createStack( stackSize );
 
     for ( int groupNumber = startingGroupIndex; groupNumber < endingGroupIndex; ++groupNumber ) {
 
         unsigned int startingGroup = groupsWithRoll[startingIndex]->content[groupNumber];
         unsigned int *firstGroups = malloc( sizeof( unsigned int ) * orderStats->maxGroupsPerOrder );
         firstGroups[0] = startingGroup;
-
         pushStack( solveStack, ( struct StackParameters ) { startingGroup, startingIndex, 1, firstGroups } );
 
         while( !stackIsEmpty( solveStack ) ) {
@@ -141,8 +141,11 @@ static void* threadSolve( void *args )  {
                     pushStack( solveStack, ( struct StackParameters ) { currentGroup | groupsWithRoll[i]->content[j], i, numGroupsInOrder + 1, tempGroups} );
                 }
             }
+            free( groups );
         }
     }
+    free( solveStack->content );
+    free( solveStack );
     pthread_exit( NULL );
 }
 
