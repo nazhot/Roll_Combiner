@@ -21,7 +21,7 @@ FILE* createOutputFile( char *fileName ) {
 
 
 void writeOrderToFile( FILE *outputFile, unsigned int order, unsigned int *groups, int numGroups, struct OrderStats *orderStats ) {
-    fprintf( outputFile, "%ui,", order );
+    fprintf( outputFile, "%u,", order );
     fprintf( outputFile, "%.1f,", rollsLength( order, orderStats->numberOfRolls, orderStats->rollList ) );
     fprintf( outputFile, "%i,", numGroups );
     fprintf( outputFile, "%i,", __builtin_popcount( order ) );
@@ -30,7 +30,7 @@ void writeOrderToFile( FILE *outputFile, unsigned int order, unsigned int *group
     for ( int i = 0; i < numGroups; ++i ) {
         unsigned int group = groups[i];
         float groupLength  = rollsLength( group, orderStats->numberOfRolls, orderStats->rollList );
-        fprintf( outputFile, "%.1f\n", groupLength );
+        fprintf( outputFile, "%.1f (%i)\n", groupLength, __builtin_popcount( group ) );
         for ( int j = 0; j < orderStats->numberOfRolls; ++j ) {
             if ( !( group >> j & 1 ) ) {
                 continue;
@@ -45,6 +45,8 @@ void writeOrderToFile( FILE *outputFile, unsigned int order, unsigned int *group
     //groups
     //remaining rolls
     //average remaining roll length
+    //
+    fputc( '\n', outputFile );
 }
 
 

@@ -11,6 +11,7 @@
 #include "testMethods.h"
 #include "roll.h"
 #include "solver.h"
+#include "fileWriter.h"
                       //guarded by strncpy
 #define MAX_NUM_ROLLS 32;
 
@@ -26,6 +27,7 @@ int main( int argc, char* argv[] ) {
     clock_t start = clock(), diff; 
 
     char *fileName = argv[1];
+    FILE *outputFile = createOutputFile( "outputs/output.csv" );
 
     struct OrderStats *orderStats = readRollFile( fileName );
 
@@ -59,7 +61,7 @@ int main( int argc, char* argv[] ) {
     printf( "Done!\nFound %'d potential orders\n", orderStats->numberOfPotentialOrders );
 
     int recursiveStart = clock();
-    nonRecursiveSolve( groupsWithRollBySize, orderStats, ordersWithRoll );
+    nonRecursiveSolve( groupsWithRollBySize, orderStats, ordersWithRoll, outputFile );
     int recursiveDiff = clock() - recursiveStart;
     int recursiveMsec = recursiveDiff * 1000 / CLOCKS_PER_SEC;
     printf( "\nCompleted recursive loop, took %i seconds, %i millis\n", recursiveMsec/1000, recursiveMsec%1000 );

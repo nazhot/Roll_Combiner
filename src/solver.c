@@ -5,6 +5,7 @@
 #include "smallArray.h"
 #include "roll.h"
 #include "solver.h"
+#include "fileWriter.h"
 #include <pthread.h>
 #include <time.h>
 #include <math.h>
@@ -13,6 +14,7 @@ struct StackParameters{
     unsigned int currentGroup;
     int currentArrayIndex;
     int numGroupsInOrder;
+    unsigned int *groups;
 };
 
 struct SolveStack {
@@ -60,10 +62,11 @@ struct ThreadArgs{
     struct IntArray **groupsWithRoll;
     struct OrderStats *orderStats;
     int *ordersWithRoll;
+    FILE *outputFile;
 };
 
-pthread_mutex_t setSAMutex;
-pthread_mutex_t updateCountMutex;
+static pthread_mutex_t setSAMutex;
+static pthread_mutex_t updateCountMutex;
 
 static void* threadSolve( void *args )  { 
     struct ThreadArgs *threadArgs = ( struct ThreadArgs * ) args;
@@ -77,19 +80,23 @@ static void* threadSolve( void *args )  {
     const int startingGroupIndex = threadArgs->startingGroupIndex;
     const int endingGroupIndex = threadArgs->endingGroupIndex;
     const int8_t numberOfRolls = orderStats->numberOfRolls;
+    FILE *outputFile = threadArgs->outputFile;
     struct SolveStack *solveStack = createStack( 500000 );
 
     for ( int groupNumber = startingGroupIndex; groupNumber < endingGroupIndex; ++groupNumber ) {
 
         unsigned int startingGroup = groupsWithRoll[startingIndex]->content[groupNumber];
+        unsigned int *tempGroups = malloc( sizeof( unsigned int ) * orderStats->maxGroupsPerOrder );
+        tempGroups[0] = startingGroup;
 
-        pushStack( solveStack, ( struct StackParameters ) { startingGroup, startingIndex, 1 } );
+        pushStack( solveStack, ( struct StackParameters ) { startingGroup, startingIndex, 1, tempGroups } );
 
         while( !stackIsEmpty( solveStack ) ) {
             struct StackParameters parameters = popStack( solveStack );
             const unsigned int currentGroup = parameters.currentGroup;
             const int currentArrayIndex = parameters.currentArrayIndex;
             const int numGroupsInOrder = parameters.numGroupsInOrder;
+            unsigned int *groups = parameters.groups;
 
             if ( currentGroup & *ordersWithRollBitMask ) {
                 continue;
@@ -102,6 +109,7 @@ static void* threadSolve( void *args )  {
                 const float currentLength = rollsLength( currentGroup, numberOfRolls, orderStats->rollList );
                 if ( currentLength >= orderStats->minOrderLength && currentLength <= orderStats->maxOrderLength ) {
                     pthread_mutex_lock( &updateCountMutex );
+                    writeOrderToFile( outputFile, currentGroup, groups, numGroupsInOrder, orderStats ); 
                     *numFound += 1;
                     for ( int i = 0; i < numberOfRolls; ++i ) {
                         ordersWithRoll[i] -= ( currentGroup >> i & 1 );
@@ -125,7 +133,8 @@ static void* threadSolve( void *args )  {
                     if ( currentGroup & groupsWithRoll[i]->content[j] || groupsWithRoll[i]->content[j] & *ordersWithRollBitMask || getSmallArrayValue( alreadyFound, currentGroup | groupsWithRoll[i]->content[j] ) ) { //could include || groupsWithRoll[i]->content[j] & *ordersWithRollBitMask, but this would only happen if that bitmask
                         continue;                                            //changes during the run, since it is already checked before
                     }
-                    pushStack( solveStack, ( struct StackParameters ) { currentGroup | groupsWithRoll[i]->content[j], i, numGroupsInOrder + 1} );
+                    groups[numGroupsInOrder] = groupsWithRoll[i]->content[j];
+                    pushStack( solveStack, ( struct StackParameters ) { currentGroup | groupsWithRoll[i]->content[j], i, numGroupsInOrder + 1, groups} );
                 }
             }
         }
@@ -133,7 +142,7 @@ static void* threadSolve( void *args )  {
     pthread_exit( NULL );
 }
 
-void nonRecursiveSolve( struct IntArray **groupsWithRoll, struct OrderStats *orderStats, int *ordersWithRoll ) {
+void nonRecursiveSolve( struct IntArray **groupsWithRoll, struct OrderStats *orderStats, int *ordersWithRoll, FILE *outputFile ) {
     int numFound = 0;
     int ordersWithRollBitMask = 0;
     int alreadyFoundSize = 1 << orderStats->numberOfRolls;
@@ -163,6 +172,7 @@ void nonRecursiveSolve( struct IntArray **groupsWithRoll, struct OrderStats *ord
         threadArgs->ordersWithRoll = ordersWithRoll;
         threadArgs->startingGroupIndex = 0; 
         threadArgs->endingGroupIndex = groupsWithRoll[i]->length; 
+        threadArgs->outputFile = outputFile;
 
         threadErrorCode = pthread_create( &threadIds[i], NULL, threadSolve, ( void * ) threadArgs );
         if ( threadErrorCode ) {
