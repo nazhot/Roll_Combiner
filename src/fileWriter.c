@@ -26,6 +26,7 @@ void writeOrderToFile( FILE *outputFile, unsigned int order, unsigned int *group
     fprintf( outputFile, "%i,", numGroups );
     fprintf( outputFile, "%i,", __builtin_popcount( order ) );
     
+
     fputc( '\"', outputFile );
     for ( int i = 0; i < numGroups; ++i ) {
         unsigned int group = groups[i];
@@ -39,7 +40,29 @@ void writeOrderToFile( FILE *outputFile, unsigned int order, unsigned int *group
         }
         fputc( '\n', outputFile );
     }
+    fputs( "\",", outputFile );
+
+
+    int numberOfUnusedRolls = orderStats->numberOfRolls - __builtin_popcount( order );
+    float unusedRollsLength = 0;
+
     fputc( '\"', outputFile );
+    for ( int i = 0; i < orderStats->numberOfRolls; ++i ) {
+        if ( order >> i & 1 ) {
+            continue;
+        }
+        unusedRollsLength += orderStats->rollList[i].length;
+        fprintf( outputFile, "%s: %.1f", orderStats->rollList[i].id, orderStats->rollList[i].length );
+        if ( i < orderStats->numberOfRolls - 2 ) {
+            fputc( '\n', outputFile );
+        }
+    }
+    fputs( "\",", outputFile );
+    if ( numberOfUnusedRolls ) {
+        fprintf( outputFile, "%.1f", unusedRollsLength / numberOfUnusedRolls );
+    } else {
+        fputc( '0', outputFile );
+    }
 
 
     //groups
