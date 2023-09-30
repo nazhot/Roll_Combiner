@@ -15,27 +15,23 @@
                       //guarded by strncpy
 #define MAX_NUM_ROLLS 32;
 
-FILE *g_outputFile;
-
 int main( int argc, char* argv[] ) {
-
     if ( argc != 2 ) {
         printf( "Not the correct number of arguments (1 expected)\n" );
         return 1;
     }
+
     setlocale(LC_NUMERIC, "");
-    clock_t start = clock(), diff; 
 
-    char *fileName = argv[1];
-    FILE *outputFile = createOutputFile( "outputs/output.csv" );
-
+           char       *fileName   = argv[1];
     struct OrderStats *orderStats = readRollFile( fileName );
+           FILE       *outputFile = createOutputFile( "outputs/output.csv" );
 
-    orderStats->minOrderLength   = 1800;
-    orderStats->maxOrderLength   = 2000;
-    orderStats->maxRollsPerGroup = 8;
-    orderStats->minGroupLength   = 250;
-    orderStats->maxGroupLength   = 350;
+    orderStats->minOrderLength    = 1800;
+    orderStats->maxOrderLength    = 2000;
+    orderStats->maxRollsPerGroup  = 8;
+    orderStats->minGroupLength    = 250;
+    orderStats->maxGroupLength    = 350;
     orderStats->minGroupsPerOrder = ceil( orderStats->minOrderLength / orderStats->maxGroupLength );
     orderStats->maxGroupsPerOrder = floor( orderStats->maxOrderLength / orderStats->minGroupLength );
 
@@ -52,7 +48,7 @@ int main( int argc, char* argv[] ) {
     
     setNumGroupsPerRoll( orderStats );
     sortRollsByNumGroups( orderStats );
-    struct IntArray **groupsWithRollBySize = getGroupsWithRollBySize( orderStats );
+    struct IntArray **groupsWithRoll = getGroupsWithRollBySize( orderStats );
 
     printf( "Done!\nFound %'d groups\nGenerating potential orders...", orderStats->numberOfGroups );
     fflush( stdout );
@@ -60,24 +56,16 @@ int main( int argc, char* argv[] ) {
     int *ordersWithRoll = getOrdersWithRoll( orderStats );
     printf( "Done!\nFound %'d potential orders\n", orderStats->numberOfPotentialOrders );
 
-    int recursiveStart = clock();
-    nonRecursiveSolve( groupsWithRollBySize, orderStats, ordersWithRoll, outputFile );
-    int recursiveDiff = clock() - recursiveStart;
-    int recursiveMsec = recursiveDiff * 1000 / CLOCKS_PER_SEC;
-    printf( "\nCompleted recursive loop, took %i seconds, %i millis\n", recursiveMsec/1000, recursiveMsec%1000 );
-
-    diff = clock() - start;
-    int msec = diff * 1000 / CLOCKS_PER_SEC;
-    printf( "Completed total program, took %i seconds, %i millis\n", msec/1000, msec%1000 );
+    nonRecursiveSolve( groupsWithRoll, orderStats, ordersWithRoll, outputFile );
 
     fclose( outputFile );
-    for ( int i = 0; i < orderStats->numberOfRolls; i++ ) {
-        freeIntArray( groupsWithRollBySize[i] );
+    for ( int i = 0; i < orderStats->numberOfRolls; ++i ) {
+        freeIntArray( groupsWithRoll[i] );
     }
 
     free( orderStats->rollList );
     free( orderStats );
-    free( groupsWithRollBySize );
+    free( groupsWithRoll );
     free( ordersWithRoll );
 
     return 0;
