@@ -67,6 +67,8 @@ struct ThreadArgs{
 
 static pthread_mutex_t setSAMutex;
 static pthread_mutex_t updateCountMutex;
+long tempCount = 0;
+
 
 static void* threadSolve( void *args )  { 
     struct ThreadArgs *threadArgs = ( struct ThreadArgs * ) args;
@@ -92,6 +94,7 @@ static void* threadSolve( void *args )  {
         pushStack( solveStack, ( struct StackParameters ) { startingGroup, startingIndex, 1, firstGroups } );
 
         while( !stackIsEmpty( solveStack ) ) {
+            tempCount++;
             struct StackParameters parameters = popStack( solveStack );
             const unsigned int currentGroup = parameters.currentGroup;
             const int currentArrayIndex = parameters.currentArrayIndex;
@@ -191,4 +194,6 @@ void nonRecursiveSolve( struct IntArray **groupsWithRoll, struct OrderStats *ord
     for ( int i = 0; i < numberOfRolls; ++i ) {
         pthread_join( threadIds[i], NULL );
     }
+
+    printf( "Num checks: %ld\n", tempCount );
 }
