@@ -17,14 +17,50 @@
                       //guarded by strncpy
 #define MAX_NUM_ROLLS 32;
 
-int main( int argc, char **argv ) {
-    if ( argc != 2 ) {
-        printf( "Not the correct number of arguments (1 expected)\n" );
-        return 1;
+struct ProgramSettings {
+    char *outputFilePath;
+    int threaded;
+    int verbose;
+};
+
+
+static int parse_opt( int key, char *arg, struct argp_state *state ) {
+    struct ProgramSettings *settings = ( struct ProgramSettings* ) state->input;
+    switch ( key ) {
+        case 'o':
+            printf( "%s\n", arg );
+            strcpy( settings->outputFilePath,  arg );
+            break;
     }
+    return 0;
+}
 
 
-    //argp_parse( 0, argc, argv, 0, 0, 0 );
+int main( int argc, char **argv ) {
+    struct ProgramSettings *settings = malloc( sizeof( struct ProgramSettings ) );
+    settings->outputFilePath = malloc( sizeof( char ) * 256 );
+    strcpy( settings->outputFilePath, "outputs/output.csv" );
+    settings->verbose = 1;
+    settings->threaded = 1;
+
+
+//    if ( argc != 2 ) {
+//        printf( "Not the correct number of arguments (1 expected)\n" );
+//        return 1;
+//    }
+
+    struct argp_option options[] = {
+        { "output", 'o', "PATH", 0, "Specify the path to the output file" },
+        { 0 }
+    };
+
+    struct argp argp = { options, parse_opt };
+
+
+
+    argp_parse( &argp, argc, argv, 0, 0, settings );
+
+    printf( "Output file: %s\n", settings->outputFilePath );
 
     setlocale(LC_NUMERIC, "");
 
