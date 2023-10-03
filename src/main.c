@@ -29,8 +29,15 @@ static int parse_opt( int key, char *arg, struct argp_state *state ) {
     struct ProgramSettings *settings = ( struct ProgramSettings* ) state->input;
     switch ( key ) {
         case 'o':
-            printf( "%s\n", arg );
             settings->outputFilePath = arg;
+            break;
+        case 0:
+            settings->inputFilePath = arg;
+            break;
+        case ARGP_KEY_END:
+            if ( !settings->inputFilePath ) { 
+                argp_failure( state, 1, 0, "Input file path not specified!" );
+            }
             break;
     }
     return 0;
@@ -38,7 +45,7 @@ static int parse_opt( int key, char *arg, struct argp_state *state ) {
 
 
 int main( int argc, char **argv ) {
-    struct ProgramSettings settings = { "", "outputs/output.csv", 1, 1, };
+    struct ProgramSettings settings = { NULL, "outputs/output.csv", 1, 1, };
 //    struct ProgramSettings *settings = malloc( sizeof( struct ProgramSettings ) );
 //    settings->outputFilePath = malloc( sizeof( char ) * 256 );
 //    strcpy( settings->outputFilePath, "outputs/output.csv" );
@@ -61,6 +68,7 @@ int main( int argc, char **argv ) {
     argp_parse( &argp, argc, argv, 0, 0, &settings );
 
     printf( "Output file: %s\n", settings.outputFilePath );
+    printf( "Input file: %s\n", settings.inputFilePath );
 
     setlocale(LC_NUMERIC, "");
 
