@@ -18,6 +18,7 @@
 #define MAX_NUM_ROLLS 32;
 
 struct ProgramSettings {
+    char *inputFilePath;
     char *outputFilePath;
     int threaded;
     int verbose;
@@ -29,7 +30,7 @@ static int parse_opt( int key, char *arg, struct argp_state *state ) {
     switch ( key ) {
         case 'o':
             printf( "%s\n", arg );
-            strcpy( settings->outputFilePath,  arg );
+            settings->outputFilePath = arg;
             break;
     }
     return 0;
@@ -37,11 +38,12 @@ static int parse_opt( int key, char *arg, struct argp_state *state ) {
 
 
 int main( int argc, char **argv ) {
-    struct ProgramSettings *settings = malloc( sizeof( struct ProgramSettings ) );
-    settings->outputFilePath = malloc( sizeof( char ) * 256 );
-    strcpy( settings->outputFilePath, "outputs/output.csv" );
-    settings->verbose = 1;
-    settings->threaded = 1;
+    struct ProgramSettings settings = { "", "outputs/output.csv", 1, 1, };
+//    struct ProgramSettings *settings = malloc( sizeof( struct ProgramSettings ) );
+//    settings->outputFilePath = malloc( sizeof( char ) * 256 );
+//    strcpy( settings->outputFilePath, "outputs/output.csv" );
+//    settings->verbose = 1;
+//    settings->threaded = 1;
 
 
 //    if ( argc != 2 ) {
@@ -56,11 +58,9 @@ int main( int argc, char **argv ) {
 
     struct argp argp = { options, parse_opt };
 
+    argp_parse( &argp, argc, argv, 0, 0, &settings );
 
-
-    argp_parse( &argp, argc, argv, 0, 0, settings );
-
-    printf( "Output file: %s\n", settings->outputFilePath );
+    printf( "Output file: %s\n", settings.outputFilePath );
 
     setlocale(LC_NUMERIC, "");
 
