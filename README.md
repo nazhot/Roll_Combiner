@@ -21,12 +21,17 @@ A group is made up of a combination of unique rolls, and groups are constrained 
 
 From these groups, orders can be made. The only explicit limitations on orders are a minimum/maximum on their overall width. Because of the restrictions on groups, there will also be limits on how many groups/rolls will make up a valid order.
 
+Running this program with a specified list of rolls will figure out all valid groups, and then work on combining them together to get all of the possible orders from that set of rolls one to check and decide between. The orders are output in a .csv format.
+
 ## ⭐️ Current Version
-v0.0.1
-- Read given file of roll id's/lengths
+v0.0.9
+- All possible orders are generated and output to a .csv file
+- Utilizes multi-threading to speed up runtime
+- Stats about the groups/orders are shown to standard output for review by the user
   
 ## Previous Versions
-N/A
+v0.0.1
+- Read given file of roll id's/lengths
 
 ## 🔜 Hopeful Features
   
@@ -36,9 +41,9 @@ N/A
 ## 🔨 Build Instructions
 After forking and cloning, navigate to the repository in your command line. Build the project using 
 ```
-gcc -o main main.c -lm
+make
 ```
 Then, run it using
 ```
-./main path-to-roll-file
+./build/rollCombos path-to-roll-file
 ```

@@ -5,6 +5,7 @@
 #include <time.h>
 #include <math.h>
 #include <locale.h>
+#include <argp.h>
 #include "fileReaders.h"
 #include "smallArray.h"
 #include "intArray.h"
@@ -12,14 +13,18 @@
 #include "roll.h"
 #include "solver.h"
 #include "fileWriter.h"
+
                       //guarded by strncpy
 #define MAX_NUM_ROLLS 32;
 
-int main( int argc, char* argv[] ) {
+int main( int argc, char **argv ) {
     if ( argc != 2 ) {
         printf( "Not the correct number of arguments (1 expected)\n" );
         return 1;
     }
+
+
+    //argp_parse( 0, argc, argv, 0, 0, 0 );
 
     setlocale(LC_NUMERIC, "");
 
@@ -57,6 +62,7 @@ int main( int argc, char* argv[] ) {
     printf( "Done!\nFound %'d potential orders\n", orderStats->numberOfPotentialOrders );
 
     nonRecursiveSolve( groupsWithRoll, orderStats, ordersWithRoll, outputFile );
+    putc( '\n', stdout );
 
     fclose( outputFile );
     for ( int i = 0; i < orderStats->numberOfRolls; ++i ) {
