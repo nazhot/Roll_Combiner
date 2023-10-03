@@ -46,18 +46,6 @@ static int parse_opt( int key, char *arg, struct argp_state *state ) {
 
 int main( int argc, char **argv ) {
     struct ProgramSettings settings = { NULL, "outputs/output.csv", 1, 1, };
-//    struct ProgramSettings *settings = malloc( sizeof( struct ProgramSettings ) );
-//    settings->outputFilePath = malloc( sizeof( char ) * 256 );
-//    strcpy( settings->outputFilePath, "outputs/output.csv" );
-//    settings->verbose = 1;
-//    settings->threaded = 1;
-
-
-//    if ( argc != 2 ) {
-//        printf( "Not the correct number of arguments (1 expected)\n" );
-//        return 1;
-//    }
-
     struct argp_option options[] = {
         { "output", 'o', "PATH", 0, "Specify the path to the output file" },
         { 0 }
@@ -66,15 +54,10 @@ int main( int argc, char **argv ) {
     struct argp argp = { options, parse_opt };
 
     argp_parse( &argp, argc, argv, 0, 0, &settings );
-
-    printf( "Output file: %s\n", settings.outputFilePath );
-    printf( "Input file: %s\n", settings.inputFilePath );
-
     setlocale(LC_NUMERIC, "");
 
-           char       *fileName   = argv[1];
-    struct OrderStats *orderStats = readRollFile( fileName );
-           FILE       *outputFile = createOutputFile( "outputs/output.csv" );
+    struct OrderStats *orderStats = readRollFile( settings.inputFilePath );
+           FILE       *outputFile = createOutputFile( settings.outputFilePath );
 
     orderStats->minOrderLength    = 1800;
     orderStats->maxOrderLength    = 2000;
