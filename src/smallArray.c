@@ -4,29 +4,33 @@
 #include <stdlib.h>
 
 
-struct SmallArray* createSmallArray( const int size ) {
-    struct SmallArray* temp = ( struct SmallArray* ) malloc( sizeof( struct SmallArray ) );
+struct SmallArray* createSmallArray( const int numberOfElements ) {
+    struct SmallArray* smallArray = ( struct SmallArray* ) malloc( sizeof( struct SmallArray ) );
    
-    int convertedSize = size / 32 + 1;
-
-    temp->size = convertedSize;
-
-    int32_t *array = ( int32_t* ) malloc( 4 * convertedSize );
-    if ( array == NULL ) {
-        printf( "Could not allocate SmallArray of that size!\n" );
+    if ( smallArray == NULL ) {
+        fprintf(stderr, "Could not allocate a SmallArray!\n" );
         exit( 1 );
     }
-    for ( int i = 0; i < convertedSize; i++ ){
-        array[i] = 0;
+
+    int convertedSize = numberOfElements / 32 + 1;
+    smallArray->size = convertedSize;
+    smallArray->numElements = 0;
+    smallArray->contents = ( int32_t* ) malloc( 4 * convertedSize );
+
+    if ( smallArray->contents == NULL ) {
+        printf( "Could not allocate SmallArray of size (%i)!\n", numberOfElements );
+        exit( 1 );
     }
-    temp->contents = array;
-    temp->numElements = 0;
-    return temp;
+
+    for ( int i = 0; i < convertedSize; i++ ){
+        smallArray->contents[i] = 0;
+    }
+    return smallArray;
 }
 
-int8_t getSmallArrayValue( struct SmallArray* SmallArray, const int number ){
-    int    index  = number / 32; 
-    int8_t modulo = number % 32;
+int8_t getSmallArrayValue( struct SmallArray* SmallArray, const int element ){
+    int    index  = element / 32; 
+    int8_t modulo = element % 32;
 
     if ( index > SmallArray->size - 1 ) {
         return 0;
@@ -37,9 +41,9 @@ int8_t getSmallArrayValue( struct SmallArray* SmallArray, const int number ){
 
 }
 
-void setSmallArrayValue( struct SmallArray* SmallArray, const int number ) {
-    int8_t modulo = number % 32;
-    int    index  = number / 32;
+void setSmallArrayValue( struct SmallArray* SmallArray, const int element ) {
+    int8_t modulo = element % 32;
+    int    index  = element / 32;
 
     if ( index > SmallArray->size - 1 ) {
         return;
