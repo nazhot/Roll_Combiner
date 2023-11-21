@@ -76,11 +76,77 @@ void printRollsFromInt( unsigned int rolls, int numberOfRolls, struct Roll *roll
  * @return the length of the given rolls
  */
 float rollsLength(  unsigned int rolls, int numberOfRolls, struct Roll *rollList );
+
+/**
+ * Set the minimum/maximum properties of orderStats, in place
+ *
+ * This assumes that the given structure is already populated with the required
+ * properties to calculate these new ones: 
+ *  - rollList
+ *  - numberOfRolls
+ *  - minGroupLength
+ *  - minOrderLength
+ *  - maxOrderLength
+ * None of these properties are checked beforehand. Calling this will also sort
+ * rollList in descending order, by length.
+ *
+ * @param orderStats pointer to the struct that holds info about this order
+ */
 void setMinMaxRollStats( struct OrderStats *orderStats );
+
+/**
+ * Calculates and sets the numGroups property of each roll within
+ * orderStats->rollList
+ *
+ * This assumes that the given structure is already populated with the required
+ * properties to calculate this roll property:
+ *   - minRollsPerGroup
+ *   - maxRollsPerGroup
+ *   - numberOfRolls
+ *   - rollList
+ *   - minGroupLength
+ *   - maxGroupLength
+ * None of these properties are checked beforehand. The number of groups that a
+ * roll belongs to is accomplished by iterating through all combinations of
+ * [minRollsPerGroup - maxRollsPerGroup] rolls, finding the ones that fit 
+ * between minGroupLength and maxGroupLength, and incrementing each roll within
+ * that group's numGroups property.
+ *
+ * @param orderStats pointer to the struct that holds info about this order
+ */
 void setNumGroupsPerRoll( struct OrderStats *orderStats );
+
+/**
+ * Sort the Rolls with rollList by how many groups they appear in, descending
+ *
+ * This assumes that setMinMaxRollStats has already been called.
+ *
+ * @param orderStats pointer to the struct that holds info about this order
+ */
 void sortRollsByNumGroups( struct OrderStats *orderStats );
-void setRollLengthsArray( struct OrderStats *orderStats, struct IntArray **groupsWithRoll );
+
+/**
+ * TODO: roll this into setNumGroupsPerRoll, it is repeating a bunch of code,
+ * including the entire calculate-all-groups loop
+ */
 struct IntArray** getGroupsWithRollBySize( struct OrderStats *orderStats );
+
+/**
+ * Calculate and return an array of how many orders each roll can appear in
+ *
+ * The index of the returned array is the index of the roll in
+ * orderStats->rollList. The reason for 'can' in the description is that
+ * this is just calculating every possible order based on all of the
+ * combinations with [minRollsPerOrder - maxRollsPerOrder] rolls in them, that
+ * also fit between minOrderLength and maxOrderLength. It does not checking to
+ * see if the order is guaranteed. This array is very useful for early exiting
+ * out of the solver loop, where if the current roll already is in all of the
+ * possible orders it can be, the loop can continue to the next roll.
+ *
+ * @param orderStats pointer to the struct that holds info about this order
+ *
+ * @return array that contains how many orders each roll can appear in
+ */
 int* getOrdersWithRoll( struct OrderStats *orderStats );
 
 #endif
