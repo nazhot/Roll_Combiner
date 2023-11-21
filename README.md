@@ -4,7 +4,6 @@
     <h1 align="center">Noah Zydel</h1>
   </a>
 </p>
-
 ---
 
 - [📖 Overview](#-overview)

@@ -68,7 +68,7 @@ int main( int argc, char **argv ) {
     orderStats->maxGroupsPerOrder = floor( orderStats->maxOrderLength / orderStats->minGroupLength );
 
     setMinMaxRollStats( orderStats ); //rolls are now sorted in descending length order
-    sortRollsAscending( orderStats->rollList, orderStats->numberOfRolls);
+    sortRollsByLengthAscending( orderStats->rollList, orderStats->numberOfRolls);
 
     printf( "Number of rolls inputted: %i\n", orderStats->numberOfRolls );
     printf( "Minimum number of rolls needed to make group: %i\n", orderStats->minRollsPerGroup );

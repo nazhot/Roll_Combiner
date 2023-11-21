@@ -33,11 +33,11 @@ static unsigned nextSetOfNBits( const unsigned x ) {
 
 }
 
-void sortRollsAscending( struct Roll *rollList, int numberOfRolls ) {
+void sortRollsByLengthAscending( struct Roll *rollList, int numberOfRolls ) {
     qsort( rollList, numberOfRolls, sizeof( struct Roll ), ascRollSort );
 }
 
-void sortRollsDescending( struct Roll *rollList, int numberOfRolls ) {
+void sortRollsByLengthDescending( struct Roll *rollList, int numberOfRolls ) {
     qsort( rollList, numberOfRolls, sizeof( struct Roll ), dscRollSort );
 }
 
@@ -61,16 +61,16 @@ void printRollsFromInt(  unsigned int integer, int numberOfRolls, struct Roll *r
  *      num:      number representation of the set of rolls
  *      numRolls: maximum number of bits to check
 */
-float rollsLength( const unsigned int num, const int numberOfRolls, struct Roll *rollList ) {
+float rollsLength( const unsigned int rolls, const int numberOfRolls, struct Roll *rollList ) {
     float totalLength = 0;
     for ( int i = 0; i <= numberOfRolls; i++ ) {
-        totalLength += ( num >> i & 1 ) * rollList[i].length;
+        totalLength += ( rolls >> i & 1 ) * rollList[i].length;
     }
     return totalLength;
 }
 
 void setMinMaxRollStats( struct OrderStats *orderStats ) {
-    sortRollsDescending( orderStats->rollList, orderStats->numberOfRolls );
+    sortRollsByLengthDescending( orderStats->rollList, orderStats->numberOfRolls );
 
     orderStats->minRollsPerGroup = 1;
     orderStats->minRollsPerOrder = 1;
