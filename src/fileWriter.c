@@ -1,7 +1,6 @@
 #include "fileWriter.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "group.h"
 #include "roll.h"
 
 FILE* createOutputFile( char *fileName ) {
