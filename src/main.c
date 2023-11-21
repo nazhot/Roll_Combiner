@@ -9,7 +9,6 @@
 #include "fileReaders.h"
 #include "smallArray.h"
 #include "intArray.h"
-#include "testMethods.h"
 #include "roll.h"
 #include "solver.h"
 #include "fileWriter.h"
