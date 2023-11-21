@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 struct IntArray* createIntArray( const int size, const int sizeAddConstant, const float sizeAddMultiplier ) {
     struct IntArray *intArray = malloc( sizeof( struct IntArray ) );
     if ( intArray == NULL ) {
@@ -21,7 +20,6 @@ struct IntArray* createIntArray( const int size, const int sizeAddConstant, cons
 
     return intArray;
 }
-
 
 struct IntArray* addToIntArray( struct IntArray *intArray, const unsigned int toAdd ) { 
     if ( intArray->length >= intArray->size ) {
