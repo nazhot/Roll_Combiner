@@ -71,7 +71,7 @@ ftest: $(FTEST_INPUTS)
 	@echo "Functional testing completed"
 
 %.input: FORCE
-	./build/rollcombos $@ > $*.check
+	./build/rollcombos --no-progress $@ > $*.check
 
 FORCE:
 
