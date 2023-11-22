@@ -4,6 +4,7 @@ CC = gcc
 
 BUILD_DIR := ./build
 SRC_DIRS := ./src
+TEST_DIR := ./tests
 
 # Find all the C and C++ files we want to compile
 # Note the single quotes around the * expressions. The shell will incorrectly expand these otherwise, but we want to send the * directly to the find command.
@@ -61,10 +62,18 @@ utest:
 	@echo "Unit testing"
 	
 #want this to compile/run the functional tests
+
+FTEST_INPUTS := $(shell find $(TEST_DIR)/functional -name '*.input')
+
 .PHONY: ftest
 
-ftest:
-	@echo "Functional testing"
+ftest: $(FTEST_INPUTS)
+	@echo "Functional testing completed"
+
+%.input: FORCE
+	./build/rollcombos $@ > $*.check
+
+FORCE:
 
 # Include the .d makefiles. The - at the front suppresses the errors of missing
 # Makefiles. Initially, all the .d files will be missing, and we don't want those
