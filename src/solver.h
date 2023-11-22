@@ -39,6 +39,6 @@
  *                       in place by the function
  * @param outputFile     file to output results to
  */
-void nonRecursiveSolve( struct IntArray **groupsWithRoll, struct OrderStats *orderStats, int *ordersWithRoll, FILE *outputFile );
+void nonRecursiveSolve( struct IntArray **groupsWithRoll, struct OrderStats *orderStats, int *ordersWithRoll, FILE *outputFile, int showProgress );
 
 #endif

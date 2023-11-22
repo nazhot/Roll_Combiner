@@ -21,6 +21,7 @@ struct ProgramSettings {
     char *outputFilePath;
     int threaded;
     int verbose;
+    int showProgress;
 };
 
 
@@ -33,6 +34,9 @@ static int parse_opt( int key, char *arg, struct argp_state *state ) {
         case 0:
             settings->inputFilePath = arg;
             break;
+        case 400:
+            settings->showProgress = 0;
+            break;
         case ARGP_KEY_END:
             if ( !settings->inputFilePath ) { 
                 argp_failure( state, 1, 0, "Input file path not specified!" );
@@ -44,9 +48,10 @@ static int parse_opt( int key, char *arg, struct argp_state *state ) {
 
 
 int main( int argc, char **argv ) {
-    struct ProgramSettings settings = { NULL, "outputs/output.csv", 1, 1, };
+    struct ProgramSettings settings = { NULL, "outputs/output.csv", 1, 1, 1 };
     struct argp_option options[] = {
         { "output", 'o', "PATH", 0, "Specify the path to the output file" },
+        { "no-progress", 400, 0, 0, "Prevent the program from using carriage return to display the progress of finding orders"},
         { 0 }
     };
 
@@ -87,7 +92,7 @@ int main( int argc, char **argv ) {
     int *ordersWithRoll = getOrdersWithRoll( orderStats );
     printf( "Done!\nFound %'d potential orders\n", orderStats->numberOfPotentialOrders );
 
-    nonRecursiveSolve( groupsWithRoll, orderStats, ordersWithRoll, outputFile );
+    nonRecursiveSolve( groupsWithRoll, orderStats, ordersWithRoll, outputFile, settings.showProgress );
     putc( '\n', stdout );
 
     fclose( outputFile );

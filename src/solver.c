@@ -10,6 +10,9 @@
 #include <time.h>
 #include <math.h>
 
+static int g_showProgress = 1;
+
+
 struct StackParameters{
     unsigned int currentGroup;
     int currentArrayIndex;
@@ -63,6 +66,7 @@ struct ThreadArgs{
     struct OrderStats *orderStats;
     int *ordersWithRoll;
     FILE *outputFile;
+    int showProgress;
 };
 
 static pthread_mutex_t setSAMutex;
@@ -118,7 +122,9 @@ static void* threadSolve( void *args )  {
                         }
                     }
                     pthread_mutex_unlock( &updateCountMutex );
-                    printf( "\rOrders found: %'i/%'i (%.2f%%)", *numFound, orderStats->numberOfPotentialOrders, *numFound * 1.0 / orderStats->numberOfPotentialOrders * 100 );
+                    if ( g_showProgress ) {
+                        printf( "\rOrders found: %'i/%'i (%.2f%%)", *numFound, orderStats->numberOfPotentialOrders, *numFound * 1.0 / orderStats->numberOfPotentialOrders * 100 );
+                    }
                     fflush( stdout );
                 }
                 if ( currentLength + orderStats->minGroupLength > orderStats->maxOrderLength ) {
@@ -149,7 +155,8 @@ static void* threadSolve( void *args )  {
     pthread_exit( NULL );
 }
 
-void nonRecursiveSolve( struct IntArray **groupsWithRoll, struct OrderStats *orderStats, int *ordersWithRoll, FILE *outputFile ) {
+void nonRecursiveSolve( struct IntArray **groupsWithRoll, struct OrderStats *orderStats, int *ordersWithRoll, FILE *outputFile, int showProgress ) {
+    g_showProgress = showProgress;
     int numFound = 0;
     int ordersWithRollBitMask = 0;
     int alreadyFoundSize = 1 << orderStats->numberOfRolls;
