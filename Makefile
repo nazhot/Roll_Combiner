@@ -46,6 +46,26 @@ clean:
 	make
 
 
+TEST_SRCS := $(shell find $(SRC_DIRS) -name '*.h')
+
+#want this to compile/run the unit tests, compile the main code, and compile/
+#run the functional tests
+.PHONY: test
+test:
+	@echo "Testing"
+
+#want this to compile/run the unit tests
+.PHONY: utest
+
+utest:
+	@echo "Unit testing"
+	
+#want this to compile/run the functional tests
+.PHONY: ftest
+
+ftest:
+	@echo "Functional testing"
+
 # Include the .d makefiles. The - at the front suppresses the errors of missing
 # Makefiles. Initially, all the .d files will be missing, and we don't want those
 # errors to show up.
