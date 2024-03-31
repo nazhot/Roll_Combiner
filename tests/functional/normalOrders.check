@@ -1,0 +1,11 @@
+Number of rolls inputted: 24
+Minimum number of rolls needed to make group: 2
+Minimum number of rolls needed to make order: 17
+Maximum number of rolls needed to make order: 24
+Minimum number of groups to make an order: 6
+Maximum number of groups to make an order: 8
+Generating list of groups...Done!
+Found 26,378 groups
+Generating potential orders...Done!
+Found 4,934 potential orders
+

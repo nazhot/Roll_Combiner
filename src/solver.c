@@ -8,7 +8,6 @@
 #include "fileWriter.h"
 #include <pthread.h>
 #include <time.h>
-#include <math.h>
 
 static int g_showProgress = 1;
 
@@ -71,6 +70,9 @@ struct ThreadArgs{
 
 static pthread_mutex_t setSAMutex;
 static pthread_mutex_t updateCountMutex;
+const int stackSize = 500000;
+static struct SolveStack *solveStack;
+
 
 static void* threadSolve( void *args )  { 
     struct ThreadArgs *threadArgs = ( struct ThreadArgs * ) args;
@@ -85,8 +87,8 @@ static void* threadSolve( void *args )  {
     const int endingGroupIndex = threadArgs->endingGroupIndex;
     const int8_t numberOfRolls = orderStats->numberOfRolls;
     FILE *outputFile = threadArgs->outputFile;
-    const int stackSize = 500000; 
-    struct SolveStack *solveStack = createStack( stackSize );
+    //const int stackSize = 500000; 
+    //struct SolveStack *solveStack = createStack( stackSize );
 
     for ( int groupNumber = startingGroupIndex; groupNumber < endingGroupIndex; ++groupNumber ) {
 
@@ -150,9 +152,10 @@ static void* threadSolve( void *args )  {
             free( groups );
         }
     }
-    free( solveStack->content );
-    free( solveStack );
-    pthread_exit( NULL );
+    //free( solveStack->content );
+    //free( solveStack );
+    //pthread_exit( NULL );
+    return NULL;
 }
 
 void nonRecursiveSolve( struct IntArray **groupsWithRoll, struct OrderStats *orderStats, int *ordersWithRoll, FILE *outputFile, int showProgress ) {
@@ -175,6 +178,7 @@ void nonRecursiveSolve( struct IntArray **groupsWithRoll, struct OrderStats *ord
     int threadErrorCode;
     pthread_t threadIds[numberOfRolls]; 
 
+    solveStack = createStack( stackSize );
     for ( int8_t i = 0; i < numberOfRolls; ++i ) {
         struct ThreadArgs *threadArgs = malloc( sizeof( struct ThreadArgs ) );
         threadArgs->firstRoll = i;
@@ -188,14 +192,16 @@ void nonRecursiveSolve( struct IntArray **groupsWithRoll, struct OrderStats *ord
         threadArgs->endingGroupIndex = groupsWithRoll[i]->length; 
         threadArgs->outputFile = outputFile;
 
-        threadErrorCode = pthread_create( &threadIds[i], NULL, threadSolve, ( void * ) threadArgs );
-        if ( threadErrorCode ) {
-            printf("\n ERROR: return code from pthread_create is %d \n", threadErrorCode );
-            exit(1);
-        }
+        threadSolve( ( void * ) threadArgs );
+
+        //threadErrorCode = pthread_create( &threadIds[i], NULL, threadSolve, ( void * ) threadArgs );
+        //if ( threadErrorCode ) {
+        //    printf("\n ERROR: return code from pthread_create is %d \n", threadErrorCode );
+        //    exit(1);
+        //}
     }
 
-    for ( int i = 0; i < numberOfRolls; ++i ) {
-        pthread_join( threadIds[i], NULL );
-    }
+    //for ( int i = 0; i < numberOfRolls; ++i ) {
+    //    pthread_join( threadIds[i], NULL );
+    //}
 }
